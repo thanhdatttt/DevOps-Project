@@ -128,13 +128,15 @@ jobs:
           cache: 'maven'
 
       # snyk scan
-      # - name: Snyk security scan
-      #   uses: snyk/actions/maven@master
-      #   continue-on-error: true
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     args: --severity-threshold=high
+      - name: Snyk Security Scan
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: >
+            --file=media/pom.xml 
+            --severity-threshold=high
+            --sarif-file-output=snyk.sarif
 
       # test
       - name: Test and coverage
