@@ -130,7 +130,7 @@ jobs:
       # # snyk scan
       # Install snyk CLI
       - name: Setup Snyk
-        uses: snyk/actions/setup@master
+        uses: snyk/actions/maven@master
 
       # Authenticate snyk
       - name: Authenticate Snyk
