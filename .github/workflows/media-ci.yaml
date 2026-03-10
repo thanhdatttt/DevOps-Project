@@ -127,19 +127,26 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      # snyk scan
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/setup@master
+      # # snyk scan
+      # Install snyk CLI
+      - name: Setup Snyk
+        uses: snyk/actions/setup@v4
 
-      - name: Snyk Security Scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+      # Authenticate snyk
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      # Run snyk scan
+      - name: Snyk security scan
         run: |
-          snyk test --file=media/pom.xml --severity-threshold=high --sarif-file-output=snyk.sarif
+          snyk test \
+            --file=media/pom.xml \
+            --severity-threshold=high \
+            --sarif-file-output=snyk.sarif
         continue-on-error: true
-      
-      - name: Upload Snyk result to GitHub Code Scanning
+
+      # Upload result to GitHub Security tab
+      - name: Upload Snyk SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
