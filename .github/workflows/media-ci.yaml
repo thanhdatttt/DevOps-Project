@@ -131,7 +131,7 @@ jobs:
       # Fix Maven wrapper permission
       - name: Fix mvnw permissions
         run: |
-          chmod +x mvnw
+          chmod +x media/mvnw
 
       # Install Snyk CLI
       - name: Install Snyk
