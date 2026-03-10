@@ -162,7 +162,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
-          run: mvn clean verify -pl media -am
+          mvn clean verify -pl media -am
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt 
