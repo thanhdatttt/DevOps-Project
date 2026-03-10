@@ -127,22 +127,23 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      # # snyk scan
-      # Install snyk CLI
-      - name: Setup Snyk
-        uses: snyk/actions/maven@master
+      # snyk scan
+      # Install Snyk CLI
+      - name: Install Snyk
+        run: npm install -g snyk
 
-      # Authenticate snyk
+      # Authenticate Snyk
       - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      # Run snyk scan
-      - name: Snyk security scan
+      # Run Snyk scan
+      - name: Snyk Dependency Scan
         run: |
           snyk test \
             --file=media/pom.xml \
             --severity-threshold=high \
-            --sarif-file-output=snyk.sarif
+            --sarif-file-output=snyk.sarif \
+            -d
         continue-on-error: true
 
       # Upload result to GitHub Security tab
