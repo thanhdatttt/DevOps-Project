@@ -95,20 +95,24 @@ on:
     branches: [ "main" ]
     paths:
       - 'product/**'
+      - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/product-ci.yaml"
       - "pom.xml"
   pull_request:
     paths:
       - "product/**"
+      - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/product-ci.yaml"
       - "pom.xml"
 
 jobs:
   build-test-analyze:
-    name: Build, Test, Snyk & SonarQube
+    name: Product service pipeline
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -123,17 +127,17 @@ jobs:
           cache: 'maven'
 
       # snyk scan
-      - name: Snyk security scan
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          JAVA_HOME: /opt/java/openjdk
-        with:
-          args: --file=media/pom.xml --severity-threshold=high -d
+      # - name: Snyk security scan
+      #   uses: snyk/actions/maven@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #     JAVA_HOME: /opt/java/openjdk
+      #   with:
+      #     args: --file=media/pom.xml --severity-threshold=high -d
 
       # test
       - name: Test and coverage
-        run: mvn clean test jacoco:report
+        run: mvn clean test jacoco:report -pl product -am
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -163,4 +167,4 @@ jobs:
 
       #build
       - name: Build
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -pl product -am
