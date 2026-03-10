@@ -107,7 +107,6 @@ on:
       - "pom.xml"
 
 jobs:
-
   build-test-analyze:
     name: Build, Test, Snyk & SonarQube
     runs-on: ubuntu-latest
@@ -126,57 +125,43 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: show java
-        run: |
-          echo $JAVA_HOME
-          echo $PATH
-          java -version
-
       # snyk scan
       - name: Snyk security scan
         uses: snyk/actions/maven@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.10-7/x64/bin
-        with:
-          args: --sarif-file-output=snyk.sarif
 
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk.sarif
-
-      # test
-      - name: Test and coverage
-        run: mvn clean test jacoco:report
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # run: >
-        #   mvn -f media/pom.xml clean verify 
-        #   org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-        #   -Dsonar.projectKey=thanhdatttt_DevOps-Project
-        #   -Dsonar.organization=thanhdatttt 
-        #   -Dsonar.host.url=https://sonarcloud.io 
-        #   -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+      # # test
+      # - name: Test and coverage
+      #   run: mvn clean test jacoco:report
+      #   # env:
+      #   #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   # run: >
+      #   #   mvn -f media/pom.xml clean verify 
+      #   #   org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+      #   #   -Dsonar.projectKey=thanhdatttt_DevOps-Project
+      #   #   -Dsonar.organization=thanhdatttt 
+      #   #   -Dsonar.host.url=https://sonarcloud.io 
+      #   #   -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       # test results
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: media-test-results
-          path: media/target/surefire-reports/
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: media-test-results
+      #     path: media/target/surefire-reports/
 
-      # coverage report
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: media-coverage-report
-          path: media/target/site/jacoco/
+      # # coverage report
+      # - name: Upload coverage report
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: media-coverage-report
+      #     path: media/target/site/jacoco/
 
-      #build
-      - name: Build
-        run: mvn package -DskipTests
+      # #build
+      # - name: Build
+      #   run: mvn package -DskipTests
