@@ -128,15 +128,23 @@ jobs:
           cache: 'maven'
 
       # snyk scan
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
       - name: Snyk Security Scan
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: >
+        run: snyk test
             --file=media/pom.xml 
             --severity-threshold=high
             --sarif-file-output=snyk.sarif
+        continue-on-error: true
+      
+      - name: Upload Snyk result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
 
       # test
       - name: Test and coverage
