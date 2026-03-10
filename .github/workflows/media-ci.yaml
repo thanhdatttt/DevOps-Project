@@ -128,12 +128,13 @@ jobs:
           cache: 'maven'
 
       # snyk scan
-      - name: Install Snyk CLI
-        run: npm install -g snyk
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/setup@master
 
       - name: Snyk Security Scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           snyk test --file=media/pom.xml --severity-threshold=high --sarif-file-output=snyk.sarif
         continue-on-error: true
