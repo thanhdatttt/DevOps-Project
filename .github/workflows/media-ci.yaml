@@ -113,17 +113,17 @@ jobs:
     permissions:
       security-events: write
     steps:
-      # - name: Checkout source code
-      #   uses: actions/checkout@v4
-      #   with:
-      #     fetch-depth: 0 # for SonarQube
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # for SonarQube
 
-      # - name: Set up java and jdk21
-      #   uses: actions/setup-java@v4
-      #   with:
-      #     distribution: 'temurin'
-      #     java-version: '21'
-      #     cache: 'maven'
+      - name: Set up java and jdk21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
 
       # snyk scan
       - uses: actions/checkout@master
