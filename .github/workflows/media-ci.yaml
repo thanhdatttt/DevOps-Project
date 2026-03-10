@@ -126,6 +126,7 @@ jobs:
       #     cache: 'maven'
 
       # snyk scan
+      - uses: actions/maven@master
       - name: Snyk security scan
         uses: snyk/actions/maven@master
         continue-on-error: true
