@@ -132,13 +132,10 @@ jobs:
         run: npm install -g snyk
 
       - name: Snyk Security Scan
-        uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test
-            --file=media/pom.xml 
-            --severity-threshold=high
-            --sarif-file-output=snyk.sarif
+        run: |
+          snyk test --file=media/pom.xml --severity-threshold=high --sarif-file-output=snyk.sarif
         continue-on-error: true
       
       - name: Upload Snyk result to GitHub Code Scanning
