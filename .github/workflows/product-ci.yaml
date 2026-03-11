@@ -127,27 +127,41 @@ jobs:
           cache: 'maven'
 
       # snyk scan
-      # - name: Snyk security scan
-      #   uses: snyk/actions/maven@master
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #     JAVA_HOME: /opt/java/openjdk
-      #   with:
-      #     args: --file=media/pom.xml --severity-threshold=high -d
+      # Fix Maven wrapper permission
+      - name: Fix mvnw permissions
+        run: |
+          chmod +x media/mvnw
+
+      # Install Snyk CLI
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      # Authenticate Snyk
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      # Run Snyk scan
+      - name: Snyk security scan
+        run: |
+          snyk test \
+            --file=product/pom.xml \
+            --severity-threshold=high \
+            --sarif-file-output=snyk.sarif \
+        continue-on-error: true
 
       # test
       - name: Test and coverage
-        run: mvn clean test jacoco:report -pl product -am
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # run: >
-        #   mvn -f product/pom.xml clean verify 
-        #   org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-        #   -Dsonar.projectKey=thanhdatttt_DevOps-Project
-        #   -Dsonar.organization=thanhdatttt 
-        #   -Dsonar.host.url=https://sonarcloud.io 
-        #   -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        run: mvn clean verify -pl product -am
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn sonar:sonar
+          -pl product -am
+          -Dsonar.projectKey=thanhdatttt_DevOps-Project
+          -Dsonar.organization=thanhdatttt 
+          -Dsonar.host.url=https://sonarcloud.io 
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       # test results
       - name: Upload test results
