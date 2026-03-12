@@ -207,7 +207,7 @@ on:
       - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/media-ci.yaml"
-      - "pom.xml"
+      - "media/pom.xml"
   pull_request:
     branches: [ "main" ]
     paths:
@@ -215,7 +215,7 @@ on:
       - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/media-ci.yaml"
-      - "pom.xml"
+      - "media/pom.xml"
 
 jobs:
   gitleaks:
@@ -307,11 +307,8 @@ jobs:
 
   # 5: Phase Build
   build:
-    needs: test # Chỉ build khi test pass
+    needs: test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./media
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
