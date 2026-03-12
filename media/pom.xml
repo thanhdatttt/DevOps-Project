@@ -91,7 +91,8 @@
                     </execution>
                     
                     <execution>
-                        <id>check</id>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -101,6 +102,11 @@
                                     <element>BUNDLE</element>
                                     <limits>
                                         <limit>
+                                            <counter>INSTRUCTION</counter> 
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                        <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.70</minimum>
@@ -108,6 +114,7 @@
                                     </limits>
                                 </rule>
                             </rules>
+                            <haltOnFailure>true</haltOnFailure>
                         </configuration>
                     </execution>
                 </executions>
