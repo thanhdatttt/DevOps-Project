@@ -247,7 +247,7 @@ jobs:
 
       # test
       - name: Run Tests & Check Coverage
-        run: mvn clean test jacoco:report jacoco:check -pl media -am
+        run: mvn clean verify -pl media -am
 
       # 5: Upload Test Result
       - name: Upload Test Results
