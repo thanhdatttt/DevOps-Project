@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./github/workflows/actions
+      - uses: ./.github/workflows/actions
       - name: Build Application
         run: mvn clean package -DskipTests -pl media -am
 
@@ -62,7 +62,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses:  ./github/workflows/actions
+      - uses: ./.github/workflows/actions
 
       # test
       - name: Run Tests
