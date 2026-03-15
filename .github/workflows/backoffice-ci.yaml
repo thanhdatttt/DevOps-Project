@@ -4,83 +4,145 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "backoffice/**"
+      - 'backoffice/**'
+      - 'common-library/**' 
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-ci.yaml"
+      - "package.json"
   pull_request:
     branches: [ "main" ]
     paths:
-      - "backoffice/**"
+      - 'backoffice/**'
+      - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-ci.yaml"
+      - "package.json"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  Build:
+  # gitleaks
+  gitleaks:
     runs-on: ubuntu-latest
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: actions/setup-node@v4
+          fetch-depth: 0
+      - name: Run Gitleaks
+        run: |
+          docker pull zricethezav/gitleaks:latest
+          docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./backoffice" --config="/work/gitleaks.toml" --verbose --no-git
+
+  # Build
+  build:
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with:
-          node-version: 20
-      - run: npm ci
-        working-directory: backoffice
-      - run: npm run build
-        working-directory: backoffice
-      - run: npm run lint
-        working-directory: backoffice
-      - run: npx prettier --check .
-        working-directory: backoffice
-      - run: npm audit --omit=dev
-        continue-on-error: true
-        working-directory: backoffice
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.24.0
+          fetch-depth: 0
+      - uses: ./.github/workflows/actions
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          scan-type: 'fs'
-          scan-ref: './backoffice'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          node-version: '20' # Phiên bản LTS của Node.js
+          cache: 'npm'
+          cache-dependency-path: backoffice/package-lock.json
+
+      - name: Build Application
+        working-directory: backoffice
+        run: |
+          npm ci
+          npm run build
+
+  # Test
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      checks: write
+    env:
+      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/workflows/actions
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backoffice/package-lock.json
+
+      # test
+      - name: Run Tests
+        working-directory: backoffice
+        run: |
+          npm ci
+          npm run test:ci
+
+      # Upload Test Result
+      - name: Upload Test Results
+        uses: dorny/test-reporter@v2.6.0
+        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
+        with:
+          name: Backoffice-Service-Unit-Test-Results
+          path: "backoffice/junit.xml"
+          reporter: jest-junit
+
+      # sonar
       - name: SonarCloud Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
+        continue-on-error: true
         uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: backoffice
+          args: >
+            -Dsonar.projectKey=thanhdatttt_DevOps-Project
+            -Dsonar.organization=thanhdatttt
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      # Upload coverage report to PR
+      - name: Upload coverage report to PR
+        uses: romeovs/lcov-reporter-action@v0.3.1 
+        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./backoffice/coverage/lcov.info
+          filter-changed-files: true
+
+  # security
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Run Snyk scan
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master # Đổi từ maven sang node
+        continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/login-action@v3
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Docker image
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
+          args: --file=backoffice/package.json --sarif-file-output=snyk.sarif
+
+      # Upload result to GitHub Security tab
+      - name: Upload Snyk SARIF
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          context: ./backoffice
-          tags: ghcr.io/nashtech-garage/yas-backoffice:latest
-      - name: Run Trivy vulnerability scanner
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: 'ghcr.io/nashtech-garage/yas-backoffice:latest'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      - name: Push Docker image
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          context: ./backoffice
-          tags: ghcr.io/nashtech-garage/yas-backoffice:latest
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: snyk.sarif
