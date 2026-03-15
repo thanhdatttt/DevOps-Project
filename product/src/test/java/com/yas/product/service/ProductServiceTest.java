@@ -42,8 +42,10 @@ import com.yas.product.viewmodel.NoFileMediaVm;
 import com.yas.product.viewmodel.product.ProductExportingDetailVm;
 import com.yas.product.viewmodel.product.ProductGetDetailVm;
 import com.yas.product.viewmodel.product.ProductInfoVm;
+import com.yas.product.viewmodel.product.ProductListGetVm;
 import com.yas.product.viewmodel.product.ProductListVm;
 import com.yas.product.viewmodel.product.ProductPostVm;
+import com.yas.product.viewmodel.product.ProductPutVm;
 import com.yas.product.viewmodel.product.ProductQuantityPostVm;
 import com.yas.product.viewmodel.product.ProductQuantityPutVm;
 import com.yas.product.viewmodel.product.ProductSlugGetVm;
@@ -679,5 +681,474 @@ class ProductServiceTest {
 
         assertNotNull(result);
         assertTrue(result.productCheckoutListVms().isEmpty());
+    }
+
+    // ── updateProduct ──────────────────────────────────────────────────────────
+
+    @Test
+    void updateProduct_WhenProductNotFound_ThrowsNotFoundException() {
+        ProductPutVm vm = new ProductPutVm(
+                "Name", "name-slug", 100.0, true, true, false, true, false,
+                null, List.of(), "short", "desc", "spec", "SKU-U", "",
+                1.0, DimensionUnit.CM, 10.0, 5.0, 3.0,
+                null, null, null, null,
+                List.of(), List.of(), List.of(), List.of(), List.of(), null);
+
+        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.updateProduct(99L, vm));
+    }
+
+    @Test
+    void updateProduct_WhenValidSimpleProduct_UpdatesSuccessfully() {
+        Product existing = buildProduct(1L, "Old", "old-slug", "OLD-SKU");
+
+        ProductOption opt = new ProductOption();
+        opt.setId(1L);
+        opt.setName("Color");
+
+        com.yas.product.viewmodel.productoption.ProductOptionValuePutVm optVm =
+            new com.yas.product.viewmodel.productoption.ProductOptionValuePutVm(
+                1L, "dropdown", 0, List.of("Red"));
+
+        com.yas.product.viewmodel.product.ProductOptionValueDisplay displayVm =
+            new com.yas.product.viewmodel.product.ProductOptionValueDisplay(1L, "dropdown", 0, "Red");
+
+        ProductPutVm vm = new ProductPutVm(
+                "Updated", "updated-slug", 200.0, true, true, false, true, false,
+                null, List.of(), "short", "desc", "spec", "NEW-SKU", "",
+                1.0, DimensionUnit.CM, 10.0, 5.0, 3.0,
+                null, null, null, null,
+                List.of(), List.of(), List.of(optVm), List.of(displayVm), List.of(), null);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(productRepository.findBySlugAndIsPublishedTrue("updated-slug")).thenReturn(Optional.empty());
+        when(productRepository.findBySkuAndIsPublishedTrue("NEW-SKU")).thenReturn(Optional.empty());
+        when(productRepository.findAllById(anyList())).thenReturn(List.of());
+        when(productImageRepository.saveAll(anyList())).thenReturn(List.of());
+        when(productCategoryRepository.findAllByProductId(1L)).thenReturn(List.of());
+        when(productCategoryRepository.saveAll(anyList())).thenReturn(List.of());
+        when(productRepository.saveAll(anyList())).thenReturn(List.of());
+        when(productRelatedRepository.saveAll(anyList())).thenReturn(List.of());
+        when(productOptionRepository.findAllByIdIn(anyList())).thenReturn(List.of(opt));
+        when(productOptionValueRepository.saveAll(anyList())).thenReturn(List.of());
+
+        productService.updateProduct(1L, vm);
+
+        assertEquals("Updated", existing.getName());
+        assertEquals("updated-slug", existing.getSlug());
+    }
+
+    // ── updateMainProductFromVm ────────────────────────────────────────────────
+
+    @Test
+    void updateMainProductFromVm_UpdatesAllFields() {
+        Product product = buildProduct(1L, "Old", "old-slug", "OLD");
+
+        ProductPutVm vm = new ProductPutVm(
+                "New Name", "new-slug", 500.0, false, true, true, false, true,
+                null, List.of(), "new-short", "new-desc", "new-spec", "NEW-SKU", "GTIN-1",
+                2.0, DimensionUnit.CM, 20.0, 10.0, 5.0,
+                "new-meta-title", "new-kw", "new-meta-desc", 99L,
+                List.of(), List.of(), List.of(), List.of(), List.of(), 7L);
+
+        productService.updateMainProductFromVm(vm, product);
+
+        assertEquals("New Name", product.getName());
+        assertEquals("new-slug", product.getSlug());
+        assertEquals(500.0, product.getPrice());
+        assertEquals("NEW-SKU", product.getSku());
+        assertEquals("GTIN-1", product.getGtin());
+        assertEquals("new-short", product.getShortDescription());
+        assertEquals("new-desc", product.getDescription());
+        assertEquals(99L, product.getThumbnailMediaId());
+        assertEquals(7L, product.getTaxClassId());
+    }
+
+    // ── getProductsWithFilter ──────────────────────────────────────────────────
+
+    @Test
+    void getProductsWithFilter_WhenProductsExist_ReturnsPaginatedList() {
+        Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
+        Page<Product> page = new PageImpl<>(List.of(p));
+
+        when(productRepository.getProductsWithFilter(anyString(), anyString(), any(Pageable.class)))
+                .thenReturn(page);
+
+        var result = productService.getProductsWithFilter(0, 10, "laptop", "");
+
+        assertNotNull(result);
+        assertEquals(1, result.productContent().size());
+        assertEquals("Laptop", result.productContent().get(0).name());
+    }
+
+    @Test
+    void getProductsWithFilter_WhenNoProducts_ReturnsEmptyList() {
+        when(productRepository.getProductsWithFilter(anyString(), anyString(), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        var result = productService.getProductsWithFilter(0, 10, "", "");
+
+        assertNotNull(result);
+        assertTrue(result.productContent().isEmpty());
+    }
+
+    // ── getProductById ─────────────────────────────────────────────────────────
+
+    @Test
+    void getProductById_WhenProductExists_ReturnsDetailVm() {
+        Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
+        p.setThumbnailMediaId(1L);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.id());
+        assertEquals("Laptop", result.name());
+    }
+
+    @Test
+    void getProductById_WhenNotFound_ThrowsNotFoundException() {
+        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.getProductById(99L));
+    }
+
+    @Test
+    void getProductById_WhenHasBrandAndCategories_ReturnsBrandIdAndCategories() {
+        Brand brand = new Brand();
+        brand.setId(5L);
+        brand.setName("Apple");
+
+        Category cat = new Category();
+        cat.setId(1L);
+        cat.setName("Electronics");
+
+        ProductCategory pc = new ProductCategory();
+        pc.setCategory(cat);
+
+        Product p = buildProduct(2L, "MacBook", "macbook", "MB-1");
+        p.setBrand(brand);
+        p.setProductCategories(List.of(pc));
+        p.setThumbnailMediaId(1L);
+
+        when(productRepository.findById(2L)).thenReturn(Optional.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductById(2L);
+
+        assertEquals(5L, result.brandId());
+        assertEquals(1, result.categories().size());
+    }
+
+    // ── getLatestProducts ──────────────────────────────────────────────────────
+
+    @Test
+    void getLatestProducts_WhenCountPositive_ReturnsProducts() {
+        Product p = buildProduct(1L, "Latest", "latest", "L-SKU");
+        when(productRepository.getLatestProducts(any(Pageable.class))).thenReturn(List.of(p));
+
+        var result = productService.getLatestProducts(3);
+
+        assertEquals(1, result.size());
+        assertEquals("Latest", result.get(0).name());
+    }
+
+    @Test
+    void getLatestProducts_WhenCountZero_ReturnsEmpty() {
+        var result = productService.getLatestProducts(0);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getLatestProducts_WhenCountNegative_ReturnsEmpty() {
+        var result = productService.getLatestProducts(-1);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getLatestProducts_WhenNoProducts_ReturnsEmpty() {
+        when(productRepository.getLatestProducts(any(Pageable.class))).thenReturn(List.of());
+
+        var result = productService.getLatestProducts(5);
+        assertTrue(result.isEmpty());
+    }
+
+    // ── getProductsByBrand ─────────────────────────────────────────────────────
+
+    @Test
+    void getProductsByBrand_WhenBrandExists_ReturnsThumbnailList() {
+        Brand brand = new Brand();
+        brand.setId(1L);
+        brand.setSlug("apple");
+
+        Product p = buildProduct(1L, "MacBook", "macbook", "MB-1");
+        p.setThumbnailMediaId(1L);
+
+        when(brandRepository.findBySlug("apple")).thenReturn(Optional.of(brand));
+        when(productRepository.findAllByBrandAndIsPublishedTrueOrderByIdAsc(brand))
+                .thenReturn(List.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductsByBrand("apple");
+
+        assertEquals(1, result.size());
+        assertEquals("MacBook", result.get(0).name());
+    }
+
+    @Test
+    void getProductsByBrand_WhenBrandNotFound_ThrowsNotFoundException() {
+        when(brandRepository.findBySlug("unknown")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.getProductsByBrand("unknown"));
+    }
+
+    // ── getProductsFromCategory ────────────────────────────────────────────────
+
+    @Test
+    void getProductsFromCategory_WhenCategoryExists_ReturnsThumbnailList() {
+        Category cat = new Category();
+        cat.setId(1L);
+        cat.setSlug("electronics");
+
+        Product p = buildProduct(1L, "Phone", "phone", "PH-1");
+        p.setThumbnailMediaId(1L);
+
+        ProductCategory pc = new ProductCategory();
+        pc.setCategory(cat);
+        pc.setProduct(p);
+
+        Page<ProductCategory> page = new PageImpl<>(List.of(pc));
+
+        when(categoryRepository.findBySlug("electronics")).thenReturn(Optional.of(cat));
+        when(productCategoryRepository.findAllByCategory(any(Pageable.class), any(Category.class)))
+                .thenReturn(page);
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductsFromCategory(0, 10, "electronics");
+
+        assertEquals(1, result.productContent().size());
+        assertEquals("Phone", result.productContent().get(0).name());
+    }
+
+    @Test
+    void getProductsFromCategory_WhenCategoryNotFound_ThrowsNotFoundException() {
+        when(categoryRepository.findBySlug("unknown")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> productService.getProductsFromCategory(0, 10, "unknown"));
+    }
+
+    // ── getFeaturedProductsById ────────────────────────────────────────────────
+
+    @Test
+    void getFeaturedProductsById_WhenProductsExist_ReturnsThumbnailGetVms() {
+        Product p = buildProduct(1L, "Featured", "featured", "F-SKU");
+        p.setThumbnailMediaId(1L);
+
+        when(productRepository.findAllByIdIn(List.of(1L))).thenReturn(List.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getFeaturedProductsById(List.of(1L));
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).id());
+        assertEquals("Featured", result.get(0).name());
+    }
+
+    @Test
+    void getFeaturedProductsById_WhenEmptyIds_ReturnsEmptyList() {
+        when(productRepository.findAllByIdIn(List.of())).thenReturn(List.of());
+
+        var result = productService.getFeaturedProductsById(List.of());
+        assertTrue(result.isEmpty());
+    }
+
+    // ── getListFeaturedProducts ────────────────────────────────────────────────
+
+    @Test
+    void getListFeaturedProducts_WhenProductsExist_ReturnsFeatureGetVm() {
+        Product p = buildProduct(1L, "Feature", "feature", "F-SKU");
+        p.setThumbnailMediaId(1L);
+        Page<Product> page = new PageImpl<>(List.of(p));
+
+        when(productRepository.getFeaturedProduct(any(Pageable.class))).thenReturn(page);
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getListFeaturedProducts(0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.productList().size());
+        assertEquals("Feature", result.productList().get(0).name());
+    }
+
+    @Test
+    void getListFeaturedProducts_WhenNoProducts_ReturnsEmptyList() {
+        when(productRepository.getFeaturedProduct(any(Pageable.class))).thenReturn(Page.empty());
+
+        var result = productService.getListFeaturedProducts(0, 10);
+        assertTrue(result.productList().isEmpty());
+    }
+
+    // ── getProductDetail ───────────────────────────────────────────────────────
+
+    @Test
+    void getProductDetail_WhenSlugNotFound_ThrowsNotFoundException() {
+        when(productRepository.findBySlugAndIsPublishedTrue("ghost")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.getProductDetail("ghost"));
+    }
+
+    @Test
+    void getProductDetail_WhenProductExists_ReturnsDetailGetVm() {
+        Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
+        p.setThumbnailMediaId(1L);
+
+        when(productRepository.findBySlugAndIsPublishedTrue("laptop")).thenReturn(Optional.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductDetail("laptop");
+
+        assertNotNull(result);
+        assertEquals("Laptop", result.name());
+        assertNull(result.brandName());
+    }
+
+    @Test
+    void getProductDetail_WhenProductHasBrand_ReturnsBrandName() {
+        Brand brand = new Brand();
+        brand.setId(1L);
+        brand.setName("Dell");
+
+        Product p = buildProduct(1L, "XPS", "xps", "XPS-1");
+        p.setThumbnailMediaId(1L);
+        p.setBrand(brand);
+
+        when(productRepository.findBySlugAndIsPublishedTrue("xps")).thenReturn(Optional.of(p));
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductDetail("xps");
+
+        assertEquals("Dell", result.brandName());
+    }
+
+    // ── deleteProduct ──────────────────────────────────────────────────────────
+
+    @Test
+    void deleteProduct_WhenProductNotFound_ThrowsNotFoundException() {
+        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.deleteProduct(99L));
+    }
+
+    @Test
+    void deleteProduct_WhenParentProduct_SetsPublishedFalse() {
+        Product p = buildProduct(1L, "Main", "main", "M-SKU");
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(p));
+        when(productRepository.save(any(Product.class))).thenReturn(p);
+
+        productService.deleteProduct(1L);
+
+        org.junit.jupiter.api.Assertions.assertFalse(p.isPublished());
+        verify(productRepository).save(p);
+    }
+
+    @Test
+    void deleteProduct_WhenVariantWithCombinations_DeletesCombinations() {
+        Product parent = buildProduct(10L, "Parent", "parent", "P-SKU");
+        Product variant = buildProduct(2L, "Variant", "variant", "V-SKU");
+        variant.setParent(parent);
+
+        ProductOptionCombination combo = ProductOptionCombination.builder()
+                .id(1L).value("Red")
+                .productOption(new ProductOption())
+                .build();
+
+        when(productRepository.findById(2L)).thenReturn(Optional.of(variant));
+        when(productOptionCombinationRepository.findAllByProduct(variant))
+                .thenReturn(List.of(combo));
+        when(productRepository.save(any(Product.class))).thenReturn(variant);
+
+        productService.deleteProduct(2L);
+
+        verify(productOptionCombinationRepository).deleteAll(List.of(combo));
+    }
+
+    // ── getProductsByMultiQuery ────────────────────────────────────────────────
+
+    @Test
+    void getProductsByMultiQuery_WhenProductsMatch_ReturnsThumbnailVms() {
+        Product p = buildProduct(1L, "Phone", "phone", "PH-1");
+        p.setThumbnailMediaId(1L);
+        Page<Product> page = new PageImpl<>(List.of(p));
+
+        when(productRepository.findByProductNameAndCategorySlugAndPriceBetween(
+                anyString(), anyString(), any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+        when(mediaService.getMedia(1L)).thenReturn(mediaVm);
+
+        var result = productService.getProductsByMultiQuery(0, 10, "phone", "", 0.0, 1000.0);
+
+        assertNotNull(result);
+        assertEquals(1, result.productContent().size());
+        assertEquals("Phone", result.productContent().get(0).name());
+    }
+
+    @Test
+    void getProductsByMultiQuery_WhenNoProducts_ReturnsEmptyVm() {
+        when(productRepository.findByProductNameAndCategorySlugAndPriceBetween(
+                anyString(), anyString(), any(), any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        var result = productService.getProductsByMultiQuery(0, 10, "", "", 0.0, 999.0);
+
+        assertNotNull(result);
+        assertTrue(result.productContent().isEmpty());
+    }
+
+    // ── getProductByCategoryIds ────────────────────────────────────────────────
+
+    @Test
+    void getProductByCategoryIds_WhenMatchingProducts_ReturnsMappedVms() {
+        Product p = buildProduct(1L, "Phone", "phone", "PH-1");
+        when(productRepository.findByCategoryIdsIn(List.of(1L))).thenReturn(List.of(p));
+
+        var result = productService.getProductByCategoryIds(List.of(1L));
+
+        assertEquals(1, result.size());
+        assertEquals("Phone", result.get(0).name());
+    }
+
+    @Test
+    void getProductByCategoryIds_WhenEmptyIds_ReturnsEmptyList() {
+        when(productRepository.findByCategoryIdsIn(List.of())).thenReturn(List.of());
+
+        var result = productService.getProductByCategoryIds(List.of());
+        assertTrue(result.isEmpty());
+    }
+
+    // ── getProductByBrandIds ───────────────────────────────────────────────────
+
+    @Test
+    void getProductByBrandIds_WhenMatchingProducts_ReturnsMappedVms() {
+        Product p = buildProduct(1L, "MacBook", "macbook", "MB-1");
+        when(productRepository.findByBrandIdsIn(List.of(5L))).thenReturn(List.of(p));
+
+        var result = productService.getProductByBrandIds(List.of(5L));
+
+        assertEquals(1, result.size());
+        assertEquals("MacBook", result.get(0).name());
+    }
+
+    @Test
+    void getProductByBrandIds_WhenEmptyIds_ReturnsEmptyList() {
+        when(productRepository.findByBrandIdsIn(List.of())).thenReturn(List.of());
+
+        var result = productService.getProductByBrandIds(List.of());
+        assertTrue(result.isEmpty());
     }
 }
