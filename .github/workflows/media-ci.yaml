@@ -33,7 +33,7 @@ jobs:
       - name: Run Gitleaks
         run: |
           docker pull zricethezav/gitleaks:latest
-          docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./cart" --config="/work/gitleaks.toml" --verbose --no-git
+          docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./media" --config="/work/gitleaks.toml" --verbose --no-git
 
   # Build
   build:
