@@ -132,17 +132,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Run Snyk scan
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backoffice/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backoffice
+        run: npm ci
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master # Đổi từ maven sang node
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=backoffice/package.json --sarif-file-output=snyk.sarif
+        run: |
+          snyk test --file=backoffice/package.json --sarif-file-output=snyk.sarif
+        continue-on-error: true
 
-      # Upload result to GitHub Security tab
       - name: Upload Snyk SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
