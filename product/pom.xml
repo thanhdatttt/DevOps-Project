@@ -127,7 +127,6 @@
                                     </limits>
                                 </rule>
                             </rules>
-                            <haltOnFailure>true</haltOnFailure>
                         </configuration>
                     </execution>
                 </executions>
