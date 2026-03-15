@@ -137,4 +137,36 @@ class ProductAttributeGroupControllerTest {
         productAttributeGroup.setName(name);
         return productAttributeGroup;
     }
+
+    @Test
+    void testGetProductAttributeGroupNotFound() throws Exception {
+        Mockito.when(productAttributeGroupRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/backoffice/product-attribute-groups/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateProductAttributeGroupNotFound() throws Exception {
+        ProductAttributeGroupPostVm postVm = new ProductAttributeGroupPostVm("Updated");
+        Mockito.when(productAttributeGroupRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/backoffice/product-attribute-groups/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postVm)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testGetPageableProductAttributeGroupsStorefront() throws Exception {
+        List<ProductAttributeGroupVm> vms = List.of(new ProductAttributeGroupVm(1L, "Color"));
+        Mockito.when(productAttributeGroupService.getPageableProductAttributeGroups(0, 10))
+                .thenReturn(new ProductAttributeGroupListGetVm(vms, 0, 10, 1, 1, true));
+
+        mockMvc.perform(get("/storefront/product-attribute-groups/paging")
+                        .param("pageNo", "0").param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productAttributeGroupContent[0].name").value("Color"));
+    }
 }

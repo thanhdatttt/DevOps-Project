@@ -9,6 +9,7 @@ import com.yas.product.viewmodel.product.ProductListVm;
 import com.yas.product.viewmodel.product.ProductPostVm;
 import com.yas.product.viewmodel.product.ProductPutVm;
 import com.yas.product.viewmodel.product.ProductQuantityPutVm;
+import com.yas.product.viewmodel.product.ProductQuantityPostVm;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -304,5 +305,69 @@ class ProductControllerTest {
             .param("pageSize", "10")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetProductByIds_Success() throws Exception {
+        List<ProductListVm> mockList = Arrays.asList(
+            new ProductListVm(10L, "Product X", "product-x", true,
+                true, false, true, 50.0, ZonedDateTime.now(), 1L, 1L)
+        );
+        when(productService.getProductByIds(anyList())).thenReturn(mockList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/backoffice/products/by-ids")
+                        .param("ids", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(10L))
+                .andExpect(jsonPath("$[0].name").value("Product X"));
+
+        verify(productService, times(1)).getProductByIds(anyList());
+    }
+
+    @Test
+    void testGetProductsByCategoryBackofficeAlias() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/backoffice/category/{categorySlug}/products", "electronics"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetProductVariationsByParentIdBackofficeAlias() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/backoffice/product-variations/{id}", 1))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testUpdateProductQuantityWithItems() throws Exception {
+        com.yas.product.viewmodel.product.ProductQuantityPostVm item =
+            new com.yas.product.viewmodel.product.ProductQuantityPostVm(1L, 5L);
+        String body = objectMapper.writeValueAsString(List.of(item));
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/backoffice/products/update-quantity")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testGetProductsByMultiQueryWithAllParams() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/storefront/products")
+                        .param("pageNo", "1")
+                        .param("pageSize", "20")
+                        .param("productName", "laptop")
+                        .param("categorySlug", "electronics")
+                        .param("startPrice", "100.0")
+                        .param("endPrice", "2000.0"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testListProductsWithFilters() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/backoffice/products")
+                        .param("pageNo", "0")
+                        .param("pageSize", "5")
+                        .param("productName", "phone")
+                        .param("brandName", "samsung"))
+                .andExpect(status().isOk());
     }
 }
