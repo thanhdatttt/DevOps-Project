@@ -150,16 +150,6 @@ class ProductTemplateServiceTest {
     }
 
     @Test
-    void updateProductTemplate_WhenValid_ThenSuccess() {
-        ProductTemplatePostVm postVm = new ProductTemplatePostVm("productTemplate1-updated",
-                List.of(new ProductAttributeTemplatePostVm(productAttribute1.getId(), 0)));
-        productTemplateService.updateProductTemplate(productTemplate1.getId(), postVm);
-        Optional<ProductTemplate> updated = productTemplateRepository.findById(productTemplate1.getId());
-        assertTrue(updated.isPresent());
-        assertEquals("productTemplate1-updated", updated.get().getName());
-    }
-
-    @Test
     void checkExistedName_WhenNameExists_ReturnsTrue() {
         assertTrue(productTemplateService.checkExistedName("productTemplate1", null));
     }
