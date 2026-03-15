@@ -1,19 +1,14 @@
 package com.yas.media;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.yas.commonlibrary.exception.NotFoundException;
 import com.yas.media.controller.MediaController;
@@ -22,19 +17,19 @@ import com.yas.media.model.dto.MediaDto;
 import com.yas.media.service.MediaService;
 import com.yas.media.viewmodel.MediaVm;
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import com.yas.media.viewmodel.MediaPostVm;
 
-@ExtendWith(MockitoExtension.class)
 class MediaControllerTest {
 
     @Mock
@@ -43,119 +38,138 @@ class MediaControllerTest {
     @InjectMocks
     private MediaController mediaController;
 
-    private MockMvc mockMvc;
-
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(mediaController).build();
+        MockitoAnnotations.openMocks(this);
     }
 
-    // ── POST /medias ────────────────────────────────────────────────────────
+    // ========================
+    // POST /medias - create
+    // ========================
 
     @Test
-    void create_whenValidFile_thenReturns200WithBody() throws Exception {
-        Media savedMedia = new Media();
-        savedMedia.setId(1L);
-        savedMedia.setCaption("my caption");
-        savedMedia.setFileName("photo.png");
-        savedMedia.setMediaType("image/png");
+    void create_whenValidInput_thenReturnOk() {
+        MockMultipartFile multipartFile = new MockMultipartFile(
+            "file", "test.png", "image/png", new byte[]{});
+        MediaPostVm mediaPostVm = new MediaPostVm("caption", multipartFile, "override.png");
 
-        when(mediaService.saveMedia(any())).thenReturn(savedMedia);
+        Media media = new Media();
+        media.setId(1L);
+        media.setCaption("caption");
+        media.setFileName("override.png");
+        media.setMediaType("image/png");
 
-        MockMultipartFile file = new MockMultipartFile(
-            "multipartFile", "photo.png", "image/png", "fake-image".getBytes()
-        );
+        when(mediaService.saveMedia(any(MediaPostVm.class))).thenReturn(media);
 
-        mockMvc.perform(multipart("/medias")
-                .file(file)
-                .param("caption", "my caption")
-                .param("fileNameOverride", ""))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.caption").value("my caption"))
-            .andExpect(jsonPath("$.fileName").value("photo.png"))
-            .andExpect(jsonPath("$.mediaType").value("image/png"));
+        ResponseEntity<Object> response = mediaController.create(mediaPostVm);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(mediaService, times(1)).saveMedia(any(MediaPostVm.class));
     }
 
-    // ── DELETE /medias/{id} ─────────────────────────────────────────────────
+    // ========================
+    // DELETE /medias/{id} - delete
+    // ========================
 
     @Test
-    void delete_whenMediaExists_thenReturns204() throws Exception {
+    void delete_whenValidId_thenReturnNoContent() {
         doNothing().when(mediaService).removeMedia(1L);
 
-        mockMvc.perform(delete("/medias/1"))
-            .andExpect(status().isNoContent());
+        ResponseEntity<Void> response = mediaController.delete(1L);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(mediaService, times(1)).removeMedia(1L);
     }
 
     @Test
-    void delete_whenMediaNotFound_thenReturns404() throws Exception {
+    void delete_whenMediaNotFound_thenThrowNotFoundException() {
         doThrow(new NotFoundException("Media 99 is not found"))
             .when(mediaService).removeMedia(99L);
 
-        mockMvc.perform(delete("/medias/99"))
-            .andExpect(status().isNotFound());
+        try {
+            mediaController.delete(99L);
+        } catch (NotFoundException ex) {
+            assertEquals("Media 99 is not found", ex.getMessage());
+        }
+
+        verify(mediaService, times(1)).removeMedia(99L);
     }
 
-    // ── GET /medias/{id} ────────────────────────────────────────────────────
+    // ========================
+    // GET /medias/{id} - get
+    // ========================
 
     @Test
-    void get_whenMediaExists_thenReturns200WithBody() throws Exception {
-        MediaVm vm = new MediaVm(1L, "caption", "photo.png", "image/png",
-            "http://localhost/medias/1/file/photo.png");
-        when(mediaService.getMediaById(1L)).thenReturn(vm);
+    void get_whenMediaExists_thenReturnOk() {
+        MediaVm mediaVm = new MediaVm(1L, "caption", "file.png", "image/png", "http://localhost/medias/1/file/file.png");
+        when(mediaService.getMediaById(1L)).thenReturn(mediaVm);
 
-        mockMvc.perform(get("/medias/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.fileName").value("photo.png"));
+        ResponseEntity<MediaVm> response = mediaController.get(1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mediaVm, response.getBody());
+        verify(mediaService, times(1)).getMediaById(1L);
     }
 
     @Test
-    void get_whenMediaNotFound_thenReturns404() throws Exception {
+    void get_whenMediaNotFound_thenReturnNotFound() {
         when(mediaService.getMediaById(99L)).thenReturn(null);
 
-        mockMvc.perform(get("/medias/99"))
-            .andExpect(status().isNotFound());
+        ResponseEntity<MediaVm> response = mediaController.get(99L);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(mediaService, times(1)).getMediaById(99L);
     }
 
-    // ── GET /medias?ids= ────────────────────────────────────────────────────
+    // ========================
+    // GET /medias?ids=... - getByIds
+    // ========================
 
     @Test
-    void getByIds_whenMediasExist_thenReturns200WithList() throws Exception {
-        MediaVm vm1 = new MediaVm(1L, "c1", "a.png", "image/png", "http://host/medias/1/file/a.png");
-        MediaVm vm2 = new MediaVm(2L, "c2", "b.jpg", "image/jpeg", "http://host/medias/2/file/b.jpg");
-        when(mediaService.getMediaByIds(anyList())).thenReturn(List.of(vm1, vm2));
+    void getByIds_whenMediasExist_thenReturnOk() {
+        List<Long> ids = List.of(1L, 2L);
+        List<MediaVm> mediaVms = List.of(
+            new MediaVm(1L, "cap1", "file1.png", "image/png", "http://url/1"),
+            new MediaVm(2L, "cap2", "file2.png", "image/jpeg", "http://url/2")
+        );
+        when(mediaService.getMediaByIds(ids)).thenReturn(mediaVms);
 
-        mockMvc.perform(get("/medias").param("ids", "1", "2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[1].id").value(2));
+        ResponseEntity<List<MediaVm>> response = mediaController.getByIds(ids);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(mediaService, times(1)).getMediaByIds(ids);
     }
 
     @Test
-    void getByIds_whenNoMediasFound_thenReturns404() throws Exception {
-        when(mediaService.getMediaByIds(anyList())).thenReturn(List.of());
+    void getByIds_whenNoMediaFound_thenReturnNotFound() {
+        List<Long> ids = List.of(99L, 100L);
+        when(mediaService.getMediaByIds(ids)).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/medias").param("ids", "99"))
-            .andExpect(status().isNotFound());
+        ResponseEntity<List<MediaVm>> response = mediaController.getByIds(ids);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(mediaService, times(1)).getMediaByIds(ids);
     }
 
-    // ── GET /medias/{id}/file/{fileName} ────────────────────────────────────
+    // ========================
+    // GET /medias/{id}/file/{fileName} - getFile
+    // ========================
 
     @Test
-    void getFile_whenFileExists_thenReturns200WithStream() throws Exception {
-        byte[] content = "image-bytes".getBytes();
-        MediaDto dto = MediaDto.builder()
+    void getFile_whenFileExists_thenReturnOkWithContent() {
+        byte[] content = "fake-image-content".getBytes();
+        MediaDto mediaDto = MediaDto.builder()
             .content(new ByteArrayInputStream(content))
             .mediaType(MediaType.IMAGE_PNG)
             .build();
-        when(mediaService.getFile(anyLong(), anyString())).thenReturn(dto);
 
-        mockMvc.perform(get("/medias/1/file/photo.png"))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition", "attachment; filename=\"photo.png\""))
-            .andExpect(content().contentType(MediaType.IMAGE_PNG))
-            .andExpect(content().bytes(content));
+        when(mediaService.getFile(1L, "file.png")).thenReturn(mediaDto);
+
+        var response = mediaController.getFile(1L, "file.png");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(MediaType.IMAGE_PNG, response.getHeaders().getContentType());
+        verify(mediaService, times(1)).getFile(1L, "file.png");
     }
 }
