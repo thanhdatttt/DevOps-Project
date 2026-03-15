@@ -43,7 +43,10 @@ class ProductAttributeServiceTest {
     void test_retrieve_pageable_product_attributes_successfully() {
 
         List<ProductAttribute> productAttributes = new ArrayList<>();
-        productAttributes.add(new ProductAttribute(1L, "Attribute1", null, null, null));
+        ProductAttribute attr = new ProductAttribute();
+        attr.setId(1L);
+        attr.setName("Attribute1");
+        productAttributes.add(attr);
         Page<ProductAttribute> page = new PageImpl<>(productAttributes);
         when(productAttributeRepository.findAll(any(Pageable.class))).thenReturn(page);
 
@@ -103,8 +106,10 @@ class ProductAttributeServiceTest {
     // Save a product attribute with a null group ID
     @Test
     void test_save_product_attribute_with_null_group_id() {
-        when(productAttributeRepository.save(any(ProductAttribute.class)))
-                .thenReturn(new ProductAttribute(1L, "New Attribute", null, null, null));
+        ProductAttribute saved = new ProductAttribute();
+        saved.setId(1L);
+        saved.setName("New Attribute");
+        when(productAttributeRepository.save(any(ProductAttribute.class))).thenReturn(saved);
 
         ProductAttributePostVm postVm = new ProductAttributePostVm("New Attribute", null);
         ProductAttribute result = productAttributeService.save(postVm);
@@ -116,10 +121,15 @@ class ProductAttributeServiceTest {
     // Update a product attribute with a null group ID
     @Test
     void test_update_product_attribute_with_null_group_id() {
-        ProductAttribute existingAttr = new ProductAttribute(1L, "Old Attribute", null, null, null);
+        ProductAttribute existingAttr = new ProductAttribute();
+        existingAttr.setId(1L);
+        existingAttr.setName("Old Attribute");
         when(productAttributeRepository.findById(1L)).thenReturn(Optional.of(existingAttr));
-        when(productAttributeRepository.save(any(ProductAttribute.class)))
-                .thenReturn(new ProductAttribute(1L, "Updated Attribute", null, null, null));
+
+        ProductAttribute updatedAttr = new ProductAttribute();
+        updatedAttr.setId(1L);
+        updatedAttr.setName("Updated Attribute");
+        when(productAttributeRepository.save(any(ProductAttribute.class))).thenReturn(updatedAttr);
 
         ProductAttributePostVm postVm = new ProductAttributePostVm("Updated Attribute", null);
         ProductAttribute result = productAttributeService.update(postVm, 1L);
@@ -168,7 +178,9 @@ class ProductAttributeServiceTest {
 
     @Test
     void test_update_product_attribute_with_group_id_not_found() {
-        ProductAttribute existing = new ProductAttribute(1L, "OldAttr", null, null, null);
+        ProductAttribute existing = new ProductAttribute();
+        existing.setId(1L);
+        existing.setName("OldAttr");
         ProductAttributePostVm vm = new ProductAttributePostVm("NewName", 99L);
 
         when(productAttributeRepository.findExistedName("NewName", 1L)).thenReturn(null);

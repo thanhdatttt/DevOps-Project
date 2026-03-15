@@ -86,7 +86,7 @@ class CategoryControllerTest {
 
     @Test
     void testCreateCategory() throws Exception {
-        CategoryPostVm categoryPostVm = new CategoryPostVm("Electronic", "Electronics", "electronics",
+        CategoryPostVm categoryPostVm = new CategoryPostVm("Electronic", "electronics", "Electronics",
                 1L,
                 "electronics, gadgets, technology", "A category for electronic products.",
                 (short) 1, true, 1L);
@@ -104,8 +104,8 @@ class CategoryControllerTest {
 
     @Test
     void testUpdateCategory() throws Exception {
-        CategoryPostVm categoryPostVm = new CategoryPostVm("Electronic", "Electronics",
-                "electronics", 1L, "electronics, gadgets, technology",
+        CategoryPostVm categoryPostVm = new CategoryPostVm("Electronic", "electronics",
+                "Electronics", 1L, "electronics, gadgets, technology",
                 "A category for electronic products.",
                 (short) 1, true, 1L);
 
@@ -143,5 +143,60 @@ class CategoryControllerTest {
         category.setDescription("electronics, gadgets, technology");
         category.setDisplayOrder((short) 1);
         return category;
+    }
+
+    @Test
+    void testStorefrontListCategories() throws Exception {
+        CategoryGetVm cat = new CategoryGetVm(1L, "Electronics", "electronics", 0L, null);
+        when(categoryService.getCategories("")).thenReturn(Arrays.asList(cat));
+
+        mockMvc.perform(get("/storefront/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Electronics"));
+    }
+
+    @Test
+    void testListTopNthCategories() throws Exception {
+        when(categoryService.getTopNthCategories(5)).thenReturn(Arrays.asList("Electronics", "Phones"));
+
+        mockMvc.perform(get("/storefront/categories/suggestions").param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("Electronics"))
+                .andExpect(jsonPath("$[1]").value("Phones"));
+    }
+
+    @Test
+    void testGetCategoriesByIds() throws Exception {
+        CategoryGetVm cat1 = new CategoryGetVm(1L, "Electronics", "electronics", 0L, null);
+        CategoryGetVm cat2 = new CategoryGetVm(2L, "Phones", "phones", 0L, null);
+        when(categoryService.getCategoryByIds(Arrays.asList(1L, 2L))).thenReturn(Arrays.asList(cat1, cat2));
+
+        mockMvc.perform(get("/backoffice/categories/by-ids").param("ids", "1", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[1].id").value(2L));
+    }
+
+    @Test
+    void testDeleteCategoryWithChildren() throws Exception {
+        Category category = createCategory();
+        Category child = new Category();
+        child.setId(2L);
+        category.setCategories(Arrays.asList(child));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        mockMvc.perform(delete("/backoffice/categories/1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeleteCategoryWithProducts() throws Exception {
+        Category category = createCategory();
+        com.yas.product.model.ProductCategory pc = new com.yas.product.model.ProductCategory();
+        category.setProductCategories(Arrays.asList(pc));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        mockMvc.perform(delete("/backoffice/categories/1"))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -84,7 +84,7 @@ class CategoryServiceTest {
     void create_whenValidInput_thenSaveAndReturnCategory() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "New Cat", "desc", "new-cat", null, "kw", "meta-desc", (short) 1, true, null);
+                "New Cat", "new-cat", "desc", null, "kw", "meta-desc", (short) 1, true, null);
 
         Category created = categoryService.create(postVm);
 
@@ -97,7 +97,7 @@ class CategoryServiceTest {
     void create_whenDuplicateName_thenThrowDuplicatedException() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "name", "desc", "name-slug", null, "kw", "meta", (short) 1, true, null);
+                "name", "name-slug", "desc", null, "kw", "meta", (short) 1, true, null);
 
         Assertions.assertThrows(com.yas.commonlibrary.exception.DuplicatedException.class,
             () -> categoryService.create(postVm));
@@ -112,7 +112,7 @@ class CategoryServiceTest {
 
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "Child Cat", "desc", "child-cat", parent.getId(), "kw", "meta", (short) 1, true, null);
+                "Child Cat", "child-cat", "desc", parent.getId(), "kw", "meta", (short) 1, true, null);
 
         Category created = categoryService.create(postVm);
 
@@ -124,7 +124,7 @@ class CategoryServiceTest {
     void create_whenParentIdNotFound_thenThrowBadRequestException() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "Orphan Cat", "desc", "orphan-cat", 9999L, "kw", "meta", (short) 1, true, null);
+                "Orphan Cat", "orphan-cat", "desc", 9999L, "kw", "meta", (short) 1, true, null);
 
         Assertions.assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
             () -> categoryService.create(postVm));
@@ -134,7 +134,7 @@ class CategoryServiceTest {
     void update_whenValidInput_thenUpdateCategory() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "Updated Name", "updated desc", "updated-slug", null, "kw", "meta", (short) 2, false, null);
+                "Updated Name", "updated-slug", "updated desc", null, "kw", "meta", (short) 2, false, null);
 
         categoryService.update(postVm, category.getId());
 
@@ -147,7 +147,7 @@ class CategoryServiceTest {
     void update_whenCategoryNotFound_thenThrowNotFoundException() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "X", "desc", "x-slug", null, "kw", "meta", (short) 1, true, null);
+                "X", "x-slug", "desc", null, "kw", "meta", (short) 1, true, null);
 
         Assertions.assertThrows(com.yas.commonlibrary.exception.NotFoundException.class,
             () -> categoryService.update(postVm, 9999L));
@@ -162,7 +162,7 @@ class CategoryServiceTest {
 
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "other", "desc", "other-slug", null, "kw", "meta", (short) 1, true, null);
+                "other", "other-slug", "desc", null, "kw", "meta", (short) 1, true, null);
 
         Assertions.assertThrows(com.yas.commonlibrary.exception.DuplicatedException.class,
             () -> categoryService.update(postVm, category.getId()));
@@ -172,7 +172,7 @@ class CategoryServiceTest {
     void update_whenParentIsSelf_thenThrowBadRequestException() {
         com.yas.product.viewmodel.category.CategoryPostVm postVm =
             new com.yas.product.viewmodel.category.CategoryPostVm(
-                "name", "desc", "slug", category.getId(), "kw", "meta", (short) 1, true, null);
+                "name", "slug", "desc", category.getId(), "kw", "meta", (short) 1, true, null);
 
         Assertions.assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
             () -> categoryService.update(postVm, category.getId()));
