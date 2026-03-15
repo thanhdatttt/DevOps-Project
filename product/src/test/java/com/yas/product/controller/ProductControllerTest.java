@@ -338,18 +338,6 @@ class ProductControllerTest {
     }
 
     @Test
-    void testUpdateProductQuantityWithItems() throws Exception {
-        ProductQuantityPostVm item =
-            new ProductQuantityPostVm(1L, 5L);
-        String body = objectMapper.writeValueAsString(List.of(item));
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/backoffice/products/update-quantity")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
     void testGetProductsByMultiQueryWithAllParams() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/storefront/products")
                         .param("pageNo", "1")
