@@ -3,6 +3,7 @@ package com.yas.product.service;
 import com.yas.commonlibrary.exception.DuplicatedException;
 import com.yas.commonlibrary.exception.NotFoundException;
 import com.yas.product.model.Brand;
+import java.util.List;
 import com.yas.product.repository.BrandRepository;
 import com.yas.product.viewmodel.brand.BrandListGetVm;
 import com.yas.product.viewmodel.brand.BrandPostVm;
@@ -105,5 +106,56 @@ class BrandServiceTest {
         Assertions.assertThrows(NotFoundException.class, () -> {
             brandService.update(brandPostVm, 1L);
         });
+    }
+
+    @Test
+    void delete_whenBrandHasProducts_thenThrowBadRequestException() {
+        Brand brand = new Brand();
+        brand.setId(1L);
+        com.yas.product.model.Product product = new com.yas.product.model.Product();
+        brand.setProducts(List.of(product));
+        when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.BadRequestException.class, () -> {
+            brandService.delete(1L);
+        });
+    }
+
+    @Test
+    void delete_whenBrandNotFound_thenThrowNotFoundException() {
+        when(brandRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            brandService.delete(99L);
+        });
+    }
+
+    @Test
+    void delete_whenBrandHasNoProducts_thenDeleteSuccessfully() {
+        Brand brand = new Brand();
+        brand.setId(1L);
+        brand.setProducts(List.of());
+        when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
+
+        brandService.delete(1L);
+
+        org.mockito.Mockito.verify(brandRepository).deleteById(1L);
+    }
+
+    @Test
+    void getBrandsByIds_whenIdsProvided_thenReturnBrandVms() {
+        Brand brand1 = new Brand();
+        brand1.setId(1L);
+        brand1.setName("Brand A");
+        Brand brand2 = new Brand();
+        brand2.setId(2L);
+        brand2.setName("Brand B");
+        when(brandRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(brand1, brand2));
+
+        List<com.yas.product.viewmodel.brand.BrandVm> result = brandService.getBrandsByIds(List.of(1L, 2L));
+
+        assertEquals(2, result.size());
+        assertEquals("Brand A", result.get(0).name());
+        assertEquals("Brand B", result.get(1).name());
     }
 }

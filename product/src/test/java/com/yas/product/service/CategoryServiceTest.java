@@ -79,4 +79,152 @@ class CategoryServiceTest {
         CategoryGetVm categoryGetVm = categoryService.getCategories("a").getFirst();
         assertEquals("name", categoryGetVm.name());
     }
+
+    @Test
+    void create_whenValidInput_thenSaveAndReturnCategory() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "New Cat", "desc", "new-cat", null, "kw", "meta-desc", (short) 1, true, null);
+
+        Category created = categoryService.create(postVm);
+
+        assertNotNull(created);
+        assertEquals("New Cat", created.getName());
+        assertEquals("new-cat", created.getSlug());
+    }
+
+    @Test
+    void create_whenDuplicateName_thenThrowDuplicatedException() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "name", "desc", "name-slug", null, "kw", "meta", (short) 1, true, null);
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.DuplicatedException.class,
+            () -> categoryService.create(postVm));
+    }
+
+    @Test
+    void create_whenParentIdProvided_thenSetParent() {
+        Category parent = new Category();
+        parent.setName("parent");
+        parent.setSlug("parent-slug");
+        categoryRepository.save(parent);
+
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "Child Cat", "desc", "child-cat", parent.getId(), "kw", "meta", (short) 1, true, null);
+
+        Category created = categoryService.create(postVm);
+
+        assertNotNull(created.getParent());
+        assertEquals(parent.getId(), created.getParent().getId());
+    }
+
+    @Test
+    void create_whenParentIdNotFound_thenThrowBadRequestException() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "Orphan Cat", "desc", "orphan-cat", 9999L, "kw", "meta", (short) 1, true, null);
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
+            () -> categoryService.create(postVm));
+    }
+
+    @Test
+    void update_whenValidInput_thenUpdateCategory() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "Updated Name", "updated desc", "updated-slug", null, "kw", "meta", (short) 2, false, null);
+
+        categoryService.update(postVm, category.getId());
+
+        Category updated = categoryRepository.findById(category.getId()).orElseThrow();
+        assertEquals("Updated Name", updated.getName());
+        assertEquals("updated-slug", updated.getSlug());
+    }
+
+    @Test
+    void update_whenCategoryNotFound_thenThrowNotFoundException() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "X", "desc", "x-slug", null, "kw", "meta", (short) 1, true, null);
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.NotFoundException.class,
+            () -> categoryService.update(postVm, 9999L));
+    }
+
+    @Test
+    void update_whenDuplicateName_thenThrowDuplicatedException() {
+        Category other = new Category();
+        other.setName("other");
+        other.setSlug("other-slug");
+        categoryRepository.save(other);
+
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "other", "desc", "other-slug", null, "kw", "meta", (short) 1, true, null);
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.DuplicatedException.class,
+            () -> categoryService.update(postVm, category.getId()));
+    }
+
+    @Test
+    void update_whenParentIsSelf_thenThrowBadRequestException() {
+        com.yas.product.viewmodel.category.CategoryPostVm postVm =
+            new com.yas.product.viewmodel.category.CategoryPostVm(
+                "name", "desc", "slug", category.getId(), "kw", "meta", (short) 1, true, null);
+
+        Assertions.assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
+            () -> categoryService.update(postVm, category.getId()));
+    }
+
+    @Test
+    void getCategoryById_whenNotFound_thenThrowNotFoundException() {
+        Assertions.assertThrows(com.yas.commonlibrary.exception.NotFoundException.class,
+            () -> categoryService.getCategoryById(9999L));
+    }
+
+    @Test
+    void getCategoryById_whenNoImage_thenImageIsNull() {
+        category.setImageId(null);
+        categoryRepository.save(category);
+
+        CategoryGetDetailVm result = categoryService.getCategoryById(category.getId());
+        Assertions.assertNull(result.categoryImage());
+    }
+
+    @Test
+    void getCategories_whenCategoryHasParent_thenParentIdIncluded() {
+        Category parent = new Category();
+        parent.setName("parent-for-test");
+        parent.setSlug("parent-for-test");
+        categoryRepository.save(parent);
+
+        Category child = new Category();
+        child.setName("child-cat");
+        child.setSlug("child-cat");
+        child.setParent(parent);
+        categoryRepository.save(child);
+
+        when(mediaService.getMedia(any())).thenReturn(noFileMediaVm);
+
+        java.util.List<CategoryGetVm> result = categoryService.getCategories("child-cat");
+        assertEquals(1, result.size());
+        assertEquals(parent.getId(), result.get(0).parentId());
+    }
+
+    @Test
+    void getCategoryByIds_whenIdsProvided_thenReturnMatchingCategories() {
+        java.util.List<CategoryGetVm> result =
+            categoryService.getCategoryByIds(java.util.List.of(category.getId()));
+
+        assertEquals(1, result.size());
+        assertEquals("name", result.get(0).name());
+    }
+
+    @Test
+    void getTopNthCategories_whenLimitProvided_thenReturnLimitedList() {
+        java.util.List<String> result = categoryService.getTopNthCategories(10);
+        assertNotNull(result);
+    }
 }

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -124,6 +126,29 @@ class ProductAttributeGroupServiceTest {
         group.setId(1L);
 
         when(repository.findExistedName(anyString(), anyLong())).thenReturn(group);
+
+        assertThrows(DuplicatedException.class, () -> service.save(group));
+    }
+
+    @Test
+    void test_save_new_group_with_null_id_no_duplication() {
+        ProductAttributeGroup group = new ProductAttributeGroup();
+        group.setName("BrandNew Group");
+        // id is null for new entity
+
+        when(repository.findExistedName(eq("BrandNew Group"), isNull())).thenReturn(null);
+
+        service.save(group);
+
+        verify(repository, times(1)).save(group);
+    }
+
+    @Test
+    void test_save_new_group_with_null_id_duplicated_name() {
+        ProductAttributeGroup group = new ProductAttributeGroup();
+        group.setName("Existing Group");
+
+        when(repository.findExistedName(eq("Existing Group"), isNull())).thenReturn(new ProductAttributeGroup());
 
         assertThrows(DuplicatedException.class, () -> service.save(group));
     }

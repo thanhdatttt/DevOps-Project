@@ -145,4 +145,37 @@ class ProductAttributeServiceTest {
         ProductAttributePostVm vm = new ProductAttributePostVm("Duplicate Name", null);
         assertThrows(DuplicatedException.class, () -> productAttributeService.update(vm, 1L));
     }
+
+    @Test
+    void test_save_product_attribute_with_group_id_not_found() {
+        ProductAttributePostVm vm = new ProductAttributePostVm("NewAttr", 99L);
+        when(productAttributeRepository.findExistedName("NewAttr", null)).thenReturn(null);
+        when(productAttributeGroupRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
+            () -> productAttributeService.save(vm));
+    }
+
+    @Test
+    void test_update_product_attribute_not_found() {
+        ProductAttributePostVm vm = new ProductAttributePostVm("UpdatedAttr", null);
+        when(productAttributeRepository.findExistedName("UpdatedAttr", 99L)).thenReturn(null);
+        when(productAttributeRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(com.yas.commonlibrary.exception.NotFoundException.class,
+            () -> productAttributeService.update(vm, 99L));
+    }
+
+    @Test
+    void test_update_product_attribute_with_group_id_not_found() {
+        ProductAttribute existing = new ProductAttribute(1L, "OldAttr", null, null, null);
+        ProductAttributePostVm vm = new ProductAttributePostVm("NewName", 99L);
+
+        when(productAttributeRepository.findExistedName("NewName", 1L)).thenReturn(null);
+        when(productAttributeRepository.findById(1L)).thenReturn(java.util.Optional.of(existing));
+        when(productAttributeGroupRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(com.yas.commonlibrary.exception.BadRequestException.class,
+            () -> productAttributeService.update(vm, 1L));
+    }
 }
