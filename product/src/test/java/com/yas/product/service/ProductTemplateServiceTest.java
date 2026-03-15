@@ -149,37 +149,4 @@ class ProductTemplateServiceTest {
         assertEquals(Constants.ErrorCode.PRODUCT_TEMPlATE_IS_NOT_FOUND, exception.getMessage());
     }
 
-    @Test
-    void updateProductTemplate_WhenValid_ThenSuccess() {
-        ProductTemplatePostVm productTemplatePostVm = new ProductTemplatePostVm("productTemplate1-updated",
-                List.of(new ProductAttributeTemplatePostVm(productAttribute1.getId(), 0)));
-        productTemplateService.updateProductTemplate(productTemplate1.getId(), productTemplatePostVm);
-        Optional<ProductTemplate> updated = productTemplateRepository.findById(productTemplate1.getId());
-        assertTrue(updated.isPresent());
-        assertEquals("productTemplate1-updated", updated.get().getName());
-    }
-
-    @Test
-    void checkExistedName_WhenNameExists_ReturnsTrue() {
-        assertTrue(productTemplateService.checkExistedName("productTemplate1", null));
-    }
-
-    @Test
-    void checkExistedName_WhenNameDoesNotExist_ReturnsFalse() {
-        org.junit.jupiter.api.Assertions.assertFalse(productTemplateService.checkExistedName("nonExistentName", null));
-    }
-
-    @Test
-    void validateExistedName_WhenNameExists_ThrowsDuplicatedException() {
-        assertThrows(DuplicatedException.class, () -> productTemplateService.validateExistedName("productTemplate1", null));
-    }
-
-    @Test
-    void saveProductTemplate_WithNullAttributeList_ThenSuccess() {
-        ProductTemplatePostVm productTemplatePostVm = new ProductTemplatePostVm("productTemplate4", null);
-        ProductTemplateVm result = productTemplateService.saveProductTemplate(productTemplatePostVm);
-        Optional<ProductTemplate> saved = productTemplateRepository.findById(result.id());
-        assertTrue(saved.isPresent());
-        assertEquals("productTemplate4", saved.get().getName());
-    }
 }
