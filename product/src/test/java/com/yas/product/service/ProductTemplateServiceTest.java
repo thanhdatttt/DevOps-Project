@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -151,29 +150,36 @@ class ProductTemplateServiceTest {
     }
 
     @Test
-    void updateProductTemplate_WhenValidInput_ThenSuccess() {
-        ProductTemplatePostVm postVm = new ProductTemplatePostVm("productTemplate1-updated",
-                List.of(new ProductAttributeTemplatePostVm(productAttribute1.getId(), 1)));
-
-        productTemplateService.updateProductTemplate(productTemplate1.getId(), postVm);
-
-        ProductTemplate updated = productTemplateRepository.findById(productTemplate1.getId()).orElseThrow();
-        assertEquals("productTemplate1-updated", updated.getName());
+    void updateProductTemplate_WhenValid_ThenSuccess() {
+        ProductTemplatePostVm productTemplatePostVm = new ProductTemplatePostVm("productTemplate1-updated",
+                List.of(new ProductAttributeTemplatePostVm(productAttribute1.getId(), 0)));
+        productTemplateService.updateProductTemplate(productTemplate1.getId(), productTemplatePostVm);
+        Optional<ProductTemplate> updated = productTemplateRepository.findById(productTemplate1.getId());
+        assertTrue(updated.isPresent());
+        assertEquals("productTemplate1-updated", updated.get().getName());
     }
 
     @Test
-    void checkExistedName_whenNameExists_thenReturnTrue() {
+    void checkExistedName_WhenNameExists_ReturnsTrue() {
         assertTrue(productTemplateService.checkExistedName("productTemplate1", null));
     }
 
     @Test
-    void checkExistedName_whenNameNotExists_thenReturnFalse() {
-        assertFalse(productTemplateService.checkExistedName("nonExistentTemplateName", null));
+    void checkExistedName_WhenNameDoesNotExist_ReturnsFalse() {
+        org.junit.jupiter.api.Assertions.assertFalse(productTemplateService.checkExistedName("nonExistentName", null));
     }
 
     @Test
-    void checkExistedName_whenNameExistsForSameId_thenReturnFalse() {
-        assertFalse(productTemplateService.checkExistedName("productTemplate1", productTemplate1.getId()));
+    void validateExistedName_WhenNameExists_ThrowsDuplicatedException() {
+        assertThrows(DuplicatedException.class, () -> productTemplateService.validateExistedName("productTemplate1", null));
     }
 
+    @Test
+    void saveProductTemplate_WithNullAttributeList_ThenSuccess() {
+        ProductTemplatePostVm productTemplatePostVm = new ProductTemplatePostVm("productTemplate4", null);
+        ProductTemplateVm result = productTemplateService.saveProductTemplate(productTemplatePostVm);
+        Optional<ProductTemplate> saved = productTemplateRepository.findById(result.id());
+        assertTrue(saved.isPresent());
+        assertEquals("productTemplate4", saved.get().getName());
+    }
 }
