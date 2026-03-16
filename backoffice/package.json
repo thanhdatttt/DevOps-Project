@@ -83,7 +83,11 @@
       ]
     },
     "moduleNameMapper": {
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      "^@commonServices/(.*)$": "<rootDir>/common/services/$1",
+      "^@constants/(.*)$": "<rootDir>/constants/$1",
+      "^@catalogModels/(.*)$": "<rootDir>/modules/catalog/models/$1",
+      "^@catalogServices/(.*)$": "<rootDir>/modules/catalog/services/$1"
     }
   }
 }
