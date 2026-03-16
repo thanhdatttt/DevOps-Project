@@ -4,56 +4,156 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "storefront/**"
+      - 'storefront/**'
+      - 'common-library/**' 
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
+      - "package.json"
   pull_request:
     branches: [ "main" ]
     paths:
-      - "storefront/**"
+      - 'storefront/**'
+      - 'common-library/**'
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
+      - "package.json"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  Build:
+  # gitleaks
+  gitleaks:
     runs-on: ubuntu-latest
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: actions/setup-node@v4
+          fetch-depth: 0
+      - name: Run Gitleaks
+        run: |
+          docker pull zricethezav/gitleaks:latest
+          docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./storefront" --config="/work/gitleaks.toml" --verbose --no-git
+
+  # Build
+  build:
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with:
-          node-version: 20
-      - run: npm ci
+          fetch-depth: 0
+      - uses: ./.github/workflows/actions
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Phiên bản LTS của Node.js
+          cache: 'npm'
+          cache-dependency-path: storefront/package-lock.json
+
+      - name: Build Application
         working-directory: storefront
-      - run: npm run build
+        run: |
+          npm ci
+          npm run build
+
+  # Test
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      checks: write
+    env:
+      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/workflows/actions
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: storefront/package-lock.json
+
+      # test
+      - name: Run Tests
         working-directory: storefront
-      - run: npm run lint
-        working-directory: storefront
-      - run: npx prettier --check .
-        working-directory: storefront
+        run: |
+          npm ci
+          npm run test:ci
+
+      # Upload Test Result
+      - name: Upload Test Results
+        uses: dorny/test-reporter@v2.6.0
+        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
+        with:
+          name: Storefront-Service-Unit-Test-Results
+          path: "storefront/junit.xml"
+          reporter: jest-junit
+
+      # sonar
       - name: SonarCloud Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
+        continue-on-error: true
         uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: storefront
+          args: >
+            -Dsonar.projectKey=thanhdatttt_DevOps-Project
+            -Dsonar.organization=thanhdatttt
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      # Upload coverage report to PR
+      - name: Upload coverage report to PR
+        uses: romeovs/lcov-reporter-action@v0.3.1 
+        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./storefront/coverage/lcov.info
+          filter-changed-files: true
+
+  # security
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: storefront/package-lock.json
+
+      - name: Install dependencies
+        working-directory: storefront
+        run: npm ci
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk to check for vulnerabilities
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/login-action@v3
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk test --file=storefront/package.json --sarif-file-output=snyk.sarif
+        continue-on-error: true
+
+      - name: Upload Snyk SARIF
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
-        with:
-          context: ./storefront
-          push: true
-          tags: ghcr.io/nashtech-garage/yas-storefront:latest
+          sarif_file: snyk.sarif
