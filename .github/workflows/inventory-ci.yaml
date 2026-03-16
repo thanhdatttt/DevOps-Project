@@ -56,14 +56,14 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
         with:
-          name: Promotion-Service-Unit-Test-Results
-          path: "promotion/**/*-reports/TEST*.xml"
+          name: Inventory-Service-Test-Results
+          path: "inventory/**/*-reports/TEST*.xml"
           reporter: java-junit
       - name: Analyze with sonar cloud
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f promotion 
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f inventory
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
           -Dsonar.host.url=https://sonarcloud.io
