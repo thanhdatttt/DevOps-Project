@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="47" failures="0" errors="0" time="9.239">
+  <testsuite name="concatQueryString" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.091" tests="5">
+    <testcase classname="concatQueryString returns url unchanged when array is empty" name="concatQueryString returns url unchanged when array is empty" time="0.009">
+    </testcase>
+    <testcase classname="concatQueryString appends single param with ?" name="concatQueryString appends single param with ?" time="0.001">
+    </testcase>
+    <testcase classname="concatQueryString appends multiple params with &amp; separator" name="concatQueryString appends multiple params with &amp; separator" time="0">
+    </testcase>
+    <testcase classname="concatQueryString handles two params correctly" name="concatQueryString handles two params correctly" time="0.001">
+    </testcase>
+    <testcase classname="concatQueryString returns base url unchanged when empty array passed" name="concatQueryString returns base url unchanged when empty array passed" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="data_header_client" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.108" tests="5">
+    <testcase classname="data_header_client exports an array with 3 menu items" name="data_header_client exports an array with 3 menu items" time="0.008">
+    </testcase>
+    <testcase classname="data_header_client first item is Notification" name="data_header_client first item is Notification" time="0.001">
+    </testcase>
+    <testcase classname="data_header_client second item is Help &amp; FAQs" name="data_header_client second item is Help &amp; FAQs" time="0">
+    </testcase>
+    <testcase classname="data_header_client third item is EN" name="data_header_client third item is EN" time="0.001">
+    </testcase>
+    <testcase classname="data_header_client all items have links and id fields" name="data_header_client all items have links and id fields" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="toastSuccess" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.114" tests="4">
+    <testcase classname="toastSuccess calls toast.success with message and default options" name="toastSuccess calls toast.success with message and default options" time="0.01">
+    </testcase>
+    <testcase classname="toastSuccess uses custom options when provided" name="toastSuccess uses custom options when provided" time="0.001">
+    </testcase>
+    <testcase classname="toastError calls toast.error with message and default options" name="toastError calls toast.error with message and default options" time="0.001">
+    </testcase>
+    <testcase classname="toastError uses custom options when provided" name="toastError uses custom options when provided" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Common constants" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.093" tests="4">
+    <testcase classname="Common constants UPDATE_SUCCESSFULLY has correct value" name="Common constants UPDATE_SUCCESSFULLY has correct value" time="0.008">
+    </testcase>
+    <testcase classname="Common constants CREATE_SUCCESSFULLY has correct value" name="Common constants CREATE_SUCCESSFULLY has correct value" time="0">
+    </testcase>
+    <testcase classname="Common constants DELETE_SUCCESSFULLY has correct value" name="Common constants DELETE_SUCCESSFULLY has correct value" time="0.001">
+    </testcase>
+    <testcase classname="Common constants SEARCH_URL has correct value" name="Common constants SEARCH_URL has correct value" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="YasError" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.134" tests="8">
+    <testcase classname="YasError creates with default values when no args given" name="YasError creates with default values when no args given" time="0.01">
+    </testcase>
+    <testcase classname="YasError uses status when provided" name="YasError uses status when provided" time="0">
+    </testcase>
+    <testcase classname="YasError parses statusCode string when status not provided" name="YasError parses statusCode string when status not provided" time="0.001">
+    </testcase>
+    <testcase classname="YasError uses status over statusCode when both provided" name="YasError uses status over statusCode when both provided" time="0.001">
+    </testcase>
+    <testcase classname="YasError sets title and details correctly" name="YasError sets title and details correctly" time="0">
+    </testcase>
+    <testcase classname="YasError uses first fieldError as message when fieldErrors provided" name="YasError uses first fieldError as message when fieldErrors provided" time="0.009">
+    </testcase>
+    <testcase classname="YasError uses detail as message when fieldErrors is empty" name="YasError uses detail as message when fieldErrors is empty" time="0.001">
+    </testcase>
+    <testcase classname="YasError is an instance of Error" name="YasError is an instance of Error" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="formatPrice" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.126" tests="5">
+    <testcase classname="formatPrice formats zero as USD currency" name="formatPrice formats zero as USD currency" time="0.033">
+    </testcase>
+    <testcase classname="formatPrice formats a positive price" name="formatPrice formats a positive price" time="0.001">
+    </testcase>
+    <testcase classname="formatPrice formats a large price" name="formatPrice formats a large price" time="0.001">
+    </testcase>
+    <testcase classname="formatPrice returns a string" name="formatPrice returns a string" time="0.001">
+    </testcase>
+    <testcase classname="formatPrice formats price with correct USD format" name="formatPrice formats price with correct USD format" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="apiClientService.get" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.168" tests="11">
+    <testcase classname="apiClientService.get calls fetch with endpoint and undefined options" name="apiClientService.get calls fetch with endpoint and undefined options" time="0.013">
+    </testcase>
+    <testcase classname="apiClientService.get returns the fetch response" name="apiClientService.get returns the fetch response" time="0.002">
+    </testcase>
+    <testcase classname="apiClientService.post calls fetch with POST method and body" name="apiClientService.post calls fetch with POST method and body" time="0.002">
+    </testcase>
+    <testcase classname="apiClientService.post sets default Content-type header" name="apiClientService.post sets default Content-type header" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.post uses custom contentType when provided" name="apiClientService.post uses custom contentType when provided" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.post removes Content-type when body is FormData" name="apiClientService.post removes Content-type when body is FormData" time="0.002">
+    </testcase>
+    <testcase classname="apiClientService.put calls fetch with PUT method" name="apiClientService.put calls fetch with PUT method" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.delete calls fetch with DELETE method" name="apiClientService.delete calls fetch with DELETE method" time="0.001">
+    </testcase>
+    <testcase classname="error handling re-throws when fetch rejects" name="error handling re-throws when fetch rejects" time="0.02">
+    </testcase>
+    <testcase classname="CORS redirect handling executes without error on cors+redirected response" name="CORS redirect handling executes without error on cors+redirected response" time="0.012">
+    </testcase>
+    <testcase classname="CORS redirect handling does not redirect on basic non-redirected response" name="CORS redirect handling does not redirect on basic non-redirected response" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="useDebounce" errors="0" failures="0" skipped="0" timestamp="2026-03-16T07:50:11" time="0.383" tests="5">
+    <testcase classname="useDebounce returns initial value immediately" name="useDebounce returns initial value immediately" time="0.013">
+    </testcase>
+    <testcase classname="useDebounce does not update value before delay has passed" name="useDebounce does not update value before delay has passed" time="0.003">
+    </testcase>
+    <testcase classname="useDebounce updates value after delay has passed" name="useDebounce updates value after delay has passed" time="0.002">
+    </testcase>
+    <testcase classname="useDebounce resets timer if value changes before delay" name="useDebounce resets timer if value changes before delay" time="0.003">
+    </testcase>
+    <testcase classname="useDebounce handles undefined value" name="useDebounce handles undefined value" time="0.001">
+    </testcase>
+  </testsuite>
+</testsuites>
