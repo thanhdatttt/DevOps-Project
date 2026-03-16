@@ -1,23 +1,425 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="149" failures="0" errors="0" time="13.038">
-  <testsuite name="SLUG_FIELD_PATTERN" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="3.836" tests="18">
-    <testcase classname="SLUG_FIELD_PATTERN matches valid slugs with lowercase letters" name="SLUG_FIELD_PATTERN matches valid slugs with lowercase letters" time="0.022">
+<testsuites name="jest tests" tests="241" failures="0" errors="0" time="8.967">
+  <testsuite name="ProductAttributeGroupService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.52" tests="8">
+    <testcase classname="ProductAttributeGroupService getProductAttributeGroups fetches all" name="ProductAttributeGroupService getProductAttributeGroups fetches all" time="0.01">
     </testcase>
-    <testcase classname="SLUG_FIELD_PATTERN matches valid slugs with numbers" name="SLUG_FIELD_PATTERN matches valid slugs with numbers" time="0">
+    <testcase classname="ProductAttributeGroupService getPageableProductAttributeGroups builds paging URL" name="ProductAttributeGroupService getPageableProductAttributeGroups builds paging URL" time="0.001">
     </testcase>
-    <testcase classname="SLUG_FIELD_PATTERN matches slug with only lowercase letters" name="SLUG_FIELD_PATTERN matches slug with only lowercase letters" time="0.003">
+    <testcase classname="ProductAttributeGroupService getProductAttributeGroup fetches by id" name="ProductAttributeGroupService getProductAttributeGroup fetches by id" time="0.001">
     </testcase>
-    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with uppercase letters" name="SLUG_FIELD_PATTERN does not match slugs with uppercase letters" time="0.002">
+    <testcase classname="ProductAttributeGroupService createProductAttributeGroup posts data" name="ProductAttributeGroupService createProductAttributeGroup posts data" time="0.001">
     </testcase>
-    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with spaces" name="SLUG_FIELD_PATTERN does not match slugs with spaces" time="0.001">
+    <testcase classname="ProductAttributeGroupService updateProductAttributeGroup returns response on 204" name="ProductAttributeGroupService updateProductAttributeGroup returns response on 204" time="0">
     </testcase>
-    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with special characters" name="SLUG_FIELD_PATTERN does not match slugs with special characters" time="0.001">
+    <testcase classname="ProductAttributeGroupService updateProductAttributeGroup returns json on non-204" name="ProductAttributeGroupService updateProductAttributeGroup returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeGroupService deleteProductAttributeGroup returns response on 204" name="ProductAttributeGroupService deleteProductAttributeGroup returns response on 204" time="0">
+    </testcase>
+    <testcase classname="ProductAttributeGroupService deleteProductAttributeGroup returns json on non-204" name="ProductAttributeGroupService deleteProductAttributeGroup returns json on non-204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="StateOrProvinceService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.607" tests="9">
+    <testcase classname="StateOrProvinceService getStateOrProvincesByCountry builds URL with countryId" name="StateOrProvinceService getStateOrProvincesByCountry builds URL with countryId" time="0.022">
+    </testcase>
+    <testcase classname="StateOrProvinceService getPageableStateOrProvinces builds paging URL" name="StateOrProvinceService getPageableStateOrProvinces builds paging URL" time="0.001">
+    </testcase>
+    <testcase classname="StateOrProvinceService createStateOrProvince posts data" name="StateOrProvinceService createStateOrProvince posts data" time="0.003">
+    </testcase>
+    <testcase classname="StateOrProvinceService getStateOrProvince fetches by id" name="StateOrProvinceService getStateOrProvince fetches by id" time="0.003">
+    </testcase>
+    <testcase classname="StateOrProvinceService deleteStateOrProvince returns response on 204" name="StateOrProvinceService deleteStateOrProvince returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="StateOrProvinceService deleteStateOrProvince returns json on non-204" name="StateOrProvinceService deleteStateOrProvince returns json on non-204" time="0.004">
+    </testcase>
+    <testcase classname="StateOrProvinceService editStateOrProvince returns response on 204" name="StateOrProvinceService editStateOrProvince returns response on 204" time="0">
+    </testcase>
+    <testcase classname="StateOrProvinceService editStateOrProvince returns json on non-204" name="StateOrProvinceService editStateOrProvince returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="StateOrProvinceService getStatesOrProvinces fetches by id" name="StateOrProvinceService getStatesOrProvinces fetches by id" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="TaxClassService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.648" tests="8">
+    <testcase classname="TaxClassService getTaxClasses fetches all" name="TaxClassService getTaxClasses fetches all" time="0.012">
+    </testcase>
+    <testcase classname="TaxClassService getPageableTaxClasses builds paging URL" name="TaxClassService getPageableTaxClasses builds paging URL" time="0.001">
+    </testcase>
+    <testcase classname="TaxClassService createTaxClass posts data" name="TaxClassService createTaxClass posts data" time="0.002">
+    </testcase>
+    <testcase classname="TaxClassService getTaxClass fetches by id" name="TaxClassService getTaxClass fetches by id" time="0.001">
+    </testcase>
+    <testcase classname="TaxClassService deleteTaxClass returns response on 204" name="TaxClassService deleteTaxClass returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="TaxClassService deleteTaxClass returns json on non-204" name="TaxClassService deleteTaxClass returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="TaxClassService editTaxClass returns response on 204" name="TaxClassService editTaxClass returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="TaxClassService editTaxClass returns json on non-204" name="TaxClassService editTaxClass returns json on non-204" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="StockService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.698" tests="3">
+    <testcase classname="StockService addProductIntoWarehouse posts stock array" name="StockService addProductIntoWarehouse posts stock array" time="0.012">
+    </testcase>
+    <testcase classname="StockService fetchStocksInWarehouseByProductNameAndProductSku builds correct URL" name="StockService fetchStocksInWarehouseByProductNameAndProductSku builds correct URL" time="0.002">
+    </testcase>
+    <testcase classname="StockService updateProductQuantityInStock puts with stockQuantityList" name="StockService updateProductQuantityInStock puts with stockQuantityList" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProductTemplateService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.765" tests="6">
+    <testcase classname="ProductTemplateService getProductTemplates fetches all" name="ProductTemplateService getProductTemplates fetches all" time="0.014">
+    </testcase>
+    <testcase classname="ProductTemplateService getPageableProductTemplates builds paging URL" name="ProductTemplateService getPageableProductTemplates builds paging URL" time="0.001">
+    </testcase>
+    <testcase classname="ProductTemplateService createProductTemplate posts data" name="ProductTemplateService createProductTemplate posts data" time="0.001">
+    </testcase>
+    <testcase classname="ProductTemplateService getProductTemplate fetches by id" name="ProductTemplateService getProductTemplate fetches by id" time="0.001">
+    </testcase>
+    <testcase classname="ProductTemplateService updateProductTemplate returns response on 204" name="ProductTemplateService updateProductTemplate returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="ProductTemplateService updateProductTemplate returns json on non-204" name="ProductTemplateService updateProductTemplate returns json on non-204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="CustomerService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.802" tests="7">
+    <testcase classname="CustomerService getCustomers builds correct URL" name="CustomerService getCustomers builds correct URL" time="0.032">
+    </testcase>
+    <testcase classname="CustomerService getCustomer fetches by userId" name="CustomerService getCustomer fetches by userId" time="0.002">
+    </testcase>
+    <testcase classname="CustomerService createCustomer posts data" name="CustomerService createCustomer posts data" time="0.002">
+    </testcase>
+    <testcase classname="CustomerService updateCustomer puts data" name="CustomerService updateCustomer puts data" time="0.001">
+    </testcase>
+    <testcase classname="CustomerService deleteCustomer returns response on 204" name="CustomerService deleteCustomer returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="CustomerService deleteCustomer returns json on non-204" name="CustomerService deleteCustomer returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="CustomerService getMyProfile fetches storefront profile" name="CustomerService getMyProfile fetches storefront profile" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="PromotionService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.764" tests="6">
+    <testcase classname="PromotionService getPromotions serialises request object as query string" name="PromotionService getPromotions serialises request object as query string" time="0.011">
+    </testcase>
+    <testcase classname="PromotionService createPromotion posts data" name="PromotionService createPromotion posts data" time="0.001">
+    </testcase>
+    <testcase classname="PromotionService updatePromotion puts data" name="PromotionService updatePromotion puts data" time="0.001">
+    </testcase>
+    <testcase classname="PromotionService getPromotion fetches by id" name="PromotionService getPromotion fetches by id" time="0.001">
+    </testcase>
+    <testcase classname="PromotionService deletePromotion calls delete with correct URL" name="PromotionService deletePromotion calls delete with correct URL" time="0.001">
+    </testcase>
+    <testcase classname="PromotionService cancel navigates to promotions list page" name="PromotionService cancel navigates to promotions list page" time="0.04">
+    </testcase>
+  </testsuite>
+  <testsuite name="TaxRateService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.774" tests="8">
+    <testcase classname="TaxRateService getTaxRates fetches all" name="TaxRateService getTaxRates fetches all" time="0.016">
+    </testcase>
+    <testcase classname="TaxRateService getPageableTaxRates builds paging URL" name="TaxRateService getPageableTaxRates builds paging URL" time="0.001">
+    </testcase>
+    <testcase classname="TaxRateService createTaxRate posts data" name="TaxRateService createTaxRate posts data" time="0.007">
+    </testcase>
+    <testcase classname="TaxRateService getTaxRate fetches by id" name="TaxRateService getTaxRate fetches by id" time="0.003">
+    </testcase>
+    <testcase classname="TaxRateService deleteTaxRate returns response on 204" name="TaxRateService deleteTaxRate returns response on 204" time="0.003">
+    </testcase>
+    <testcase classname="TaxRateService deleteTaxRate returns json on non-204" name="TaxRateService deleteTaxRate returns json on non-204" time="0.008">
+    </testcase>
+    <testcase classname="TaxRateService editTaxRate returns response on 204" name="TaxRateService editTaxRate returns response on 204" time="0.003">
+    </testcase>
+    <testcase classname="TaxRateService editTaxRate returns json on non-204" name="TaxRateService editTaxRate returns json on non-204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProductAttributeValueService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.778" tests="6">
+    <testcase classname="ProductAttributeValueService getAttributeValueOfProduct fetches by productId" name="ProductAttributeValueService getAttributeValueOfProduct fetches by productId" time="0.01">
+    </testcase>
+    <testcase classname="ProductAttributeValueService createProductAttributeValueOfProduct posts and returns json" name="ProductAttributeValueService createProductAttributeValueOfProduct posts and returns json" time="0.002">
+    </testcase>
+    <testcase classname="ProductAttributeValueService updateProductAttributeValueOfProduct returns status 204 on success" name="ProductAttributeValueService updateProductAttributeValueOfProduct returns status 204 on success" time="0.002">
+    </testcase>
+    <testcase classname="ProductAttributeValueService updateProductAttributeValueOfProduct returns json on non-204" name="ProductAttributeValueService updateProductAttributeValueOfProduct returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeValueService deleteProductAttributeValueOfProductById returns 204 status on success" name="ProductAttributeValueService deleteProductAttributeValueOfProductById returns 204 status on success" time="0">
+    </testcase>
+    <testcase classname="ProductAttributeValueService deleteProductAttributeValueOfProductById returns json on non-204" name="ProductAttributeValueService deleteProductAttributeValueOfProductById returns json on non-204" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="CountryService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.798" tests="8">
+    <testcase classname="CountryService getCountries fetches all" name="CountryService getCountries fetches all" time="0.023">
+    </testcase>
+    <testcase classname="CountryService getPageableCountries builds URL" name="CountryService getPageableCountries builds URL" time="0.005">
+    </testcase>
+    <testcase classname="CountryService createCountry posts data" name="CountryService createCountry posts data" time="0.001">
+    </testcase>
+    <testcase classname="CountryService getCountry fetches by id" name="CountryService getCountry fetches by id" time="0.001">
+    </testcase>
+    <testcase classname="CountryService deleteCountry returns response on 204" name="CountryService deleteCountry returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="CountryService deleteCountry returns json on non-204" name="CountryService deleteCountry returns json on non-204" time="0.003">
+    </testcase>
+    <testcase classname="CountryService editCountry returns response on 204" name="CountryService editCountry returns response on 204" time="0.002">
+    </testcase>
+    <testcase classname="CountryService editCountry returns json on non-204" name="CountryService editCountry returns json on non-204" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="WebhookService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:20:59" time="2.794" tests="7">
+    <testcase classname="WebhookService getWebhooks builds paging URL" name="WebhookService getWebhooks builds paging URL" time="0.012">
+    </testcase>
+    <testcase classname="WebhookService createWebhook posts data" name="WebhookService createWebhook posts data" time="0.001">
+    </testcase>
+    <testcase classname="WebhookService getWebhook fetches by id" name="WebhookService getWebhook fetches by id" time="0.002">
+    </testcase>
+    <testcase classname="WebhookService deleteWebhook returns response on 204" name="WebhookService deleteWebhook returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="WebhookService deleteWebhook returns json on non-204" name="WebhookService deleteWebhook returns json on non-204" time="0">
+    </testcase>
+    <testcase classname="WebhookService updateWebhook returns response on 204" name="WebhookService updateWebhook returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="WebhookService updateWebhook returns json on non-204" name="WebhookService updateWebhook returns json on non-204" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="RatingService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:01" time="0.474" tests="4">
+    <testcase classname="RatingService getRatings appends query params" name="RatingService getRatings appends query params" time="0.003">
+    </testcase>
+    <testcase classname="RatingService getLatestRatings returns ratings on 2xx" name="RatingService getLatestRatings returns ratings on 2xx" time="0.005">
+    </testcase>
+    <testcase classname="RatingService getLatestRatings rejects on non-2xx" name="RatingService getLatestRatings rejects on non-2xx" time="0.006">
+    </testcase>
+    <testcase classname="RatingService deleteRatingById calls delete and returns json" name="RatingService deleteRatingById calls delete and returns json" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="OrderService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:01" time="0.387" tests="4">
+    <testcase classname="OrderService getOrders appends query params" name="OrderService getOrders appends query params" time="0.003">
+    </testcase>
+    <testcase classname="OrderService getLatestOrders returns orders on 2xx" name="OrderService getLatestOrders returns orders on 2xx" time="0.001">
+    </testcase>
+    <testcase classname="OrderService getLatestOrders rejects on non-2xx" name="OrderService getLatestOrders rejects on non-2xx" time="0.015">
+    </testcase>
+    <testcase classname="OrderService getOrderById fetches by id" name="OrderService getOrderById fetches by id" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="MediaService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.243" tests="2">
+    <testcase classname="MediaService uploadMedia posts FormData and returns json on 2xx" name="MediaService uploadMedia posts FormData and returns json on 2xx" time="0.006">
+    </testcase>
+    <testcase classname="MediaService uploadMedia rejects on non-2xx response" name="MediaService uploadMedia rejects on non-2xx response" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Promotion ProductService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:01" time="0.303" tests="3">
+    <testcase classname="Promotion ProductService searchProducts builds URL with product-name param" name="Promotion ProductService searchProducts builds URL with product-name param" time="0.003">
+    </testcase>
+    <testcase classname="Promotion ProductService searchCategories builds URL with categoryName param" name="Promotion ProductService searchCategories builds URL with categoryName param" time="0.001">
+    </testcase>
+    <testcase classname="Promotion ProductService searchBrands builds URL with brandName param" name="Promotion ProductService searchBrands builds URL with brandName param" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="EventService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.237" tests="1">
+    <testcase classname="EventService getEvents calls apiClientService.get and returns json" name="EventService getEvents calls apiClientService.get and returns json" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="DistrictService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.271" tests="2">
+    <testcase classname="DistrictService getDistricts fetches by id" name="DistrictService getDistricts fetches by id" time="0.006">
+    </testcase>
+    <testcase classname="DistrictService getDistricts uses correct URL for different id" name="DistrictService getDistricts uses correct URL for different id" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProductOptionService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.318" tests="8">
+    <testcase classname="ProductOptionService getProductOptions fetches all" name="ProductOptionService getProductOptions fetches all" time="0.002">
+    </testcase>
+    <testcase classname="ProductOptionService getPageableProductOptions passes paging params" name="ProductOptionService getPageableProductOptions passes paging params" time="0">
+    </testcase>
+    <testcase classname="ProductOptionService getProductOption fetches by id" name="ProductOptionService getProductOption fetches by id" time="0">
+    </testcase>
+    <testcase classname="ProductOptionService createProductOption posts data" name="ProductOptionService createProductOption posts data" time="0.004">
+    </testcase>
+    <testcase classname="ProductOptionService updateProductOption returns 204 response" name="ProductOptionService updateProductOption returns 204 response" time="0.001">
+    </testcase>
+    <testcase classname="ProductOptionService updateProductOption returns json on non-204" name="ProductOptionService updateProductOption returns json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="ProductOptionService deleteProductOption returns 204 response" name="ProductOptionService deleteProductOption returns 204 response" time="0.006">
+    </testcase>
+    <testcase classname="ProductOptionService deleteProductOption returns json on non-204" name="ProductOptionService deleteProductOption returns json on non-204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="getBrands" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.392" tests="9">
+    <testcase classname="getBrands fetches all brands from base URL" name="getBrands fetches all brands from base URL" time="0.003">
+    </testcase>
+    <testcase classname="getPageableBrands fetches pageable brands with correct query params" name="getPageableBrands fetches pageable brands with correct query params" time="0.002">
+    </testcase>
+    <testcase classname="getPageableBrands passes page number and page size correctly" name="getPageableBrands passes page number and page size correctly" time="0.001">
+    </testcase>
+    <testcase classname="createBrand posts brand data to base URL" name="createBrand posts brand data to base URL" time="0.001">
+    </testcase>
+    <testcase classname="getBrand fetches brand by id" name="getBrand fetches brand by id" time="0.002">
+    </testcase>
+    <testcase classname="deleteBrand returns response directly when status is 204" name="deleteBrand returns response directly when status is 204" time="0.001">
+    </testcase>
+    <testcase classname="deleteBrand returns parsed json when status is not 204" name="deleteBrand returns parsed json when status is not 204" time="0.001">
+    </testcase>
+    <testcase classname="editBrand puts brand data with correct URL" name="editBrand puts brand data with correct URL" time="0.001">
+    </testcase>
+    <testcase classname="editBrand returns parsed json when status is not 204" name="editBrand returns parsed json when status is not 204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="handleDeletingResponse" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.479" tests="13">
+    <testcase classname="handleDeletingResponse calls toastSuccess when status is 204 (SUCCESS)" name="handleDeletingResponse calls toastSuccess when status is 204 (SUCCESS)" time="0.001">
+    </testcase>
+    <testcase classname="handleDeletingResponse calls toastError with detail when title is NOT_FOUND" name="handleDeletingResponse calls toastError with detail when title is NOT_FOUND" time="0.001">
+    </testcase>
+    <testcase classname="handleDeletingResponse calls toastError with detail when title is BAD_REQUEST" name="handleDeletingResponse calls toastError with detail when title is BAD_REQUEST" time="0">
+    </testcase>
+    <testcase classname="handleDeletingResponse calls toastError with DELETE_FAILED for unknown responses" name="handleDeletingResponse calls toastError with DELETE_FAILED for unknown responses" time="0">
+    </testcase>
+    <testcase classname="handleUpdatingResponse calls toastSuccess on status 204 (SUCCESS)" name="handleUpdatingResponse calls toastSuccess on status 204 (SUCCESS)" time="0.001">
+    </testcase>
+    <testcase classname="handleUpdatingResponse calls toastError with detail on BAD_REQUEST title" name="handleUpdatingResponse calls toastError with detail on BAD_REQUEST title" time="0">
+    </testcase>
+    <testcase classname="handleUpdatingResponse calls toastError with detail on NOT_FOUND title" name="handleUpdatingResponse calls toastError with detail on NOT_FOUND title" time="0.001">
+    </testcase>
+    <testcase classname="handleUpdatingResponse calls toastError with UPDATE_FAILED as fallback" name="handleUpdatingResponse calls toastError with UPDATE_FAILED as fallback" time="0">
+    </testcase>
+    <testcase classname="handleCreatingResponse calls toastSuccess on status 201 (CREATED)" name="handleCreatingResponse calls toastSuccess on status 201 (CREATED)" time="0.002">
+    </testcase>
+    <testcase classname="handleCreatingResponse calls toastError with detail on status 400 (BAD_REQUEST)" name="handleCreatingResponse calls toastError with detail on status 400 (BAD_REQUEST)" time="0.001">
+    </testcase>
+    <testcase classname="handleCreatingResponse calls toastError with CREATE_FAILED as fallback" name="handleCreatingResponse calls toastError with CREATE_FAILED as fallback" time="0">
+    </testcase>
+    <testcase classname="handleResponse calls toastSuccess when response.ok is true" name="handleResponse calls toastSuccess when response.ok is true" time="0.001">
+    </testcase>
+    <testcase classname="handleResponse calls toastError when response.ok is false" name="handleResponse calls toastError when response.ok is false" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="ToastService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.296" tests="6">
+    <testcase classname="ToastService toastSuccess calls toast.success with message" name="ToastService toastSuccess calls toast.success with message" time="0.003">
+    </testcase>
+    <testcase classname="ToastService toastSuccess uses default options when none provided" name="ToastService toastSuccess uses default options when none provided" time="0.001">
+    </testcase>
+    <testcase classname="ToastService toastSuccess uses custom options when provided" name="ToastService toastSuccess uses custom options when provided" time="0">
+    </testcase>
+    <testcase classname="ToastService toastError calls toast.error with message" name="ToastService toastError calls toast.error with message" time="0">
+    </testcase>
+    <testcase classname="ToastService toastError uses default options when none provided" name="ToastService toastError uses default options when none provided" time="0.001">
+    </testcase>
+    <testcase classname="ToastService toastError uses custom options when provided" name="ToastService toastError uses custom options when provided" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="ToastVariant constants" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.33" tests="24">
+    <testcase classname="ToastVariant constants has correct SUCCESS value" name="ToastVariant constants has correct SUCCESS value" time="0.001">
+    </testcase>
+    <testcase classname="ToastVariant constants has correct WARNING value" name="ToastVariant constants has correct WARNING value" time="0.001">
+    </testcase>
+    <testcase classname="ToastVariant constants has correct ERROR value" name="ToastVariant constants has correct ERROR value" time="0">
+    </testcase>
+    <testcase classname="ResponseStatus constants CREATED is 201" name="ResponseStatus constants CREATED is 201" time="0.001">
+    </testcase>
+    <testcase classname="ResponseStatus constants SUCCESS is 204" name="ResponseStatus constants SUCCESS is 204" time="0">
+    </testcase>
+    <testcase classname="ResponseStatus constants NOT_FOUND is 404" name="ResponseStatus constants NOT_FOUND is 404" time="0">
+    </testcase>
+    <testcase classname="ResponseStatus constants BAD_REQUEST is 400" name="ResponseStatus constants BAD_REQUEST is 400" time="0.001">
+    </testcase>
+    <testcase classname="ResponseTitle constants NOT_FOUND title is &quot;Not Found&quot;" name="ResponseTitle constants NOT_FOUND title is &quot;Not Found&quot;" time="0">
+    </testcase>
+    <testcase classname="ResponseTitle constants BAD_REQUEST title is &quot;Bad Request&quot;" name="ResponseTitle constants BAD_REQUEST title is &quot;Bad Request&quot;" time="0">
+    </testcase>
+    <testcase classname="Message constants HAVE_BEEN_DELETED message" name="Message constants HAVE_BEEN_DELETED message" time="0">
+    </testcase>
+    <testcase classname="Message constants DELETE_FAILED message" name="Message constants DELETE_FAILED message" time="0">
+    </testcase>
+    <testcase classname="Message constants UPDATE_SUCCESSFULLY message" name="Message constants UPDATE_SUCCESSFULLY message" time="0">
+    </testcase>
+    <testcase classname="Message constants CREATE_SUCCESSFULLY message" name="Message constants CREATE_SUCCESSFULLY message" time="0.001">
+    </testcase>
+    <testcase classname="Message constants UPDATE_FAILED message" name="Message constants UPDATE_FAILED message" time="0">
+    </testcase>
+    <testcase classname="Message constants CREATE_FAILED message" name="Message constants CREATE_FAILED message" time="0.001">
+    </testcase>
+    <testcase classname="Pagination defaults DEFAULT_PAGE_SIZE is 10" name="Pagination defaults DEFAULT_PAGE_SIZE is 10" time="0">
+    </testcase>
+    <testcase classname="Pagination defaults DEFAULT_PAGE_NUMBER is 0" name="Pagination defaults DEFAULT_PAGE_NUMBER is 0" time="0">
+    </testcase>
+    <testcase classname="URL constants CATEGORIES_URL" name="URL constants CATEGORIES_URL" time="0">
+    </testcase>
+    <testcase classname="URL constants BRAND_URL" name="URL constants BRAND_URL" time="0.001">
+    </testcase>
+    <testcase classname="URL constants PRODUCT_URL" name="URL constants PRODUCT_URL" time="0">
+    </testcase>
+    <testcase classname="mappingExportingProductColumnNames has id column" name="mappingExportingProductColumnNames has id column" time="0">
+    </testcase>
+    <testcase classname="mappingExportingProductColumnNames has name column as &quot;Product Name&quot;" name="mappingExportingProductColumnNames has name column as &quot;Product Name&quot;" time="0">
+    </testcase>
+    <testcase classname="mappingExportingProductColumnNames has price column" name="mappingExportingProductColumnNames has price column" time="0.001">
+    </testcase>
+    <testcase classname="mappingExportingProductColumnNames has isPublished column" name="mappingExportingProductColumnNames has isPublished column" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="FilterExistInWHSelection enum" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.525" tests="13">
+    <testcase classname="FilterExistInWHSelection enum has ALL value" name="FilterExistInWHSelection enum has ALL value" time="0.001">
+    </testcase>
+    <testcase classname="FilterExistInWHSelection enum has YES value" name="FilterExistInWHSelection enum has YES value" time="0.001">
+    </testcase>
+    <testcase classname="FilterExistInWHSelection enum has NO value" name="FilterExistInWHSelection enum has NO value" time="0">
+    </testcase>
+    <testcase classname="WarehouseService getWarehouses fetches all warehouses" name="WarehouseService getWarehouses fetches all warehouses" time="0.002">
+    </testcase>
+    <testcase classname="WarehouseService getPageableWarehouses builds correct paging URL" name="WarehouseService getPageableWarehouses builds correct paging URL" time="0">
+    </testcase>
+    <testcase classname="WarehouseService createWarehouse posts warehouse data" name="WarehouseService createWarehouse posts warehouse data" time="0">
+    </testcase>
+    <testcase classname="WarehouseService getWarehouse fetches by id" name="WarehouseService getWarehouse fetches by id" time="0.005">
+    </testcase>
+    <testcase classname="WarehouseService deleteWarehouse returns response directly on 204" name="WarehouseService deleteWarehouse returns response directly on 204" time="0.001">
+    </testcase>
+    <testcase classname="WarehouseService deleteWarehouse returns parsed json on non-204" name="WarehouseService deleteWarehouse returns parsed json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="WarehouseService editWarehouse returns response directly on 204" name="WarehouseService editWarehouse returns response directly on 204" time="0.001">
+    </testcase>
+    <testcase classname="WarehouseService editWarehouse returns parsed json on non-204" name="WarehouseService editWarehouse returns parsed json on non-204" time="0">
+    </testcase>
+    <testcase classname="WarehouseService getProductInWarehouse builds correct query URL" name="WarehouseService getProductInWarehouse builds correct query URL" time="0.001">
+    </testcase>
+    <testcase classname="WarehouseService getProductInWarehouse works with YES filter" name="WarehouseService getProductInWarehouse works with YES filter" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="apiClientService.get" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.553" tests="12">
+    <testcase classname="apiClientService.get calls fetch with the endpoint and undefined options" name="apiClientService.get calls fetch with the endpoint and undefined options" time="0.003">
+    </testcase>
+    <testcase classname="apiClientService.get returns the fetch response object" name="apiClientService.get returns the fetch response object" time="0">
+    </testcase>
+    <testcase classname="apiClientService.post calls fetch with POST method and serialised body" name="apiClientService.post calls fetch with POST method and serialised body" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.post sets the default Content-type header" name="apiClientService.post sets the default Content-type header" time="0">
+    </testcase>
+    <testcase classname="apiClientService.post uses a custom contentType when provided" name="apiClientService.post uses a custom contentType when provided" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.post removes Content-type header when body is FormData" name="apiClientService.post removes Content-type header when body is FormData" time="0.001">
+    </testcase>
+    <testcase classname="apiClientService.put calls fetch with PUT method and body" name="apiClientService.put calls fetch with PUT method and body" time="0">
+    </testcase>
+    <testcase classname="apiClientService.delete calls fetch with DELETE method" name="apiClientService.delete calls fetch with DELETE method" time="0.001">
+    </testcase>
+    <testcase classname="error handling re-throws when fetch rejects" name="error handling re-throws when fetch rejects" time="0.032">
+    </testcase>
+    <testcase classname="CORS redirect handling executes without error when response is cors and redirected" name="CORS redirect handling executes without error when response is cors and redirected" time="0.019">
+    </testcase>
+    <testcase classname="CORS redirect handling does not attempt redirect when response type is basic" name="CORS redirect handling does not attempt redirect when response type is basic" time="0.001">
+    </testcase>
+    <testcase classname="CORS redirect handling does not attempt redirect when cors but not redirected" name="CORS redirect handling does not attempt redirect when cors but not redirected" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="SLUG_FIELD_PATTERN" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.322" tests="18">
+    <testcase classname="SLUG_FIELD_PATTERN matches valid slugs with lowercase letters" name="SLUG_FIELD_PATTERN matches valid slugs with lowercase letters" time="0.002">
+    </testcase>
+    <testcase classname="SLUG_FIELD_PATTERN matches valid slugs with numbers" name="SLUG_FIELD_PATTERN matches valid slugs with numbers" time="0.001">
+    </testcase>
+    <testcase classname="SLUG_FIELD_PATTERN matches slug with only lowercase letters" name="SLUG_FIELD_PATTERN matches slug with only lowercase letters" time="0">
+    </testcase>
+    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with uppercase letters" name="SLUG_FIELD_PATTERN does not match slugs with uppercase letters" time="0.001">
+    </testcase>
+    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with spaces" name="SLUG_FIELD_PATTERN does not match slugs with spaces" time="0">
+    </testcase>
+    <testcase classname="SLUG_FIELD_PATTERN does not match slugs with special characters" name="SLUG_FIELD_PATTERN does not match slugs with special characters" time="0">
     </testcase>
     <testcase classname="USER_NAME_PATTERN matches valid username with lowercase letters" name="USER_NAME_PATTERN matches valid username with lowercase letters" time="0.001">
     </testcase>
-    <testcase classname="USER_NAME_PATTERN matches valid username with numbers" name="USER_NAME_PATTERN matches valid username with numbers" time="0.002">
+    <testcase classname="USER_NAME_PATTERN matches valid username with numbers" name="USER_NAME_PATTERN matches valid username with numbers" time="0.001">
     </testcase>
-    <testcase classname="USER_NAME_PATTERN does not match username with uppercase" name="USER_NAME_PATTERN does not match username with uppercase" time="0.001">
+    <testcase classname="USER_NAME_PATTERN does not match username with uppercase" name="USER_NAME_PATTERN does not match username with uppercase" time="0">
     </testcase>
     <testcase classname="USER_NAME_PATTERN does not match username with spaces" name="USER_NAME_PATTERN does not match username with spaces" time="0.001">
     </testcase>
@@ -29,279 +431,27 @@
     </testcase>
     <testcase classname="EMAIL_PATTERN matches email with plus sign" name="EMAIL_PATTERN matches email with plus sign" time="0.001">
     </testcase>
-    <testcase classname="EMAIL_PATTERN does not match email without @" name="EMAIL_PATTERN does not match email without @" time="0.001">
+    <testcase classname="EMAIL_PATTERN does not match email without @" name="EMAIL_PATTERN does not match email without @" time="0">
     </testcase>
     <testcase classname="EMAIL_PATTERN does not match email without domain" name="EMAIL_PATTERN does not match email without domain" time="0">
     </testcase>
-    <testcase classname="EMAIL_PATTERN does not match email without TLD" name="EMAIL_PATTERN does not match email without TLD" time="0">
+    <testcase classname="EMAIL_PATTERN does not match email without TLD" name="EMAIL_PATTERN does not match email without TLD" time="0.001">
     </testcase>
     <testcase classname="EMAIL_PATTERN does not match plain text" name="EMAIL_PATTERN does not match plain text" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="getCategories" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.027" tests="8">
-    <testcase classname="getCategories calls correct endpoint and returns data" name="getCategories calls correct endpoint and returns data" time="0.015">
+  <testsuite name="getProducts" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.58" tests="16">
+    <testcase classname="getProducts calls endpoint with correct query params" name="getProducts calls endpoint with correct query params" time="0.002">
     </testcase>
-    <testcase classname="getCategory calls correct endpoint with id" name="getCategory calls correct endpoint with id" time="0.002">
+    <testcase classname="getLatestProducts returns products when status is 2xx" name="getLatestProducts returns products when status is 2xx" time="0.006">
     </testcase>
-    <testcase classname="createCategory posts category data" name="createCategory posts category data" time="0.004">
-    </testcase>
-    <testcase classname="updateCategory returns response on 204" name="updateCategory returns response on 204" time="0.007">
-    </testcase>
-    <testcase classname="updateCategory returns parsed json on non-204" name="updateCategory returns parsed json on non-204" time="0.001">
-    </testcase>
-    <testcase classname="deleteCategory returns response on 204" name="deleteCategory returns response on 204" time="0.001">
-    </testcase>
-    <testcase classname="deleteCategory returns parsed json on non-204" name="deleteCategory returns parsed json on non-204" time="0.003">
-    </testcase>
-    <testcase classname="getProductsByCategory calls storefront endpoint with slug and page" name="getProductsByCategory calls storefront endpoint with slug and page" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="ToastService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="3.891" tests="6">
-    <testcase classname="ToastService toastSuccess calls toast.success with message" name="ToastService toastSuccess calls toast.success with message" time="0.031">
-    </testcase>
-    <testcase classname="ToastService toastSuccess uses default options when none provided" name="ToastService toastSuccess uses default options when none provided" time="0.001">
-    </testcase>
-    <testcase classname="ToastService toastSuccess uses custom options when provided" name="ToastService toastSuccess uses custom options when provided" time="0.002">
-    </testcase>
-    <testcase classname="ToastService toastError calls toast.error with message" name="ToastService toastError calls toast.error with message" time="0">
-    </testcase>
-    <testcase classname="ToastService toastError uses default options when none provided" name="ToastService toastError uses default options when none provided" time="0">
-    </testcase>
-    <testcase classname="ToastService toastError uses custom options when provided" name="ToastService toastError uses custom options when provided" time="0">
-    </testcase>
-  </testsuite>
-  <testsuite name="ToastVariant constants" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="3.938" tests="24">
-    <testcase classname="ToastVariant constants has correct SUCCESS value" name="ToastVariant constants has correct SUCCESS value" time="0.024">
-    </testcase>
-    <testcase classname="ToastVariant constants has correct WARNING value" name="ToastVariant constants has correct WARNING value" time="0">
-    </testcase>
-    <testcase classname="ToastVariant constants has correct ERROR value" name="ToastVariant constants has correct ERROR value" time="0">
-    </testcase>
-    <testcase classname="ResponseStatus constants CREATED is 201" name="ResponseStatus constants CREATED is 201" time="0.001">
-    </testcase>
-    <testcase classname="ResponseStatus constants SUCCESS is 204" name="ResponseStatus constants SUCCESS is 204" time="0.001">
-    </testcase>
-    <testcase classname="ResponseStatus constants NOT_FOUND is 404" name="ResponseStatus constants NOT_FOUND is 404" time="0.001">
-    </testcase>
-    <testcase classname="ResponseStatus constants BAD_REQUEST is 400" name="ResponseStatus constants BAD_REQUEST is 400" time="0">
-    </testcase>
-    <testcase classname="ResponseTitle constants NOT_FOUND title is &quot;Not Found&quot;" name="ResponseTitle constants NOT_FOUND title is &quot;Not Found&quot;" time="0.002">
-    </testcase>
-    <testcase classname="ResponseTitle constants BAD_REQUEST title is &quot;Bad Request&quot;" name="ResponseTitle constants BAD_REQUEST title is &quot;Bad Request&quot;" time="0">
-    </testcase>
-    <testcase classname="Message constants HAVE_BEEN_DELETED message" name="Message constants HAVE_BEEN_DELETED message" time="0.001">
-    </testcase>
-    <testcase classname="Message constants DELETE_FAILED message" name="Message constants DELETE_FAILED message" time="0">
-    </testcase>
-    <testcase classname="Message constants UPDATE_SUCCESSFULLY message" name="Message constants UPDATE_SUCCESSFULLY message" time="0.001">
-    </testcase>
-    <testcase classname="Message constants CREATE_SUCCESSFULLY message" name="Message constants CREATE_SUCCESSFULLY message" time="0">
-    </testcase>
-    <testcase classname="Message constants UPDATE_FAILED message" name="Message constants UPDATE_FAILED message" time="0">
-    </testcase>
-    <testcase classname="Message constants CREATE_FAILED message" name="Message constants CREATE_FAILED message" time="0.001">
-    </testcase>
-    <testcase classname="Pagination defaults DEFAULT_PAGE_SIZE is 10" name="Pagination defaults DEFAULT_PAGE_SIZE is 10" time="0.001">
-    </testcase>
-    <testcase classname="Pagination defaults DEFAULT_PAGE_NUMBER is 0" name="Pagination defaults DEFAULT_PAGE_NUMBER is 0" time="0">
-    </testcase>
-    <testcase classname="URL constants CATEGORIES_URL" name="URL constants CATEGORIES_URL" time="0.001">
-    </testcase>
-    <testcase classname="URL constants BRAND_URL" name="URL constants BRAND_URL" time="0">
-    </testcase>
-    <testcase classname="URL constants PRODUCT_URL" name="URL constants PRODUCT_URL" time="0">
-    </testcase>
-    <testcase classname="mappingExportingProductColumnNames has id column" name="mappingExportingProductColumnNames has id column" time="0.001">
-    </testcase>
-    <testcase classname="mappingExportingProductColumnNames has name column as &quot;Product Name&quot;" name="mappingExportingProductColumnNames has name column as &quot;Product Name&quot;" time="0">
-    </testcase>
-    <testcase classname="mappingExportingProductColumnNames has price column" name="mappingExportingProductColumnNames has price column" time="0">
-    </testcase>
-    <testcase classname="mappingExportingProductColumnNames has isPublished column" name="mappingExportingProductColumnNames has isPublished column" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="ProductAttributeService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.084" tests="8">
-    <testcase classname="ProductAttributeService getProductAttributes fetches all" name="ProductAttributeService getProductAttributes fetches all" time="0.019">
-    </testcase>
-    <testcase classname="ProductAttributeService getPageableProductAttributes passes paging params" name="ProductAttributeService getPageableProductAttributes passes paging params" time="0.002">
-    </testcase>
-    <testcase classname="ProductAttributeService createProductAttribute posts data" name="ProductAttributeService createProductAttribute posts data" time="0.001">
-    </testcase>
-    <testcase classname="ProductAttributeService updateProductAttribute returns 204 response" name="ProductAttributeService updateProductAttribute returns 204 response" time="0.001">
-    </testcase>
-    <testcase classname="ProductAttributeService updateProductAttribute returns json on non-204" name="ProductAttributeService updateProductAttribute returns json on non-204" time="0.001">
-    </testcase>
-    <testcase classname="ProductAttributeService getProductAttribute fetches by id" name="ProductAttributeService getProductAttribute fetches by id" time="0.002">
-    </testcase>
-    <testcase classname="ProductAttributeService deleteProductAttribute returns 204 response" name="ProductAttributeService deleteProductAttribute returns 204 response" time="0.001">
-    </testcase>
-    <testcase classname="ProductAttributeService deleteProductAttribute returns json on non-204" name="ProductAttributeService deleteProductAttribute returns json on non-204" time="0.005">
-    </testcase>
-  </testsuite>
-  <testsuite name="ProductOptionService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.151" tests="8">
-    <testcase classname="ProductOptionService getProductOptions fetches all" name="ProductOptionService getProductOptions fetches all" time="0.013">
-    </testcase>
-    <testcase classname="ProductOptionService getPageableProductOptions passes paging params" name="ProductOptionService getPageableProductOptions passes paging params" time="0.002">
-    </testcase>
-    <testcase classname="ProductOptionService getProductOption fetches by id" name="ProductOptionService getProductOption fetches by id" time="0.001">
-    </testcase>
-    <testcase classname="ProductOptionService createProductOption posts data" name="ProductOptionService createProductOption posts data" time="0.001">
-    </testcase>
-    <testcase classname="ProductOptionService updateProductOption returns 204 response" name="ProductOptionService updateProductOption returns 204 response" time="0.002">
-    </testcase>
-    <testcase classname="ProductOptionService updateProductOption returns json on non-204" name="ProductOptionService updateProductOption returns json on non-204" time="0.002">
-    </testcase>
-    <testcase classname="ProductOptionService deleteProductOption returns 204 response" name="ProductOptionService deleteProductOption returns 204 response" time="0.001">
-    </testcase>
-    <testcase classname="ProductOptionService deleteProductOption returns json on non-204" name="ProductOptionService deleteProductOption returns json on non-204" time="0">
-    </testcase>
-  </testsuite>
-  <testsuite name="handleDeletingResponse" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.157" tests="13">
-    <testcase classname="handleDeletingResponse calls toastSuccess when status is 204 (SUCCESS)" name="handleDeletingResponse calls toastSuccess when status is 204 (SUCCESS)" time="0.029">
-    </testcase>
-    <testcase classname="handleDeletingResponse calls toastError with detail when title is NOT_FOUND" name="handleDeletingResponse calls toastError with detail when title is NOT_FOUND" time="0.009">
-    </testcase>
-    <testcase classname="handleDeletingResponse calls toastError with detail when title is BAD_REQUEST" name="handleDeletingResponse calls toastError with detail when title is BAD_REQUEST" time="0.001">
-    </testcase>
-    <testcase classname="handleDeletingResponse calls toastError with DELETE_FAILED for unknown responses" name="handleDeletingResponse calls toastError with DELETE_FAILED for unknown responses" time="0.005">
-    </testcase>
-    <testcase classname="handleUpdatingResponse calls toastSuccess on status 204 (SUCCESS)" name="handleUpdatingResponse calls toastSuccess on status 204 (SUCCESS)" time="0.001">
-    </testcase>
-    <testcase classname="handleUpdatingResponse calls toastError with detail on BAD_REQUEST title" name="handleUpdatingResponse calls toastError with detail on BAD_REQUEST title" time="0.002">
-    </testcase>
-    <testcase classname="handleUpdatingResponse calls toastError with detail on NOT_FOUND title" name="handleUpdatingResponse calls toastError with detail on NOT_FOUND title" time="0.001">
-    </testcase>
-    <testcase classname="handleUpdatingResponse calls toastError with UPDATE_FAILED as fallback" name="handleUpdatingResponse calls toastError with UPDATE_FAILED as fallback" time="0">
-    </testcase>
-    <testcase classname="handleCreatingResponse calls toastSuccess on status 201 (CREATED)" name="handleCreatingResponse calls toastSuccess on status 201 (CREATED)" time="0.006">
-    </testcase>
-    <testcase classname="handleCreatingResponse calls toastError with detail on status 400 (BAD_REQUEST)" name="handleCreatingResponse calls toastError with detail on status 400 (BAD_REQUEST)" time="0.001">
-    </testcase>
-    <testcase classname="handleCreatingResponse calls toastError with CREATE_FAILED as fallback" name="handleCreatingResponse calls toastError with CREATE_FAILED as fallback" time="0.002">
-    </testcase>
-    <testcase classname="handleResponse calls toastSuccess when response.ok is true" name="handleResponse calls toastSuccess when response.ok is true" time="0">
-    </testcase>
-    <testcase classname="handleResponse calls toastError when response.ok is false" name="handleResponse calls toastError when response.ok is false" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="apiClientService.get" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.222" tests="12">
-    <testcase classname="apiClientService.get calls fetch with the endpoint and undefined options" name="apiClientService.get calls fetch with the endpoint and undefined options" time="0.024">
-    </testcase>
-    <testcase classname="apiClientService.get returns the fetch response object" name="apiClientService.get returns the fetch response object" time="0.001">
-    </testcase>
-    <testcase classname="apiClientService.post calls fetch with POST method and serialised body" name="apiClientService.post calls fetch with POST method and serialised body" time="0.002">
-    </testcase>
-    <testcase classname="apiClientService.post sets the default Content-type header" name="apiClientService.post sets the default Content-type header" time="0.001">
-    </testcase>
-    <testcase classname="apiClientService.post uses a custom contentType when provided" name="apiClientService.post uses a custom contentType when provided" time="0">
-    </testcase>
-    <testcase classname="apiClientService.post removes Content-type header when body is FormData" name="apiClientService.post removes Content-type header when body is FormData" time="0.001">
-    </testcase>
-    <testcase classname="apiClientService.put calls fetch with PUT method and body" name="apiClientService.put calls fetch with PUT method and body" time="0.006">
-    </testcase>
-    <testcase classname="apiClientService.delete calls fetch with DELETE method" name="apiClientService.delete calls fetch with DELETE method" time="0">
-    </testcase>
-    <testcase classname="error handling re-throws when fetch rejects" name="error handling re-throws when fetch rejects" time="0.032">
-    </testcase>
-    <testcase classname="CORS redirect handling executes without error when response is cors and redirected" name="CORS redirect handling executes without error when response is cors and redirected" time="0.018">
-    </testcase>
-    <testcase classname="CORS redirect handling does not attempt redirect when response type is basic" name="CORS redirect handling does not attempt redirect when response type is basic" time="0.001">
-    </testcase>
-    <testcase classname="CORS redirect handling does not attempt redirect when cors but not redirected" name="CORS redirect handling does not attempt redirect when cors but not redirected" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="FilterExistInWHSelection enum" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.251" tests="13">
-    <testcase classname="FilterExistInWHSelection enum has ALL value" name="FilterExistInWHSelection enum has ALL value" time="0.01">
-    </testcase>
-    <testcase classname="FilterExistInWHSelection enum has YES value" name="FilterExistInWHSelection enum has YES value" time="0.001">
-    </testcase>
-    <testcase classname="FilterExistInWHSelection enum has NO value" name="FilterExistInWHSelection enum has NO value" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService getWarehouses fetches all warehouses" name="WarehouseService getWarehouses fetches all warehouses" time="0.004">
-    </testcase>
-    <testcase classname="WarehouseService getPageableWarehouses builds correct paging URL" name="WarehouseService getPageableWarehouses builds correct paging URL" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService createWarehouse posts warehouse data" name="WarehouseService createWarehouse posts warehouse data" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService getWarehouse fetches by id" name="WarehouseService getWarehouse fetches by id" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService deleteWarehouse returns response directly on 204" name="WarehouseService deleteWarehouse returns response directly on 204" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService deleteWarehouse returns parsed json on non-204" name="WarehouseService deleteWarehouse returns parsed json on non-204" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService editWarehouse returns response directly on 204" name="WarehouseService editWarehouse returns response directly on 204" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService editWarehouse returns parsed json on non-204" name="WarehouseService editWarehouse returns parsed json on non-204" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService getProductInWarehouse builds correct query URL" name="WarehouseService getProductInWarehouse builds correct query URL" time="0.001">
-    </testcase>
-    <testcase classname="WarehouseService getProductInWarehouse works with YES filter" name="WarehouseService getProductInWarehouse works with YES filter" time="0">
-    </testcase>
-  </testsuite>
-  <testsuite name="getBrands" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.234" tests="9">
-    <testcase classname="getBrands fetches all brands from base URL" name="getBrands fetches all brands from base URL" time="0.012">
-    </testcase>
-    <testcase classname="getPageableBrands fetches pageable brands with correct query params" name="getPageableBrands fetches pageable brands with correct query params" time="0.001">
-    </testcase>
-    <testcase classname="getPageableBrands passes page number and page size correctly" name="getPageableBrands passes page number and page size correctly" time="0.001">
-    </testcase>
-    <testcase classname="createBrand posts brand data to base URL" name="createBrand posts brand data to base URL" time="0.001">
-    </testcase>
-    <testcase classname="getBrand fetches brand by id" name="getBrand fetches brand by id" time="0.001">
-    </testcase>
-    <testcase classname="deleteBrand returns response directly when status is 204" name="deleteBrand returns response directly when status is 204" time="0.001">
-    </testcase>
-    <testcase classname="deleteBrand returns parsed json when status is not 204" name="deleteBrand returns parsed json when status is not 204" time="0.001">
-    </testcase>
-    <testcase classname="editBrand puts brand data with correct URL" name="editBrand puts brand data with correct URL" time="0.001">
-    </testcase>
-    <testcase classname="editBrand returns parsed json when status is not 204" name="editBrand returns parsed json when status is not 204" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="concatQueryString" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:26" time="0.294" tests="6">
-    <testcase classname="concatQueryString returns the url unchanged when array is empty" name="concatQueryString returns the url unchanged when array is empty" time="0.001">
-    </testcase>
-    <testcase classname="concatQueryString appends a single query param with ?" name="concatQueryString appends a single query param with ?" time="0">
-    </testcase>
-    <testcase classname="concatQueryString appends multiple query params with &amp; separator" name="concatQueryString appends multiple query params with &amp; separator" time="0.001">
-    </testcase>
-    <testcase classname="concatQueryString handles a single param correctly" name="concatQueryString handles a single param correctly" time="0">
-    </testcase>
-    <testcase classname="concatQueryString handles two params correctly" name="concatQueryString handles two params correctly" time="0">
-    </testcase>
-    <testcase classname="concatQueryString returns base url when empty array passed" name="concatQueryString returns base url when empty array passed" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="formatPriceVND" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:26" time="0.384" tests="8">
-    <testcase classname="formatPriceVND formats zero as VND currency" name="formatPriceVND formats zero as VND currency" time="0.032">
-    </testcase>
-    <testcase classname="formatPriceVND formats a positive price" name="formatPriceVND formats a positive price" time="0">
-    </testcase>
-    <testcase classname="formatPriceVND formats a large price" name="formatPriceVND formats a large price" time="0">
-    </testcase>
-    <testcase classname="formatPriceVND returns a string" name="formatPriceVND returns a string" time="0">
-    </testcase>
-    <testcase classname="formatPriceUSD formats zero as USD currency" name="formatPriceUSD formats zero as USD currency" time="0.001">
-    </testcase>
-    <testcase classname="formatPriceUSD formats a positive price" name="formatPriceUSD formats a positive price" time="0.001">
-    </testcase>
-    <testcase classname="formatPriceUSD formats a large price" name="formatPriceUSD formats a large price" time="0">
-    </testcase>
-    <testcase classname="formatPriceUSD returns a string" name="formatPriceUSD returns a string" time="0">
-    </testcase>
-  </testsuite>
-  <testsuite name="getProducts" errors="0" failures="0" skipped="0" timestamp="2026-03-16T02:45:22" time="4.331" tests="16">
-    <testcase classname="getProducts calls endpoint with correct query params" name="getProducts calls endpoint with correct query params" time="0.008">
-    </testcase>
-    <testcase classname="getLatestProducts returns products when status is 2xx" name="getLatestProducts returns products when status is 2xx" time="0.001">
-    </testcase>
-    <testcase classname="getLatestProducts rejects when status &gt;= 300" name="getLatestProducts rejects when status &gt;= 300" time="0.009">
+    <testcase classname="getLatestProducts rejects when status &gt;= 300" name="getLatestProducts rejects when status &gt;= 300" time="0.023">
     </testcase>
     <testcase classname="exportProducts calls export endpoint with correct params" name="exportProducts calls export endpoint with correct params" time="0.001">
     </testcase>
     <testcase classname="getProduct calls endpoint by id" name="getProduct calls endpoint by id" time="0.001">
     </testcase>
-    <testcase classname="createProduct posts to products endpoint" name="createProduct posts to products endpoint" time="0">
+    <testcase classname="createProduct posts to products endpoint" name="createProduct posts to products endpoint" time="0.001">
     </testcase>
     <testcase classname="updateProduct returns response on 204" name="updateProduct returns response on 204" time="0.001">
     </testcase>
@@ -317,11 +467,79 @@
     </testcase>
     <testcase classname="getRelatedProductByProductId returns related products when status is 2xx" name="getRelatedProductByProductId returns related products when status is 2xx" time="0.001">
     </testcase>
-    <testcase classname="getRelatedProductByProductId rejects when status &gt;= 300" name="getRelatedProductByProductId rejects when status &gt;= 300" time="0">
+    <testcase classname="getRelatedProductByProductId rejects when status &gt;= 300" name="getRelatedProductByProductId rejects when status &gt;= 300" time="0.001">
     </testcase>
-    <testcase classname="getProductOptionValueByProductId returns option values when status is 2xx" name="getProductOptionValueByProductId returns option values when status is 2xx" time="0.001">
+    <testcase classname="getProductOptionValueByProductId returns option values when status is 2xx" name="getProductOptionValueByProductId returns option values when status is 2xx" time="0">
     </testcase>
-    <testcase classname="getProductOptionValueByProductId rejects when status &gt;= 300" name="getProductOptionValueByProductId rejects when status &gt;= 300" time="0">
+    <testcase classname="getProductOptionValueByProductId rejects when status &gt;= 300" name="getProductOptionValueByProductId rejects when status &gt;= 300" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProductAttributeService" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.444" tests="8">
+    <testcase classname="ProductAttributeService getProductAttributes fetches all" name="ProductAttributeService getProductAttributes fetches all" time="0.003">
+    </testcase>
+    <testcase classname="ProductAttributeService getPageableProductAttributes passes paging params" name="ProductAttributeService getPageableProductAttributes passes paging params" time="0.002">
+    </testcase>
+    <testcase classname="ProductAttributeService createProductAttribute posts data" name="ProductAttributeService createProductAttribute posts data" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeService updateProductAttribute returns 204 response" name="ProductAttributeService updateProductAttribute returns 204 response" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeService updateProductAttribute returns json on non-204" name="ProductAttributeService updateProductAttribute returns json on non-204" time="0">
+    </testcase>
+    <testcase classname="ProductAttributeService getProductAttribute fetches by id" name="ProductAttributeService getProductAttribute fetches by id" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeService deleteProductAttribute returns 204 response" name="ProductAttributeService deleteProductAttribute returns 204 response" time="0.001">
+    </testcase>
+    <testcase classname="ProductAttributeService deleteProductAttribute returns json on non-204" name="ProductAttributeService deleteProductAttribute returns json on non-204" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="getCategories" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.422" tests="8">
+    <testcase classname="getCategories calls correct endpoint and returns data" name="getCategories calls correct endpoint and returns data" time="0.002">
+    </testcase>
+    <testcase classname="getCategory calls correct endpoint with id" name="getCategory calls correct endpoint with id" time="0.001">
+    </testcase>
+    <testcase classname="createCategory posts category data" name="createCategory posts category data" time="0">
+    </testcase>
+    <testcase classname="updateCategory returns response on 204" name="updateCategory returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="updateCategory returns parsed json on non-204" name="updateCategory returns parsed json on non-204" time="0.001">
+    </testcase>
+    <testcase classname="deleteCategory returns response on 204" name="deleteCategory returns response on 204" time="0.001">
+    </testcase>
+    <testcase classname="deleteCategory returns parsed json on non-204" name="deleteCategory returns parsed json on non-204" time="0">
+    </testcase>
+    <testcase classname="getProductsByCategory calls storefront endpoint with slug and page" name="getProductsByCategory calls storefront endpoint with slug and page" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="formatPriceVND" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.259" tests="8">
+    <testcase classname="formatPriceVND formats zero as VND currency" name="formatPriceVND formats zero as VND currency" time="0.024">
+    </testcase>
+    <testcase classname="formatPriceVND formats a positive price" name="formatPriceVND formats a positive price" time="0.001">
+    </testcase>
+    <testcase classname="formatPriceVND formats a large price" name="formatPriceVND formats a large price" time="0">
+    </testcase>
+    <testcase classname="formatPriceVND returns a string" name="formatPriceVND returns a string" time="0.001">
+    </testcase>
+    <testcase classname="formatPriceUSD formats zero as USD currency" name="formatPriceUSD formats zero as USD currency" time="0.001">
+    </testcase>
+    <testcase classname="formatPriceUSD formats a positive price" name="formatPriceUSD formats a positive price" time="0">
+    </testcase>
+    <testcase classname="formatPriceUSD formats a large price" name="formatPriceUSD formats a large price" time="0.001">
+    </testcase>
+    <testcase classname="formatPriceUSD returns a string" name="formatPriceUSD returns a string" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="concatQueryString" errors="0" failures="0" skipped="0" timestamp="2026-03-16T03:21:02" time="0.208" tests="6">
+    <testcase classname="concatQueryString returns the url unchanged when array is empty" name="concatQueryString returns the url unchanged when array is empty" time="0.001">
+    </testcase>
+    <testcase classname="concatQueryString appends a single query param with ?" name="concatQueryString appends a single query param with ?" time="0">
+    </testcase>
+    <testcase classname="concatQueryString appends multiple query params with &amp; separator" name="concatQueryString appends multiple query params with &amp; separator" time="0">
+    </testcase>
+    <testcase classname="concatQueryString handles a single param correctly" name="concatQueryString handles a single param correctly" time="0">
+    </testcase>
+    <testcase classname="concatQueryString handles two params correctly" name="concatQueryString handles two params correctly" time="0">
+    </testcase>
+    <testcase classname="concatQueryString returns base url when empty array passed" name="concatQueryString returns base url when empty array passed" time="0">
     </testcase>
   </testsuite>
 </testsuites>
