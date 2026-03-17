@@ -26,11 +26,11 @@ class SampleDataServiceTest {
     @Mock
     private DataSource mediaDataSource;
 
-    @InjectMocks
     private SampleDataService sampleDataService;
 
     @BeforeEach
     void setUp() {
+        sampleDataService = new SampleDataService(productDataSource, mediaDataSource);
     }
 
     @Test
