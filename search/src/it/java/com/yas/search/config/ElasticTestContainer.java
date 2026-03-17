@@ -4,7 +4,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 public class ElasticTestContainer extends ElasticsearchContainer {
 
-    private static final String IMAGE_NAME = "docker.elastic.co/elasticsearch/elasticsearch:%s";
+    private static final String IMAGE_NAME = "elasticsearch:%s";
 
     private static final String CLUSTER_NAME = "cluster.name";
 
