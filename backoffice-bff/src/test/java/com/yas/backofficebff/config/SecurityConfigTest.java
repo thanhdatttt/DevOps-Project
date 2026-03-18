@@ -161,6 +161,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    void authoritiesMapper_shouldReturnEmptyCollectionForUnknownAuthorityType() {
+        GrantedAuthority unknownAuthority = new SimpleGrantedAuthority("ROLE_UNKNOWN");
+
+        GrantedAuthoritiesMapper mapper = securityConfig.userAuthoritiesMapperForKeycloak();
+        Collection<? extends GrantedAuthority> mappedAuthorities = mapper.mapAuthorities(List.of(unknownAuthority));
+
+        assertThat(mappedAuthorities).isEmpty();
+    }
+
+    @Test
     void authoritiesMapper_shouldMapMultipleRolesFromOAuth2UserAttributes() {
         Map<String, Object> realmAccess = Map.of("roles", List.of("ADMIN", "MANAGER", "USER"));
         Map<String, Object> userAttributes = new HashMap<>();
