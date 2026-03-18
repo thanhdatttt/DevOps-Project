@@ -154,4 +154,42 @@ class ProductOptionControllerTest {
         return colorOption;
     }
 
+    @Test
+    void testGetPageableProductOptionsSecondPath() throws Exception {
+        ProductOptionGetVm productOptionGetVm = new ProductOptionGetVm(1L, "Color");
+        ProductOptionListGetVm pageableResponse = new ProductOptionListGetVm(
+                List.of(productOptionGetVm), 0, 10, 1, 1, true
+        );
+        when(productOptionService.getPageableProductOptions(anyInt(), anyInt()))
+                .thenReturn(pageableResponse);
+
+        mockMvc.perform(get("/backoffice/product-options/paging")
+                        .param("pageNo", "0").param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productOptionContent[0].name").value("Color"))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void testCreateProductOptionReturnsNameInBody() throws Exception {
+        ProductOptionPostVm postVm = new ProductOptionPostVm("Size");
+        ProductOption sizeOption = createProductOption(5L, "Size");
+        when(productOptionService.create(any(ProductOptionPostVm.class))).thenReturn(sizeOption);
+
+        mockMvc.perform(post("/backoffice/product-options")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postVm)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(5L))
+                .andExpect(jsonPath("$.name").value("Size"));
+    }
+
+    @Test
+    void testListProductOptionEmpty() throws Exception {
+        when(productOptionRepository.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/backoffice/product-options"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
 }
