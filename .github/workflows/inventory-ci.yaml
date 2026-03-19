@@ -39,8 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/actions
-      - name: Run Maven Build Command
-        run: mvn clean install -pl inventory -am
+      # - name: Run Maven Build Command
+      #   run: mvn clean install -pl inventory -am
       
   test:
     runs-on: ubuntu-latest
@@ -68,11 +68,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f inventory
-          -Dsonar.projectKey=thanhdatttt_DevOps-Project
-          -Dsonar.organization=thanhdatttt
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.token=$SONAR_TOKEN 
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f inventory \
+          -Dsonar.projectKey=thanhdatttt_DevOps-Project \
+          -Dsonar.organization=thanhdatttt \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.coverage.jacoco.xmlReportPaths=${{github.workspace}}/inventory/target/site/jacoco/jacoco.xml
       - name: Add coverage report to PR
         id: jacoco_reporter
