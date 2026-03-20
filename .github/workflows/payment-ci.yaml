@@ -76,7 +76,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean install sonar:sonar
+        run: mvn clean verify sonar:sonar
           -pl payment -am
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
