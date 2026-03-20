@@ -66,7 +66,7 @@ jobs:
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl webhook -am
+        run: mvn clean verify sonar:sonar -pl webhook -am
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
           -Dsonar.host.url=https://sonarcloud.io
