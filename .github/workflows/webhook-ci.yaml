@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
       - name: Gitleaks Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
-        uses: gitleaks/gitleaks-action@100688f6154620f4553229b43e80a563b782b781
+        uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -56,7 +56,7 @@ jobs:
       - name: Run Tests
         run: mvn clean verify -pl webhook -am
       - name: Test Results
-        uses: dorny/test-reporter@c9b31336605d8c671607f24f57c8d9d81373523f
+        uses: dorny/test-reporter@v1
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
         with:
           name: Webhook-Service-Test-Results
@@ -74,7 +74,7 @@ jobs:
           -Dsonar.coverage.jacoco.xmlReportPaths=${{github.workspace}}/webhook/target/site/jacoco/jacoco.xml
       - name: Add coverage report to PR
         id: jacoco_reporter
-        uses: madrapps/jacoco-report@d87b9496e57662c19a939023194a974955c45330
+        uses: madrapps/jacoco-report@v1.6.1
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         with:
           paths: ${{github.workspace}}/webhook/target/site/jacoco/jacoco.xml
@@ -101,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@9adf32b61f2249c158580b067d589d81373523f2
+        uses: snyk/actions/maven@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
