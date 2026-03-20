@@ -67,13 +67,14 @@ jobs:
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f promotion
+        run: mvn clean verify sonar:sonar -pl promotion -am
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.token=$SONAR_TOKEN 
           -Dsonar.coverage.jacoco.xmlReportPaths=${{github.workspace}}/promotion/target/site/jacoco/jacoco.xml
       - name: Add coverage report to PR
+        id: jacoco_reporter
         uses: madrapps/jacoco-report@v1.6.1
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         with:
@@ -83,13 +84,25 @@ jobs:
           min-coverage-changed-files: 70
           title: 'Promotion Coverage Report'
           update-comment: true
+
+      - name: Coverage check
+        run: |
+          OVERALL=${{ steps.jacoco_reporter.outputs['coverage-overall'] }}
+          echo "Current Overall Coverage is: $OVERALL%"
+          
+          if (( $(echo "$OVERALL < 70.0" | bc -l) )); then
+            echo "Error: Code Coverage ($OVERALL%) is lower than set standards (70%)!"
+            exit 1 
+          else
+            echo "Code Coverage Pass"
+          fi
           
   security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
+        uses: snyk/actions/maven@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
