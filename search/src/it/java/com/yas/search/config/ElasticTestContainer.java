@@ -1,4 +1,5 @@
 package com.yas.search.config;
+import java.time.Duration;
 
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
