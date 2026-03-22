@@ -38,8 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/actions
-      - name: Configure sysctl limits for Elasticsearch
-        run: sudo sysctl -w vm.max_map_count=262144
+      # - name: Configure sysctl limits for Elasticsearch
+      #   run: sudo sysctl -w vm.max_map_count=262144
       - name: Run Maven Build Command
         run: mvn clean install -pl search -am
       
