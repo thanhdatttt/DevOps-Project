@@ -58,6 +58,8 @@ class RatingControllerTest {
     private ObjectWriter objectWriter;
     private RatingVm ratingVm;
 
+    // Trigger Workflow
+
     @BeforeEach
     void setUp() {
         objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
