@@ -1,0 +1,263 @@
+name: CD - developer_build
+
+on:
+  workflow_dispatch:
+    inputs:
+      backoffice_bff_branch:
+        description: 'backoffice-bff branch (default: main → latest)'
+        required: false
+        default: 'main'
+      cart_branch:
+        description: 'cart branch (default: main → latest)'
+        required: false
+        default: 'main'
+      customer_branch:
+        description: 'customer branch (default: main → latest)'
+        required: false
+        default: 'main'
+      inventory_branch:
+        description: 'inventory branch (default: main → latest)'
+        required: false
+        default: 'main'
+      location_branch:
+        description: 'location branch (default: main → latest)'
+        required: false
+        default: 'main'
+      media_branch:
+        description: 'media branch (default: main → latest)'
+        required: false
+        default: 'main'
+      order_branch:
+        description: 'order branch (default: main → latest)'
+        required: false
+        default: 'main'
+      product_branch:
+        description: 'product branch (default: main → latest)'
+        required: false
+        default: 'main'
+      payment_branch:
+        description: 'payment branch (default: main → latest)'
+        required: false
+        default: 'main'
+      payment_payal_branch:
+        description: 'payment-payal branch (default: main → latest)'
+        required: false
+        default: 'main'
+      sampledata_branch:
+        description: 'sampledata branch (default: main → latest)'
+        required: false
+        default: 'main'
+      promotion_branch:
+        description: 'promotion branch (default: main → latest)'
+        required: false
+        default: 'main'
+      rating_branch:
+        description: 'rating branch (default: main → latest)'
+        required: false
+        default: 'main'
+      recommendation_branch:
+        description: 'recommendation branch (default: main → latest)'
+        required: false
+        default: 'main'
+      search_branch:
+        description: 'search branch (default: main → latest)'
+        required: false
+        default: 'main'
+      storefront_bff_branch:
+        description: 'storefront-bff branch (default: main → latest)'
+        required: false
+        default: 'main'
+      tax_branch:
+        description: 'tax branch (default: main → latest)'
+        required: false
+        default: 'main'
+      webhook_branch:
+        description: 'webhook branch (default: main → latest)'
+        required: false
+        default: 'main'
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Create developer namespace
+        run: |
+          kubectl create namespace developer --dry-run=client -o yaml | kubectl apply -f -
+          echo "Namespace 'developer' is ready."
+
+      # Resolve image tags and deploy
+      #   branch = main  →  tag = latest
+      #   branch = other  →  tag = commit SHA
+      - name: Resolve image tags and deploy
+        run: |
+          # Map service-name → input branch
+          declare -A BRANCHES=(
+            ["backoffice-bff"]="${{ github.event.inputs.backoffice_bff_branch }}"
+            ["cart"]="${{ github.event.inputs.cart_branch }}"
+            ["customer"]="${{ github.event.inputs.customer_branch }}"
+            ["inventory"]="${{ github.event.inputs.inventory_branch }}"
+            ["location"]="${{ github.event.inputs.location_branch }}"
+            ["media"]="${{ github.event.inputs.media_branch }}"
+            ["order"]="${{ github.event.inputs.order_branch }}"
+            ["product"]="${{ github.event.inputs.product_branch }}"
+            ["payment"]="${{ github.event.inputs.payment_branch }}"
+            ["payment-payal"]="${{ github.event.inputs.payment_payal_branch }}"
+            ["sampledata"]="${{ github.event.inputs.sampledata_branch }}"
+            ["promotion"]="${{ github.event.inputs.promotion_branch }}"
+            ["rating"]="${{ github.event.inputs.rating_branch }}"
+            ["recommendation"]="${{ github.event.inputs.recommendation_branch }}"
+            ["search"]="${{ github.event.inputs.search_branch }}"
+            ["storefront-bff"]="${{ github.event.inputs.storefront_bff_branch }}"
+            ["tax"]="${{ github.event.inputs.tax_branch }}"
+            ["webhook"]="${{ github.event.inputs.webhook_branch }}"
+          )
+
+          # NodePort for each service (30000–32767)
+          declare -A PORTS=(
+            ["backoffice-bff"]="30001"
+            ["cart"]="30002"
+            ["customer"]="30003"
+            ["inventory"]="30004"
+            ["location"]="30005"
+            ["media"]="30006"
+            ["order"]="30007"
+            ["product"]="30008"
+            ["payment"]="30009"
+            ["payment-payal"]="30010"
+            ["sampledata"]="30011"
+            ["promotion"]="30012"
+            ["rating"]="30013"
+            ["recommendation"]="30014"
+            ["search"]="30015"
+            ["storefront-bff"]="30016"
+            ["tax"]="30017"
+            ["webhook"]="30018"
+          )
+
+          for SERVICE in "${!BRANCHES[@]}"; do
+            BRANCH="${BRANCHES[$SERVICE]}"
+            PORT="${PORTS[$SERVICE]}"
+
+            # resolve tag
+            if [ -z "$BRANCH" ] || [ "$BRANCH" = "main" ]; then
+              TAG="latest"
+            else
+              # get last commit SHA of branch
+              TAG=$(git rev-parse origin/$BRANCH 2>/dev/null || echo "")
+              if [ -z "$TAG" ]; then
+                echo "Branch '$BRANCH' not found for $SERVICE — falling back to latest"
+                TAG="latest"
+              fi
+            fi
+
+            echo "Deploying $SERVICE | branch: $BRANCH | tag: $TAG | nodePort: $PORT"
+
+            kubectl apply -f - <<EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${SERVICE}
+            namespace: developer
+            labels:
+              app: ${SERVICE}
+              managed-by: developer-build
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ${SERVICE}
+            template:
+              metadata:
+                labels:
+                  app: ${SERVICE}
+              spec:
+                containers:
+                  - name: ${SERVICE}
+                    image: ${{ env.DOCKER_USER }}/${SERVICE}:${TAG}
+                    imagePullPolicy: Always
+                    ports:
+                      - containerPort: 8080
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${SERVICE}
+            namespace: developer
+          spec:
+            type: NodePort
+            selector:
+              app: ${SERVICE}
+            ports:
+              - port: 8080
+                targetPort: 8080
+                nodePort: ${PORT}
+          EOF
+          done
+
+      # wait all services success rolllout
+      - name: Wait for rollouts
+        run: |
+          SERVICES=(
+            backoffice-bff cart customer inventory location media
+            order product payment payment-payal sampledata promotion
+            rating recommendation search storefront-bff tax webhook
+          )
+          for SERVICE in "${SERVICES[@]}"; do
+            echo "Waiting for $SERVICE ..."
+            kubectl rollout status deployment/$SERVICE \
+              -n developer --timeout=120s || echo "  $SERVICE rollout timeout — check pod logs"
+          done
+
+      # print info for developer to add /etc/hosts
+      - name: Print developer access info
+        run: |
+          WORKER_IP=$(kubectl get nodes -o wide \
+            | grep -v NAME | grep -v control-plane | grep -v master \
+            | awk '{print $6}' | head -1)
+
+          echo ""
+          echo "============================================================"
+          echo "  DEPLOYMENT COMPLETE"
+          echo "============================================================"
+          echo ""
+          echo "  Add this line to file /etc/hosts on your local machine:"
+          echo "      $WORKER_IP  yas.dev"
+          echo ""
+          echo "  Service URLs (NodePort):"
+          echo "      http://yas.dev:30001  →  backoffice-bff"
+          echo "      http://yas.dev:30002  →  cart"
+          echo "      http://yas.dev:30003  →  customer"
+          echo "      http://yas.dev:30004  →  inventory"
+          echo "      http://yas.dev:30005  →  location"
+          echo "      http://yas.dev:30006  →  media"
+          echo "      http://yas.dev:30007  →  order"
+          echo "      http://yas.dev:30008  →  product"
+          echo "      http://yas.dev:30009  →  payment"
+          echo "      http://yas.dev:30010  →  payment-payal"
+          echo "      http://yas.dev:30011  →  sampledata"
+          echo "      http://yas.dev:30012  →  promotion"
+          echo "      http://yas.dev:30013  →  rating"
+          echo "      http://yas.dev:30014  →  recommendation"
+          echo "      http://yas.dev:30015  →  search"
+          echo "      http://yas.dev:30016  →  storefront-bff"
+          echo "      http://yas.dev:30017  →  tax"
+          echo "      http://yas.dev:30018  →  webhook"
+          echo ""
+          echo "  Worker node IP: $WORKER_IP"
+          echo "============================================================"

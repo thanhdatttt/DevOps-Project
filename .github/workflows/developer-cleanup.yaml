@@ -1,0 +1,53 @@
+name: CD - developer_cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Confirm to delete namespace 'developer'? (yes/no)"
+        required: true
+        default: 'no'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'yes' }}
+    steps:
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Delete developer namespace
+        run: |
+          echo "Deleting namespace 'developer' and all its resources..."
+          kubectl delete namespace developer --ignore-not-found=true
+          echo "Delete command sent. Waiting for namespace to terminate..."
+
+      - name: Wait for namespace termination
+        run: |
+          echo "Waiting for namespace to fully terminate..."
+          for i in $(seq 1 30); do
+            STATUS=$(kubectl get namespace developer -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
+            if [ "$STATUS" = "NotFound" ] || [ -z "$STATUS" ]; then
+              echo "Namespace 'developer' has been fully deleted."
+              exit 0
+            fi
+            echo "   Still terminating... ($i/30)"
+            sleep 5
+          done
+          echo "Namespace is taking longer than expected. Current status:"
+          kubectl get namespace developer -o wide || echo "Namespace not found (deleted)."
+
+      - name: Cleanup summary
+        run: |
+          echo ""
+          echo "============================================================"
+          echo "  CLEANUP COMPLETE"
+          echo "  Namespace 'developer' and all resources have been deleted."
+          echo "  Run developer_build again to deploy the latest version."
+          echo "============================================================"
