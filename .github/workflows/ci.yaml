@@ -22,7 +22,7 @@ jobs:
             order,
             product,
             payment,
-            payment-payal,
+            payment-paypal,
             promotion,
             rating,
             recommendation,

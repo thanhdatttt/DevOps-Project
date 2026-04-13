@@ -39,7 +39,7 @@ on:
         description: 'payment branch (default: main → latest)'
         required: false
         default: 'main'
-      payment_payal_branch:
+      payment_paypal_branch:
         description: 'payment-payal branch (default: main → latest)'
         required: false
         default: 'main'
@@ -117,7 +117,7 @@ jobs:
             ["order"]="${{ github.event.inputs.order_branch }}"
             ["product"]="${{ github.event.inputs.product_branch }}"
             ["payment"]="${{ github.event.inputs.payment_branch }}"
-            ["payment-payal"]="${{ github.event.inputs.payment_payal_branch }}"
+            ["payment-paypal"]="${{ github.event.inputs.payment_payal_branch }}"
             ["sampledata"]="${{ github.event.inputs.sampledata_branch }}"
             ["promotion"]="${{ github.event.inputs.promotion_branch }}"
             ["rating"]="${{ github.event.inputs.rating_branch }}"
@@ -139,7 +139,7 @@ jobs:
             ["order"]="30007"
             ["product"]="30008"
             ["payment"]="30009"
-            ["payment-payal"]="30010"
+            ["payment-paypal"]="30010"
             ["sampledata"]="30011"
             ["promotion"]="30012"
             ["rating"]="30013"
@@ -249,7 +249,7 @@ jobs:
           echo "      http://yas.dev:30007  →  order"
           echo "      http://yas.dev:30008  →  product"
           echo "      http://yas.dev:30009  →  payment"
-          echo "      http://yas.dev:30010  →  payment-payal"
+          echo "      http://yas.dev:30010  →  payment-paypal"
           echo "      http://yas.dev:30011  →  sampledata"
           echo "      http://yas.dev:30012  →  promotion"
           echo "      http://yas.dev:30013  →  rating"
