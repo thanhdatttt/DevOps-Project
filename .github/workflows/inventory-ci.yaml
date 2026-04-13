@@ -115,7 +115,7 @@ jobs:
         with:
           context: ./inventory
           push: true
-          tags:
+          tags: |
             ghcr.io/thanhdatttt/yas-inventory:latest
             ghcr.io/thanhdatttt/yas-inventory:${{ github.sha }}
 
