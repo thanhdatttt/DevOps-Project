@@ -134,6 +134,15 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # setup java
+      - uses: ./.github/workflows/actions
+
+      # Build JAR
+      - name: Build JAR
+        run: mvn clean package -DskipTests -pl media -am
 
       - name: Set image tags
         id: meta
