@@ -9,10 +9,6 @@ on:
         description: 'backoffice-bff branch'
         required: false
         default: 'main'
-      backoffice_branch:
-        description: 'backoffice branch'
-        required: false
-        default: 'main'
       cart_branch:
         description: 'cart branch'
         required: false
@@ -73,10 +69,6 @@ on:
         description: 'storefront-bff branch'
         required: false
         default: 'main'
-      storefront_branch:
-        description: 'storefront branch'
-        required: false
-        default: 'main'
       tax_branch:
         description: 'tax branch'
         required: false
@@ -87,11 +79,15 @@ on:
         default: 'main'
 
 env:
-  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read # need this for pulling images from ghcr.io
     steps:
       - uses: actions/checkout@v4
         with:
@@ -112,12 +108,21 @@ jobs:
           kubectl create namespace developer --dry-run=client -o yaml | kubectl apply -f -
           echo "Namespace 'developer' ready."
 
+      - name: Create imagePullSecret for ghcr.io
+        run: |
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=developer \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "imagePullSecret 'ghcr-secret' ready."
+
       - name: Resolve tags and deploy all services
         run: |
           # map: service-name → input branch
           declare -A BRANCHES=(
             ["backoffice-bff"]="${{ github.event.inputs.backoffice_bff_branch }}"
-            ["backoffice"]="${{ github.event.inputs.backoffice_branch }}"
             ["cart"]="${{ github.event.inputs.cart_branch }}"
             ["customer"]="${{ github.event.inputs.customer_branch }}"
             ["inventory"]="${{ github.event.inputs.inventory_branch }}"
@@ -133,7 +138,6 @@ jobs:
             ["sampledata"]="${{ github.event.inputs.sampledata_branch }}"
             ["search"]="${{ github.event.inputs.search_branch }}"
             ["storefront-bff"]="${{ github.event.inputs.storefront_bff_branch }}"
-            ["storefront"]="${{ github.event.inputs.storefront_branch }}"
             ["tax"]="${{ github.event.inputs.tax_branch }}"
             ["webhook"]="${{ github.event.inputs.webhook_branch }}"
           )
@@ -141,26 +145,26 @@ jobs:
           # map: service-name → NodePort
           declare -A PORTS=(
             ["backoffice-bff"]="30001"
-            ["backoffice"]="30002"
-            ["cart"]="30003"
-            ["customer"]="30004"
-            ["inventory"]="30005"
-            ["location"]="30006"
-            ["media"]="30007"
-            ["order"]="30008"
-            ["payment"]="30009"
-            ["payment-paypal"]="30010"
-            ["product"]="30011"
-            ["promotion"]="30012"
-            ["rating"]="30013"
-            ["recommendation"]="30014"
-            ["sampledata"]="30015"
-            ["search"]="30016"
-            ["storefront-bff"]="30017"
-            ["storefront"]="30018"
-            ["tax"]="30019"
-            ["webhook"]="30020"
+            ["cart"]="30002"
+            ["customer"]="30003"
+            ["inventory"]="30004"
+            ["location"]="30005"
+            ["media"]="30006"
+            ["order"]="30007"
+            ["payment"]="30008"
+            ["payment-paypal"]="30009"
+            ["product"]="30010"
+            ["promotion"]="30011"
+            ["rating"]="30012"
+            ["recommendation"]="30013"
+            ["sampledata"]="30014"
+            ["search"]="30015"
+            ["storefront-bff"]="30016"
+            ["tax"]="30017"
+            ["webhook"]="30018"
           )
+
+          OWNER="${{ github.repository_owner }}"
 
           for SERVICE in "${!BRANCHES[@]}"; do
             BRANCH="${BRANCHES[$SERVICE]}"
@@ -177,7 +181,8 @@ jobs:
               fi
             fi
 
-            echo "$SERVICE | branch: $BRANCH | tag: $TAG | nodePort: $PORT"
+            IMAGE="ghcr.io/${OWNER}/${SERVICE}:${TAG}"
+            echo "▶ $SERVICE | branch: $BRANCH | image: $IMAGE | nodePort: $PORT"
 
             # apply Deployment + NodePort Service
             kubectl apply -f - <<MANIFEST
@@ -199,9 +204,11 @@ jobs:
                 labels:
                   app: ${SERVICE}
               spec:
+                imagePullSecrets:
+                  - name: ghcr-secret
                 containers:
                   - name: ${SERVICE}
-                    image: ${{ env.DOCKER_USER }}/${SERVICE}:${TAG}
+                    image: $
                     imagePullPolicy: Always
                     ports:
                       - containerPort: 8080
@@ -225,10 +232,10 @@ jobs:
       - name: Wait for rollouts
         run: |
           SERVICES=(
-            backoffice-bff backoffice cart customer inventory
+            backoffice-bff cart customer inventory
             location media order payment payment-paypal product
             promotion rating recommendation sampledata search
-            storefront-bff storefront tax webhook
+            storefront-bff tax webhook
           )
           for SERVICE in "${SERVICES[@]}"; do
             echo "Waiting for $SERVICE ..."
@@ -254,24 +261,22 @@ jobs:
           echo ""
           echo "  Service URLs:"
           echo "      http://yas.dev:30001  →  backoffice-bff"
-          echo "      http://yas.dev:30002  →  backoffice (Next.js)"
-          echo "      http://yas.dev:30003  →  cart"
-          echo "      http://yas.dev:30004  →  customer"
-          echo "      http://yas.dev:30005  →  inventory"
-          echo "      http://yas.dev:30006  →  location"
-          echo "      http://yas.dev:30007  →  media"
-          echo "      http://yas.dev:30008  →  order"
-          echo "      http://yas.dev:30009  →  payment"
-          echo "      http://yas.dev:30010  →  payment-paypal"
-          echo "      http://yas.dev:30011  →  product"
-          echo "      http://yas.dev:30012  →  promotion"
-          echo "      http://yas.dev:30013  →  rating"
-          echo "      http://yas.dev:30014  →  recommendation"
-          echo "      http://yas.dev:30015  →  sampledata"
-          echo "      http://yas.dev:30016  →  search"
-          echo "      http://yas.dev:30017  →  storefront-bff"
-          echo "      http://yas.dev:30018  →  storefront (Next.js)"
-          echo "      http://yas.dev:30019  →  tax"
-          echo "      http://yas.dev:30020  →  webhook"
+          echo "      http://yas.dev:30002  →  cart"
+          echo "      http://yas.dev:30003  →  customer"
+          echo "      http://yas.dev:30004  →  inventory"
+          echo "      http://yas.dev:30005  →  location"
+          echo "      http://yas.dev:30006  →  media"
+          echo "      http://yas.dev:30007  →  order"
+          echo "      http://yas.dev:30008  →  payment"
+          echo "      http://yas.dev:30009  →  payment-paypal"
+          echo "      http://yas.dev:30010  →  product"
+          echo "      http://yas.dev:30011  →  promotion"
+          echo "      http://yas.dev:30012  →  rating"
+          echo "      http://yas.dev:30013  →  recommendation"
+          echo "      http://yas.dev:30014  →  sampledata"
+          echo "      http://yas.dev:30015  →  search"
+          echo "      http://yas.dev:30016  →  storefront-bff"
+          echo "      http://yas.dev:30017  →  tax"
+          echo "      http://yas.dev:30018  →  webhook"
           echo ""
           echo "  Worker node IP: $WORKER_IP"
