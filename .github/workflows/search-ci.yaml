@@ -40,6 +40,20 @@ jobs:
       - uses: ./.github/workflows/actions
       - name: Run Maven Build Command
         run: mvn clean install -pl search -am
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./search
+          push: true
+          tags: |
+            ghcr.io/thanhdatttt/yas-search:latest
+            ghcr.io/thanhdatttt/yas-search:${{ github.sha }}
       
   test:
     runs-on: ubuntu-latest
