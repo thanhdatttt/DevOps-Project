@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {
@@ -80,6 +81,18 @@ class SecurityConfigTest {
         assertThat(authorities)
                 .extracting(GrantedAuthority::getAuthority)
                 .containsExactlyInAnyOrder("ROLE_ADMIN", "ROLE_USER", "ROLE_CUSTOMER", "ROLE_GUEST");
+    }
+
+    // -----------------------------------------------------------------------
+    // userAuthoritiesMapperForKeycloak — empty authorities
+    // -----------------------------------------------------------------------
+
+    @Test
+    void authoritiesMapper_shouldThrowWhenAuthoritiesCollectionIsEmpty() {
+        GrantedAuthoritiesMapper mapper = securityConfig.userAuthoritiesMapperForKeycloak();
+
+        assertThatThrownBy(() -> mapper.mapAuthorities(List.of()))
+                .isInstanceOf(java.util.NoSuchElementException.class);
     }
 
     // -----------------------------------------------------------------------
