@@ -35,6 +35,8 @@ class PaymentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    // Trigger Workflow
+
     @Test
     void initPayment_ShouldReturnSuccess() throws Exception {
         InitPaymentRequestVm request = InitPaymentRequestVm.builder()
