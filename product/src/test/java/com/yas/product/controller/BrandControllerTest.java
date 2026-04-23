@@ -4,6 +4,8 @@ import com.yas.product.ProductApplication;
 import com.yas.product.model.Brand;
 import com.yas.product.repository.BrandRepository;
 import com.yas.product.service.BrandService;
+import com.yas.product.viewmodel.brand.BrandListGetVm;
+import com.yas.product.viewmodel.brand.BrandVm;
 import com.yas.product.viewmodel.brand.BrandPostVm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -124,5 +126,79 @@ class BrandControllerTest {
         brand.setName(name);
         brand.setProducts(Collections.emptyList());
         return brand;
+    }
+
+    @Test
+    void testListBrandsStorefront() throws Exception {
+        when(brandRepository.findByNameContainingIgnoreCase(any())).thenReturn(Arrays.asList(
+                createBrand(1L, "Brand 1"),
+                createBrand(2L, "Brand 2")
+        ));
+
+        mockMvc.perform(get("/storefront/brands"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[1].id").value(2L));
+    }
+
+    @Test
+    void testListBrandsWithNameFilter() throws Exception {
+        when(brandRepository.findByNameContainingIgnoreCase("Nike")).thenReturn(
+                Arrays.asList(createBrand(3L, "Nike"))
+        );
+
+        mockMvc.perform(get("/backoffice/brands").param("brandName", "Nike"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Nike"));
+    }
+
+    @Test
+    void testListBrandsEmpty() throws Exception {
+        when(brandRepository.findByNameContainingIgnoreCase(any())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/backoffice/brands"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetPageableBrands() throws Exception {
+        BrandListGetVm brandListGetVm = new BrandListGetVm(
+                Arrays.asList(
+                        new BrandVm(1L, "Brand A", "brand-a", true),
+                        new BrandVm(2L, "Brand B", "brand-b", true)
+                ), 0, 10, 2, 1, true);
+
+        when(brandService.getBrands(0, 10)).thenReturn(brandListGetVm);
+
+        mockMvc.perform(get("/backoffice/brands/paging").param("pageNo", "0").param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.brandContent[0].name").value("Brand A"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void testGetPageableBrandsStorefront() throws Exception {
+        BrandListGetVm brandListGetVm = new BrandListGetVm(
+                Collections.emptyList(), 0, 10, 0, 0, true);
+
+        when(brandService.getBrands(0, 10)).thenReturn(brandListGetVm);
+
+        mockMvc.perform(get("/storefront/brands/paging"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetBrandsByIds() throws Exception {
+        when(brandService.getBrandsByIds(Arrays.asList(1L, 2L))).thenReturn(Arrays.asList(
+                new BrandVm(1L, "Brand A", "brand-a", true),
+                new BrandVm(2L, "Brand B", "brand-b", true)
+        ));
+
+        mockMvc.perform(get("/backoffice/brands/by-ids").param("ids", "1", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[1].id").value(2L));
     }
 }

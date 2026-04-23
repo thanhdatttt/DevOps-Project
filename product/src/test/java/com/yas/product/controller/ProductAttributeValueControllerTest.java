@@ -22,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -136,5 +137,49 @@ class ProductAttributeValueControllerTest {
 
         mockMvc.perform(delete("/backoffice/product-attribute-value/{id}", id))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testListProductAttributeValuesByProductId_NotFound() throws Exception {
+        when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/backoffice/product-attribute-value/{productId}", 999L))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testUpdateProductAttributeValue_NotFound() throws Exception {
+        ProductAttributeValuePostVm postVm = new ProductAttributeValuePostVm(1L, 1L, "Blue");
+
+        when(productAttributeValueRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/backoffice/product-attribute-value/{id}", 999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(postVm)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteProductAttributeValueById_NotFound() throws Exception {
+        when(productAttributeValueRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/backoffice/product-attribute-value/{id}", 999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testListProductAttributeValues_Empty() throws Exception {
+        when(productAttributeValueRepository.findAll()).thenReturn(List.of());
+
+        // The backoffice product-attribute-value endpoint lists by productId, not all
+        // but we can verify empty result for product with no attribute values
+        Product product = new Product();
+        product.setId(2L);
+        when(productRepository.findById(2L)).thenReturn(Optional.of(product));
+        when(productAttributeValueRepository.findAllByProduct(product)).thenReturn(List.of());
+
+        mockMvc.perform(get("/backoffice/product-attribute-value/{productId}", 2L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

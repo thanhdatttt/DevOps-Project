@@ -132,4 +132,39 @@ class ProductOptionServiceTest {
         assertEquals(0, result.pageNo());
         assertEquals(2, result.pageSize());
     }
+
+    @Test
+    void test_update_product_option_success() {
+        ProductOption existing = new ProductOption();
+        existing.setId(1L);
+        existing.setName("OldName");
+
+        ProductOptionPostVm postVm = new ProductOptionPostVm("NewName");
+        when(productOptionRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(productOptionRepository.findExistedName(eq("NewName"), eq(1L))).thenReturn(null);
+        when(productOptionRepository.save(any(ProductOption.class))).thenReturn(existing);
+
+        ProductOption result = productOptionService.update(postVm, 1L);
+
+        assertNotNull(result);
+        assertEquals("NewName", result.getName());
+        verify(productOptionRepository).save(existing);
+    }
+
+    @Test
+    void test_create_product_option_saves_to_repository() {
+        ProductOptionPostVm postVm = new ProductOptionPostVm("StoredOption");
+        ProductOption saved = new ProductOption();
+        saved.setId(5L);
+        saved.setName("StoredOption");
+
+        when(productOptionRepository.findExistedName(eq("StoredOption"), isNull())).thenReturn(null);
+        when(productOptionRepository.save(any(ProductOption.class))).thenReturn(saved);
+
+        ProductOption result = productOptionService.create(postVm);
+
+        assertNotNull(result);
+        org.junit.jupiter.api.Assertions.assertEquals(5L, result.getId());
+        verify(productOptionRepository).save(any(ProductOption.class));
+    }
 }

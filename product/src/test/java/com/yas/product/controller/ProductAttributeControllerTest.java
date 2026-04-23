@@ -166,6 +166,47 @@ class ProductAttributeControllerTest {
         productAttribute.getProductAttributeGroup().setName(groupName);
         return productAttribute;
     }
+
+    @Test
+    void testListProductAttributesStorefront() throws Exception {
+        when(productAttributeRepository.findAll())
+                .thenReturn(Arrays.asList(
+                        createProductAttribute(1L, "Smooth", "Texture"),
+                        createProductAttribute(2L, "Matte", "Finish")
+                ));
+
+        mockMvc.perform(get("/storefront/product-attribute"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].name").value("Smooth"))
+                .andExpect(jsonPath("$[1].id").value(2L))
+                .andExpect(jsonPath("$[1].name").value("Matte"));
+    }
+
+    @Test
+    void testGetPageableProductAttributesStorefront() throws Exception {
+        List<ProductAttributeGetVm> content = List.of(ProductAttributeGetVm.fromModel(
+                createProductAttribute(1L, "Smooth", "Texture")));
+        ProductAttributeListGetVm pageableResponse = new ProductAttributeListGetVm(
+                content, 0, 10, 1, 1, true);
+
+        when(productAttributeService.getPageableProductAttributes(anyInt(), anyInt()))
+                .thenReturn(pageableResponse);
+
+        mockMvc.perform(get("/storefront/product-attribute/paging?pageNo=0&pageSize=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.productAttributeContent[0].name").value("Smooth"));
+    }
+
+    @Test
+    void testListProductAttributesEmpty() throws Exception {
+        when(productAttributeRepository.findAll()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/backoffice/product-attribute"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
 }
 
 
