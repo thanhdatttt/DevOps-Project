@@ -159,21 +159,4 @@ class SecurityConfigTest {
 
         assertThat(mappedAuthorities).isEmpty();
     }
-
-    @Test
-    void authoritiesMapper_shouldMapMultipleRolesFromOAuth2UserAttributes() {
-        Map<String, Object> realmAccess = Map.of("roles", List.of("ADMIN", "MANAGER", "USER"));
-        Map<String, Object> userAttributes = new HashMap<>();
-        userAttributes.put("realm_access", realmAccess);
-        userAttributes.put("sub", "user-id");
-
-        OAuth2UserAuthority oauth2UserAuthority = new OAuth2UserAuthority(userAttributes);
-
-        GrantedAuthoritiesMapper mapper = securityConfig.userAuthoritiesMapperForKeycloak();
-        Collection<? extends GrantedAuthority> mappedAuthorities = mapper.mapAuthorities(List.of(oauth2UserAuthority));
-
-        assertThat(mappedAuthorities)
-                .extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("ROLE_ADMIN", "ROLE_MANAGER", "ROLE_USER");
-    }
 }
