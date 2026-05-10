@@ -31,33 +31,10 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-  build:
-    runs-on: ubuntu-latest
-    needs: gitleaks
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/workflows/actions
-      - name: Run Maven Build Command
-        run: mvn clean install -pl search -am
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v6
-        with:
-          context: ./search
-          push: true
-          tags: |
-            ghcr.io/thanhdatttt/yas-search:latest
-            ghcr.io/thanhdatttt/yas-search:${{ github.sha }}
-      
+          
   test:
     runs-on: ubuntu-latest
-    needs: build
+    needs: gitleaks
     permissions:
       pull-requests: write
       contents: read
@@ -67,15 +44,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/workflows/actions
-      - name: Run Tests
-        run: mvn clean verify -pl search -am
-      - name: Test Results
-        uses: dorny/test-reporter@v1
-        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
-        with:
-          name: Search-Service-Test-Results
-          path: "search/**/*-reports/TEST*.xml"
-          reporter: java-junit
       - name: Analyze with sonar cloud
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         env:
@@ -86,6 +54,13 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.token=$SONAR_TOKEN 
           -Dsonar.coverage.jacoco.xmlReportPaths=${{github.workspace}}/search/target/site/jacoco/jacoco.xml
+      - name: Test Results
+        uses: dorny/test-reporter@v1
+        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
+        with:
+          name: Search-Service-Test-Results
+          path: "search/**/*-reports/TEST*.xml"
+          reporter: java-junit
       - name: Add coverage report to PR
         id: jacoco_reporter
         uses: madrapps/jacoco-report@v1.6.1
@@ -109,6 +84,29 @@ jobs:
           else
             echo "Code Coverage Pass"
           fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/actions
+      - name: Run Maven Build Command
+        run: mvn clean install -pl search -am
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./search
+          push: true
+          tags: |
+            ghcr.io/thanhdatttt/yas-search:latest
+            ghcr.io/thanhdatttt/yas-search:${{ github.sha }}
           
   security:
     runs-on: ubuntu-latest
