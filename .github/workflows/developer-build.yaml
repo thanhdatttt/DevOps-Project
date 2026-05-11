@@ -3,8 +3,6 @@ name: CD - developer_build
 on:
   workflow_dispatch:
     inputs:
-      # empty or "main"  →  deploy image tag: latest
-      # named branch     →  deploy image tag: commit SHA of that branch
       backoffice_bff_branch:
         description: 'backoffice-bff branch'
         required: false
@@ -83,153 +81,24 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  gitops:
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: read # need this for pulling images from ghcr.io
+      contents: write
+      packages: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-
-      # KUBE_CONFIG secret
-      - name: Configure kubeconfig
+      - name: Install yq
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
 
-      - name: Create developer namespace
-        run: |
-          kubectl get namespace developer || kubectl create namespace developer
-          echo "Namespace 'developer' ready."
-
-      - name: Create imagePullSecret for ghcr.io
-        run: |
-          kubectl create secret docker-registry ghcr-secret \
-            --docker-server=ghcr.io \
-            --docker-username=${{ github.actor }} \
-            --docker-password=${{ secrets.GITHUB_TOKEN }} \
-            --namespace=developer \
-            --dry-run=client -o yaml | kubectl apply -f -
-          echo "imagePullSecret 'ghcr-secret' ready."
-
-      - name: Resolve tags and deploy all services
-        run: |
-          # map: service-name → input branch
-          declare -A BRANCHES=(
-            ["backoffice-bff"]="${{ github.event.inputs.backoffice_bff_branch }}"
-            ["cart"]="${{ github.event.inputs.cart_branch }}"
-            ["customer"]="${{ github.event.inputs.customer_branch }}"
-            ["inventory"]="${{ github.event.inputs.inventory_branch }}"
-            ["location"]="${{ github.event.inputs.location_branch }}"
-            ["media"]="${{ github.event.inputs.media_branch }}"
-            ["order"]="${{ github.event.inputs.order_branch }}"
-            ["payment"]="${{ github.event.inputs.payment_branch }}"
-            ["payment-paypal"]="${{ github.event.inputs.payment_paypal_branch }}"
-            ["product"]="${{ github.event.inputs.product_branch }}"
-            ["promotion"]="${{ github.event.inputs.promotion_branch }}"
-            ["rating"]="${{ github.event.inputs.rating_branch }}"
-            ["recommendation"]="${{ github.event.inputs.recommendation_branch }}"
-            ["sampledata"]="${{ github.event.inputs.sampledata_branch }}"
-            ["search"]="${{ github.event.inputs.search_branch }}"
-            ["storefront-bff"]="${{ github.event.inputs.storefront_bff_branch }}"
-            ["tax"]="${{ github.event.inputs.tax_branch }}"
-            ["webhook"]="${{ github.event.inputs.webhook_branch }}"
-          )
-
-          # map: service-name → NodePort
-          declare -A PORTS=(
-            ["backoffice-bff"]="30001"
-            ["cart"]="30002"
-            ["customer"]="30003"
-            ["inventory"]="30004"
-            ["location"]="30005"
-            ["media"]="30006"
-            ["order"]="30007"
-            ["payment"]="30008"
-            ["payment-paypal"]="30009"
-            ["product"]="30010"
-            ["promotion"]="30011"
-            ["rating"]="30012"
-            ["recommendation"]="30013"
-            ["sampledata"]="30014"
-            ["search"]="30015"
-            ["storefront-bff"]="30016"
-            ["tax"]="30017"
-            ["webhook"]="30018"
-          )
-
-          OWNER="${{ github.repository_owner }}"
-
-          for SERVICE in "${!BRANCHES[@]}"; do
-            BRANCH="${BRANCHES[$SERVICE]}"
-            PORT="${PORTS[$SERVICE]}"
-
-            # ── Resolve image tag ──────────────────────────────────────
-            if [ -z "$BRANCH" ] || [ "$BRANCH" = "main" ]; then
-              TAG="latest"
-            else
-              TAG=$(git rev-parse origin/$BRANCH 2>/dev/null || echo "")
-              if [ -z "$TAG" ]; then
-                echo "Branch '$BRANCH' not found for $SERVICE → fallback to latest"
-                TAG="latest"
-              fi
-            fi
-
-            IMAGE="ghcr.io/${OWNER}/${SERVICE}:${TAG}"
-            echo "▶ $SERVICE | branch: $BRANCH | image: $IMAGE | nodePort: $PORT"
-
-            # apply Deployment + NodePort Service
-            kubectl apply -f - <<MANIFEST
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: ${SERVICE}
-            namespace: developer
-            labels:
-              app: ${SERVICE}
-              managed-by: developer-build
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: ${SERVICE}
-            template:
-              metadata:
-                labels:
-                  app: ${SERVICE}
-              spec:
-                imagePullSecrets:
-                  - name: ghcr-secret
-                containers:
-                  - name: ${SERVICE}
-                    image: ${IMAGE}
-                    imagePullPolicy: Always
-                    ports:
-                      - containerPort: 8080
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: ${SERVICE}
-            namespace: developer
-          spec:
-            type: NodePort
-            selector:
-              app: ${SERVICE}
-            ports:
-              - port: 8080
-                targetPort: 8080
-                nodePort: ${PORT}
-          MANIFEST
-          done
-
-      - name: Wait for rollouts
+      - name: Update helm values
         run: |
           SERVICES=(
             backoffice-bff cart customer inventory
@@ -237,46 +106,88 @@ jobs:
             promotion rating recommendation sampledata search
             storefront-bff tax webhook
           )
-          for SERVICE in "${SERVICES[@]}"; do
-            echo "Waiting for $SERVICE ..."
-            kubectl rollout status deployment/$SERVICE -n developer --timeout=120s \
-              || echo "$SERVICE timeout — check: kubectl logs -n developer deploy/$SERVICE"
+
+          for svc in ${SERVICES[@]}; do
+            input_key="${svc//-/_}_branch"
+
+            # Đọc branch input từ workflow_dispatch — dùng env để tránh script injection
+            branch_name="${{ toJson(github.event.inputs) }}"
+            branch_name=$(echo "$branch_name" | jq -r --arg key "$input_key" '.[$key] // "main"')
+
+            # main hoặc rỗng → tag latest
+            if [ -z "$branch_name" ] || [ "$branch_name" = "main" ]; then
+              tag="latest"
+            else
+              # ✅ Fix: dùng đúng $branch_name thay vì $BRANCH
+              tag=$(git ls-remote origin "refs/heads/$branch_name" | cut -f1)
+              if [ -z "$tag" ]; then
+                echo "⚠️  Branch '$branch_name' not found for '$svc' → fallback to latest"
+                tag="latest"
+              else
+                # Dùng short SHA (7 ký tự) cho dễ đọc
+                tag="${tag:0:7}"
+              fi
+            fi
+
+            FILE_PATH="k8s/charts/$svc/values.yaml" 
+
+            if [ -f "$FILE_PATH" ]; then
+              echo "✅ $svc → tag: $tag"
+              yq -i ".image.tag = \"$tag\"" "$FILE_PATH"
+            else
+              echo "⚠️  $FILE_PATH not found, skipping"
+            fi
           done
 
-      - name: Print developer access info
+      - name: Commit and Push
         run: |
-          WORKER_IP=$(kubectl get nodes -o wide \
-            | grep -v NAME | grep -v control-plane | grep -v master \
-            | awk '{print $6}' | head -1)
-          # Single node cluster: use the node IP directly
-          if [ -z "$WORKER_IP" ] || [ "$WORKER_IP" = "<none>" ]; then
-            WORKER_IP=$(kubectl get nodes -o wide | grep -v NAME | awk '{print $6}' | head -1)
-          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/charts/ 
+          # Chỉ commit nếu có thay đổi thực sự
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "GitOps: dev-build - Update image tags [skip ci]"
+          git push origin main
+
+      - name: Trigger ArgoCD Sync
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }} 
+          ARGOCD_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          # Sync tất cả app thuộc project developer (hoặc liệt kê từng app)
+          SERVICES=(
+            backoffice-bff-dev cart-dev customer-dev inventory-dev
+            location-dev media-dev order-dev payment-dev payment-paypal-dev
+            product-dev promotion-dev rating-dev recommendation-dev
+            sampledata-dev search-dev storefront-bff-dev tax-dev webhook-dev
+          )
+          for app in ${SERVICES[@]}; do
+            echo "Syncing ArgoCD app: $app"
+            curl -s -X POST \
+              -H "Authorization: Bearer $ARGOCD_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://$ARGOCD_SERVER/api/v1/applications/$app/sync" \
+              -d '{"prune":false,"dryRun":false}' || echo "⚠️  Sync $app failed (non-blocking)"
+          done
+
+      - name: Print Developer Access Info
+        run: |
+          # Worker node IP — lưu trong secret hoặc hardcode nếu cố định
+          WORKER_IP="${{ secrets.K8S_WORKER_IP }}" 
 
           echo ""
-          echo "  DEPLOYMENT COMPLETE — Developer Access Info"
+          echo "👉 Add bellow code line to your file hosts:"
+          echo "   (Windows: C:\\Windows\\System32\\drivers\\etc\\hosts)"
+          echo "   (Linux/Mac: /etc/hosts)"
           echo ""
-          echo "  Add to /etc/hosts on your device:"
-          echo "      $WORKER_IP  yas.dev"
+          echo "   $WORKER_IP  dev.backoffice.local"
+          echo "   $WORKER_IP  dev.storefront.local"
+          echo "   $WORKER_IP  dev.api.local"
           echo ""
-          echo "  Service URLs:"
-          echo "      http://yas.dev:30001  →  backoffice-bff"
-          echo "      http://yas.dev:30002  →  cart"
-          echo "      http://yas.dev:30003  →  customer"
-          echo "      http://yas.dev:30004  →  inventory"
-          echo "      http://yas.dev:30005  →  location"
-          echo "      http://yas.dev:30006  →  media"
-          echo "      http://yas.dev:30007  →  order"
-          echo "      http://yas.dev:30008  →  payment"
-          echo "      http://yas.dev:30009  →  payment-paypal"
-          echo "      http://yas.dev:30010  →  product"
-          echo "      http://yas.dev:30011  →  promotion"
-          echo "      http://yas.dev:30012  →  rating"
-          echo "      http://yas.dev:30013  →  recommendation"
-          echo "      http://yas.dev:30014  →  sampledata"
-          echo "      http://yas.dev:30015  →  search"
-          echo "      http://yas.dev:30016  →  storefront-bff"
-          echo "      http://yas.dev:30017  →  tax"
-          echo "      http://yas.dev:30018  →  webhook"
+          echo "📌 NodePort endpoints:"
+          echo "   Storefront BFF : http://dev.storefront.local:30001"
+          echo "   Backoffice BFF : http://dev.backoffice.local:30002"
+          echo "   API Gateway    : http://dev.api.local:30000"
           echo ""
-          echo "  Worker node IP: $WORKER_IP"
+          echo "⚠️  ArgoCD sync can take a few minutes to complete pod restart"
+          echo "=========================================="
