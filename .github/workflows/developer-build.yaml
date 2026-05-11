@@ -105,7 +105,7 @@ jobs:
 
       - name: Create developer namespace
         run: |
-          kubectl create namespace developer --dry-run=client -o yaml | kubectl apply -f -
+          kubectl get namespace developer || kubectl create namespace developer
           echo "Namespace 'developer' ready."
 
       - name: Create imagePullSecret for ghcr.io
