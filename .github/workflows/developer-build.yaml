@@ -208,7 +208,7 @@ jobs:
                   - name: ghcr-secret
                 containers:
                   - name: ${SERVICE}
-                    image: $
+                    image: ${IMAGE}
                     imagePullPolicy: Always
                     ports:
                       - containerPort: 8080
