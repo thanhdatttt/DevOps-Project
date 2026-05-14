@@ -16,6 +16,7 @@ spec:
 
     # 2. Pull your local chart and inject the config
     - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+      targetRevision: feat/argocd
       ref: values 
     
     - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git' # Replace with your repo
