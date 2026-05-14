@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: devops-project-obs-internal
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: opentelemetry-collector
+            path: k8s/deploy/observability/opentelemetry
+            destinationNamespace: observability
+            syncWave: "1"
+          - name: grafana
+            path: k8s/deploy/observability/grafana
+            destinationNamespace: observability
+            syncWave: "1"
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
+    spec:
+      project: default
+      sources:
+        - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          ref: values
+          
+        - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          path: '{{path}}'
+          targetRevision: HEAD
+          helm:
+            valueFiles:
+              - $values/cluster-config.yaml
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{destinationNamespace}}'
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: [ CreateNamespace=true ]

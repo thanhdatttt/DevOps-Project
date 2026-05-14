@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: devops-project-infra-external
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: postgres-operator
+            repoURL: 'https://opensource.zalando.com/postgres-operator/charts/postgres-operator'
+            chart: postgres-operator
+            version: '1.10.1' # <-- Always put the actual version here
+            destinationNamespace: postgres
+            syncWave: "-5"
+          - name: kafka-operator
+            repoURL: 'https://strimzi.io/charts/'
+            chart: strimzi-kafka-operator
+            version: '0.35.0'
+            destinationNamespace: kafka
+            syncWave: "-5"
+          - name: akhq
+            repoURL: 'https://akhq.io/'
+            chart: akhq
+            version: '0.23.0'
+            destinationNamespace: kafka
+            syncWave: "0"
+          - name: elastic-operator
+            repoURL: 'https://helm.elastic.co'
+            chart: eck-operator
+            version: '2.8.0'
+            destinationNamespace: elasticsearch
+            syncWave: "-5"
+          - name: cert-manager
+            repoURL: 'https://charts.jetstack.io'
+            chart: cert-manager
+            version: 'v1.12.0'
+            destinationNamespace: cert-manager
+            syncWave: "-5"
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
+    spec:
+      project: default
+      source:
+        repoURL: '{{repoURL}}'
+        chart: '{{chart}}'
+        targetRevision: '{{version}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{destinationNamespace}}'
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: [ CreateNamespace=true ]

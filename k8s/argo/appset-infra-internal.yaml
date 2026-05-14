@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: devops-project-infra-internal
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: postgres
+            path: k8s/deploy/postgres/postgresql
+            destinationNamespace: postgres
+            syncWave: "-3"
+          - name: pgadmin
+            path: k8s/deploy/postgres/pgadmin
+            destinationNamespace: postgres
+            syncWave: "0"
+          - name: kafka-cluster
+            path: k8s/deploy/kafka/kafka-cluster
+            destinationNamespace: kafka
+            syncWave: "-1"
+          - name: elasticsearch-cluster
+            path: k8s/deploy/elasticsearch/elasticsearch-cluster
+            destinationNamespace: elasticsearch
+            syncWave: "-3"
+          - name: zookeeper
+            path: k8s/deploy/zookeeper
+            destinationNamespace: zookeeper
+            syncWave: "-3"
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
+    spec:
+      project: default
+      sources:
+        # 1. Pull the config values
+        - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          ref: values
+        
+        # 2. Pull the local chart and inject the values
+        - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          path: '{{path}}'
+          targetRevision: HEAD
+          helm:
+            valueFiles:
+              - $values/cluster-config.yaml
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{destinationNamespace}}'
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: [ CreateNamespace=true ]

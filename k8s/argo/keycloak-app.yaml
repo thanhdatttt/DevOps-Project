@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak
+  namespace: argocd
+  annotations:
+    # Keycloak starts after the database (Wave -2) is ready
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  sources:
+    # 1. Pull the official CRDs directly from Keycloak's repo
+    - repoURL: 'https://github.com/keycloak/keycloak-k8s-resources.git'
+      path: kubernetes
+      targetRevision: 26.0.2
+
+    # 2. Pull your local chart and inject the config
+    - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+      ref: values 
+    
+    - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git # Replace with your repo
+      path: keycloak/keycloak
+      targetRevision: HEAD
+      helm:
+        valueFiles:
+          - $values/k8s/deploy/cluster-config.yaml
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: keycloak
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true # Essential for CRDs

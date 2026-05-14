@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: devops-project-obs-external
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: loki
+            repoURL: 'https://grafana.github.io/helm-charts'
+            chart: loki
+            version: '5.4.1'
+            destinationNamespace: observability
+            syncWave: "0"
+          - name: tempo
+            repoURL: 'https://grafana.github.io/helm-charts'
+            chart: tempo
+            version: '1.6.0'
+            destinationNamespace: observability
+            syncWave: "0"
+          - name: opentelemetry-operator
+            repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
+            chart: opentelemetry-operator
+            version: '0.38.0'
+            destinationNamespace: observability
+            syncWave: "-5"
+          - name: promtail
+            repoURL: 'https://grafana.github.io/helm-charts'
+            chart: promtail
+            version: '6.15.3'
+            destinationNamespace: observability
+            syncWave: "1"
+          - name: prometheus
+            repoURL: 'https://prometheus-community.github.io/helm-charts'
+            chart: kube-prometheus-stack
+            version: '51.2.0'
+            destinationNamespace: observability
+            syncWave: "0"
+          - name: grafana-operator
+            repoURL: 'ghcr.io/grafana-operator/helm-charts'
+            chart: grafana-operator
+            version: 'v5.0.2'
+            destinationNamespace: observability
+            syncWave: "-5"
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
+    spec:
+      project: default
+      source:
+        repoURL: '{{repoURL}}'
+        chart: '{{chart}}'
+        targetRevision: '{{version}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{destinationNamespace}}'
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: [ CreateNamespace=true ]
