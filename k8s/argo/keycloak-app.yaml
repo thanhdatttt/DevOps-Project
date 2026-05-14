@@ -19,7 +19,7 @@ spec:
       ref: values 
     
     - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git' # Replace with your repo
-      path: keycloak/keycloak
+      path: k8s/deploy/keycloak/keycloak
       targetRevision: feat/argocd
       helm:
         valueFiles:
