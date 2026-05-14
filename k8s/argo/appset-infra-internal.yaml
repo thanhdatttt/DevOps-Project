@@ -38,6 +38,7 @@ spec:
         # 1. Pull the config values
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
           targetRevision: feat/argocd
+          path: k8s/deploy
           ref: values
         
         # 2. Pull the local chart and inject the values
@@ -46,7 +47,7 @@ spec:
           targetRevision: feat/argocd
           helm:
             valueFiles:
-              - $values/k8s/deploy/cluster-config.yaml
+              - $values/cluster-config.yaml
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: '{{destinationNamespace}}'
