@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
     path: k8s/argo  # Points to the folder holding your 4 AppSets
-    targetRevision: HEAD
+    targetRevision: feat/argocd
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: argocd 

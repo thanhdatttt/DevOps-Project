@@ -30,6 +30,9 @@ kubectl apply -f appset-obs-internal.yaml -n argocd
 # Turn on Ip in IP in Calico
 
 
+# Watch
+❯ kubectl port-forward service/argocd-server -n argocd 8080:443
+
 
 # helm dep update argo/
 
