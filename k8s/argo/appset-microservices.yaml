@@ -10,6 +10,10 @@ spec:
         revision: feat/argocd
         directories:
           - path: k8s/charts/* # Chỉ quét các folder bên trong k8s/charts/
+          - path: k8s/charts/backend
+            exclude: true
+          - path: k8s/charts/ui
+            exclude: true
   template:
     metadata:
       name: '{{path.basename}}' # Tên App sẽ là tên service (ví dụ: tax-service)
@@ -20,7 +24,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: feat/ar
+        targetRevision: feat/argocd
         path: '{{path}}' # Đường dẫn chính xác đến từng chart
         helm:
           valueFiles:
