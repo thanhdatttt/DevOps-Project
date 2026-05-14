@@ -24,6 +24,7 @@ spec:
       project: default
       sources:
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          targetRevision: feat/argocd
           ref: values
           
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'

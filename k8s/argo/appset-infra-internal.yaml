@@ -37,6 +37,7 @@ spec:
       sources:
         # 1. Pull the config values
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+          targetRevision: feat/argocd
           ref: values
         
         # 2. Pull the local chart and inject the values
