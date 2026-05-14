@@ -42,7 +42,7 @@ spec:
         # 2. Pull the local chart and inject the values
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
           path: '{{path}}'
-          targetRevision: HEAD
+          targetRevision: feat/argocd
           helm:
             valueFiles:
               - $values/cluster-config.yaml

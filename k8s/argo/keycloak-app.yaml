@@ -20,7 +20,7 @@ spec:
     
     - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git # Replace with your repo
       path: keycloak/keycloak
-      targetRevision: HEAD
+      targetRevision: feat/argocd
       helm:
         valueFiles:
           - $values/k8s/deploy/cluster-config.yaml

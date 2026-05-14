@@ -28,7 +28,7 @@ spec:
           
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
           path: '{{path}}'
-          targetRevision: HEAD
+          targetRevision: feat/argocd
           helm:
             valueFiles:
               - $values/cluster-config.yaml

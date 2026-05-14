@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        revision: HEAD
+        revision: feat/argocd
         directories:
           - path: k8s/charts/* # Chỉ quét các folder bên trong k8s/charts/
   template:
@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: HEAD
+        targetRevision: feat/ar
         path: '{{path}}' # Đường dẫn chính xác đến từng chart
         helm:
           valueFiles:
