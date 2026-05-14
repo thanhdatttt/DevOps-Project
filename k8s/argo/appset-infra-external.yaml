@@ -16,7 +16,7 @@ spec:
           - name: kafka-operator
             repoURL: 'https://strimzi.io/charts/'
             chart: strimzi-kafka-operator
-            version: '0.38.0'
+            version: '0.51.0'
             destinationNamespace: kafka
             syncWave: "-5"
           - name: akhq
