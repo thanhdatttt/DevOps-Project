@@ -1,0 +1,10 @@
+backend:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-recommendation
+    tag: staging
+
+  nameOverride: recommendation
+  fullnameOverride: recommendation
+  databaseName: recommendation
+  ingress:
+    enabled: false

@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: yas-frontend-services
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # Định nghĩa service, tên param của Helm và domain tương ứng
+          - service: backoffice-bff
+            helm_param_name: "backend.ingress.host"
+            domain: "backoffice.yas.local.com"
+            wave: "2"
+            
+          - service: storefront-bff
+            helm_param_name: "backend.ingress.host"
+            domain: "storefront.yas.local.com"
+            wave: "2"
+            
+          - service: swagger-ui
+            helm_param_name: "ingress.host" # Lưu ý: Swagger UI trong script của bạn dùng tham số khác
+            domain: "api.yas.local.com"
+            wave: "2"
+
+  template:
+    metadata:
+      name: '{{service}}-dev'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+        targetRevision: main
+        path: 'k8s/charts/{{service}}'
+        helm:
+          parameters:
+            # Truyền động tên tham số và giá trị domain
+            - name: '{{helm_param_name}}'
+              value: '{{domain}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: staging
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

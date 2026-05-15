@@ -10,6 +10,7 @@ helm repo add grafana https://grafana.github.io/helm-charts
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo add jetstack https://charts.jetstack.io
+helm repo add argo argoproj/argo-helm
 helm repo update
 
 #Read configuration value from cluster-config.yaml file
@@ -121,3 +122,6 @@ helm upgrade --install grafana ./observability/grafana \
 
 helm upgrade --install zookeeper ./zookeeper \
  --namespace zookeeper --create-namespace
+
+ helm upgrade --install argocd argo/argo-cd \
+ --create-namespace --namespace argocd

@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-backend-services
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - service: cart
+          - service: customer
+          - service: inventory
+          # - service: location
+          - service: media
+          - service: order
+          # - service: payment
+          # - service: payment-paypal
+          - service: product
+          # - service: promotion
+          # - service: rating
+          - service: search
+          - service: tax
+          # - service: recommendation
+          # - service: webhook
+          # - service: sampledata
+          
+  template:
+    metadata:
+      name: '{{service}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+        targetRevision: main
+        path: 'k8s/charts/{{service}}'
+        helm:
+          valueFiles:
+            - values.yaml 
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: dev # Deploy to Dev namespace
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
