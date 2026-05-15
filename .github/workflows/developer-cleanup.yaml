@@ -1,57 +1,238 @@
-name: CD - developer_cleanup
+name: CD - Developer Cleanup
 
 on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: "Reset all services to 'latest' tag? (yes / no)"
+        description: "Type 'yes' to reset targeted services to 'latest'"
         required: true
         default: 'no'
+      target_services:
+        description: '"all"  OR  comma-separated names, e.g. "tax,payment,cart"'
+        required: false
+        default: 'all'
 
 jobs:
-  cleanup:
+  # Safety gate — abort unless user explicitly typed "yes"
+  guard:
+    name: Safety Check
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.confirm == 'yes' }}
+    steps:
+      - name: Verify confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "yes" ]; then
+            echo "❌ Aborted — input was '${{ inputs.confirm }}', expected 'yes'"
+            exit 1
+          fi
+          echo "✅ Confirmed — proceeding with cleanup"
+
+  # Reset values-dev image tags → "latest"
+  gitops:
+    name: Reset values-dev to latest
+    needs: guard
+    runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    outputs:
+      reset_list:  ${{ steps.reset.outputs.reset_list }}   # services actually changed
+      argocd_apps: ${{ steps.reset.outputs.argocd_apps }}  # corresponding ArgoCD app names
+
     steps:
-      - name: Checkout
+      - name: Checkout GitOps repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install yq
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo wget -q \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
 
-      - name: Reset all charts to latest
+      - name: Reset image tags
+        id: reset
+        env:
+          TARGET: ${{ inputs.target_services }}
         run: |
-          find k8s/charts/ -name "values.yaml" -exec yq -i '.image.tag = "latest"' {} +
-          echo "All image tags reset to 'latest'"
+          set -euo pipefail
 
-      - name: Commit and Push
+          ALL_SERVICES=(
+            backoffice-bff   cart             customer
+            inventory        location         media
+            order            payment          payment-paypal
+            product          promotion        rating
+            recommendation   sampledata       search
+            storefront-bff   tax              webhook
+          )
+
+          # Resolve target list
+          if [ -z "$TARGET" ] || [ "$TARGET" = "all" ]; then
+            SERVICES=("${ALL_SERVICES[@]}")
+            echo "🎯 Target: ALL (${#SERVICES[@]} services)"
+          else
+            SERVICES=()
+            IFS=',' read -ra RAW <<< "$TARGET"
+            for s in "${RAW[@]}"; do
+              svc=$(echo "$s" | tr -d '[:space:]')
+              if printf '%s\n' "${ALL_SERVICES[@]}" | grep -qx "$svc"; then
+                SERVICES+=("$svc")
+              else
+                echo "⚠️  Unknown service '$svc' — skipped"
+              fi
+            done
+
+            if [ ${#SERVICES[@]} -eq 0 ]; then
+              echo "❌ No valid services found in input: $TARGET"
+              exit 1
+            fi
+            echo "🎯 Target: ${SERVICES[*]}"
+          fi
+
+          echo ""
+
+          RESET_LIST=""
+          ARGOCD_APPS=""
+
+          for svc in "${SERVICES[@]}"; do
+            file="k8s/charts/${svc}/values-dev.yaml"
+
+            if [ ! -f "$file" ]; then
+              echo "⚠️  [$svc] $file not found — skipping"
+              continue
+            fi
+
+            current=$(yq '.image.tag' "$file" 2>/dev/null || echo "unknown")
+
+            if [ "$current" = "latest" ]; then
+              echo "⏭️  [$svc]  already on latest — no change"
+            else
+              yq -i '.image.tag = "latest"' "$file"
+              echo "✅ [$svc]  $current  →  latest"
+              RESET_LIST="${RESET_LIST}${svc},"
+              ARGOCD_APPS="${ARGOCD_APPS}${svc}-dev,"
+            fi
+          done
+
+          RESET_LIST="${RESET_LIST%,}"
+          ARGOCD_APPS="${ARGOCD_APPS%,}"
+
+          echo ""
+          count=$(echo "$RESET_LIST" | tr -cd ',' | wc -c)
+          echo "$((count + ${#RESET_LIST:+1})) service(s) reset"
+
+          echo "reset_list=${RESET_LIST}"   >> "$GITHUB_OUTPUT"
+          echo "argocd_apps=${ARGOCD_APPS}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit & Push
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/charts/ 
-          git diff --cached --quiet && echo "Nothing to reset" && exit 0
-          git commit -m "GitOps: Cleanup - Reset all tags to latest [skip ci]"
-          git push origin main
 
-      - name: Trigger ArgoCD Sync All
+          git add k8s/charts/
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit — all targeted services were already on latest"
+            exit 0
+          fi
+
+          git commit -m "GitOps: dev-cleanup — Reset values-dev.yaml to latest [skip ci]
+
+          Triggered by : ${{ github.actor }}
+          Target       : ${{ inputs.target_services }}
+          Run ID       : ${{ github.run_id }}"
+
+          for attempt in 1 2 3; do
+            git push origin main && break || {
+              echo "⚠️  Push attempt $attempt failed — rebasing..."
+              git pull --rebase origin main
+            }
+          done
+
+  # Sync only the apps that were actually reset
+  # prune=true to remove stale ReplicaSets / leftover resources
+  sync:
+    name: Sync ArgoCD (prune=true)
+    needs: gitops
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger sync for changed apps
         env:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          ARGOCD_TOKEN:  ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          ARGOCD_APPS:   ${{ needs.gitops.outputs.argocd_apps }}
         run: |
-          SERVICES=(
-            backoffice-bff-dev cart-dev customer-dev inventory-dev
-            location-dev media-dev order-dev payment-dev payment-paypal-dev
-            product-dev promotion-dev rating-dev recommendation-dev
-            sampledata-dev search-dev storefront-bff-dev tax-dev webhook-dev
-          )
-          for app in ${SERVICES[@]}; do
-            curl -s -X POST \
-              -H "Authorization: Bearer $ARGOCD_TOKEN" \
-              "https://$ARGOCD_SERVER/api/v1/applications/$app/sync" \
-              -d '{"prune":true}' || true
+          set -euo pipefail
+
+          if [ -z "$ARGOCD_APPS" ]; then
+            echo "ℹ️  No apps to sync — nothing was reset"
+            exit 0
+          fi
+
+          IFS=',' read -ra APPS <<< "$ARGOCD_APPS"
+          FAILED=()
+
+          for app in "${APPS[@]}"; do
+            echo -n "🔄 $app (prune=true) ... "
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+              -H "Content-Type: application/json" \
+              "https://${ARGOCD_SERVER}/api/v1/applications/${app}/sync" \
+              -d '{"prune":true,"dryRun":false}')
+
+            if [[ "$http_code" =~ ^2 ]]; then
+              echo "✅"
+            else
+              echo "⚠️  HTTP $http_code"
+              FAILED+=("$app")
+            fi
           done
-          echo "Complete Cleanup + sync"
+
+          echo ""
+          if [ ${#FAILED[@]} -gt 0 ]; then
+            echo "⚠️  Non-blocking sync failures: ${FAILED[*]}"
+          else
+            echo "✅ Sync complete"
+          fi
+
+  # JOB 3 — Cleanup summary
+  summary:
+    name: Cleanup Summary
+    needs: [gitops, sync]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print report
+        env:
+          RESET_LIST: ${{ needs.gitops.outputs.reset_list }}
+          TARGET:     ${{ inputs.target_services }}
+        run: |
+          echo ""
+          echo "╔══════════════════════════════════════════════════════╗"
+          echo "║               DEVELOPER CLEANUP COMPLETE             ║"
+          echo "╚══════════════════════════════════════════════════════╝"
+          echo ""
+          echo "  Triggered by : ${{ github.actor }}"
+          echo "  Target       : ${TARGET}"
+          echo ""
+
+          if [ -z "$RESET_LIST" ]; then
+            echo "All targeted services were already on 'latest'"
+            echo "No changes were necessary."
+          else
+            echo "  ✅ Reset to 'latest':"
+            IFS=',' read -ra SVCS <<< "$RESET_LIST"
+            for svc in "${SVCS[@]}"; do
+              echo "     - $svc"
+            done
+          fi
+
+          echo ""
+          echo "  ⏳ ArgoCD will pull 'latest' images over the next 1-3 min"
+          echo ""
+          echo "  💡 Run developer_build again when ready to test a branch"
+          echo "══════════════════════════════════════════════════════"
