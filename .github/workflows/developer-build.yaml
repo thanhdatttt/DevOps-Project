@@ -1,93 +1,94 @@
-name: CD - developer_build
+name: CD - Developer Build
 
 on:
   workflow_dispatch:
     inputs:
       backoffice_bff_branch:
-        description: 'backoffice-bff branch'
+        description: 'backoffice-bff'
         required: false
         default: 'main'
       cart_branch:
-        description: 'cart branch'
+        description: 'cart'
         required: false
         default: 'main'
       customer_branch:
-        description: 'customer branch'
+        description: 'customer'
         required: false
         default: 'main'
       inventory_branch:
-        description: 'inventory branch'
+        description: 'inventory'
         required: false
         default: 'main'
       location_branch:
-        description: 'location branch'
+        description: 'location'
         required: false
         default: 'main'
       media_branch:
-        description: 'media branch'
+        description: 'media'
         required: false
         default: 'main'
       order_branch:
-        description: 'order branch'
+        description: 'order'
         required: false
         default: 'main'
       payment_branch:
-        description: 'payment branch'
+        description: 'payment'
         required: false
         default: 'main'
       payment_paypal_branch:
-        description: 'payment-paypal branch'
+        description: 'payment-paypal'
         required: false
         default: 'main'
       product_branch:
-        description: 'product branch'
+        description: 'product'
         required: false
         default: 'main'
       promotion_branch:
-        description: 'promotion branch'
+        description: 'promotion'
         required: false
         default: 'main'
       rating_branch:
-        description: 'rating branch'
+        description: 'rating'
         required: false
         default: 'main'
       recommendation_branch:
-        description: 'recommendation branch'
+        description: 'recommendation'
         required: false
         default: 'main'
       sampledata_branch:
-        description: 'sampledata branch'
+        description: 'sampledata'
         required: false
         default: 'main'
       search_branch:
-        description: 'search branch'
+        description: 'search'
         required: false
         default: 'main'
       storefront_bff_branch:
-        description: 'storefront-bff branch'
+        description: 'storefront-bff'
         required: false
         default: 'main'
       tax_branch:
-        description: 'tax branch'
+        description: 'tax'
         required: false
         default: 'main'
       webhook_branch:
-        description: 'webhook branch'
+        description: 'webhook'
         required: false
         default: 'main'
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
-
 jobs:
+  # Resolve tags + update values-dev.yaml + commit & push
   gitops:
+    name: Resolve Tags & Update values-dev
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: read
+
+    outputs:
+      tag_map: ${{ steps.resolve.outputs.tag_map }}
+
     steps:
-      - name: Checkout
+      - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -95,99 +96,230 @@ jobs:
 
       - name: Install yq
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo wget -q \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
 
-      - name: Update helm values
+      - name: Resolve image tags
+        id: resolve
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_REPO: ${{ github.repository }}
+          INPUT_backoffice_bff:  ${{ inputs.backoffice_bff_branch }}
+          INPUT_cart:            ${{ inputs.cart_branch }}
+          INPUT_customer:        ${{ inputs.customer_branch }}
+          INPUT_inventory:       ${{ inputs.inventory_branch }}
+          INPUT_location:        ${{ inputs.location_branch }}
+          INPUT_media:           ${{ inputs.media_branch }}
+          INPUT_order:           ${{ inputs.order_branch }}
+          INPUT_payment:         ${{ inputs.payment_branch }}
+          INPUT_payment_paypal:  ${{ inputs.payment_paypal_branch }}
+          INPUT_product:         ${{ inputs.product_branch }}
+          INPUT_promotion:       ${{ inputs.promotion_branch }}
+          INPUT_rating:          ${{ inputs.rating_branch }}
+          INPUT_recommendation:  ${{ inputs.recommendation_branch }}
+          INPUT_sampledata:      ${{ inputs.sampledata_branch }}
+          INPUT_search:          ${{ inputs.search_branch }}
+          INPUT_storefront_bff:  ${{ inputs.storefront_bff_branch }}
+          INPUT_tax:             ${{ inputs.tax_branch }}
+          INPUT_webhook:         ${{ inputs.webhook_branch }}
         run: |
-          SERVICES=(
-            backoffice-bff cart customer inventory
-            location media order payment payment-paypal product
-            promotion rating recommendation sampledata search
-            storefront-bff tax webhook
+          set -euo pipefail
+
+          declare -A SVC_ENV=(
+            [backoffice-bff]=INPUT_backoffice_bff
+            [cart]=INPUT_cart
+            [customer]=INPUT_customer
+            [inventory]=INPUT_inventory
+            [location]=INPUT_location
+            [media]=INPUT_media
+            [order]=INPUT_order
+            [payment]=INPUT_payment
+            [payment-paypal]=INPUT_payment_paypal
+            [product]=INPUT_product
+            [promotion]=INPUT_promotion
+            [rating]=INPUT_rating
+            [recommendation]=INPUT_recommendation
+            [sampledata]=INPUT_sampledata
+            [search]=INPUT_search
+            [storefront-bff]=INPUT_storefront_bff
+            [tax]=INPUT_tax
+            [webhook]=INPUT_webhook
           )
 
-          for svc in ${SERVICES[@]}; do
-            input_key="${svc//-/_}_branch"
+          # github.repository = "owner/repo"
+          FULL_SOURCE_REPO="$CURRENT_REPO"
+          TAG_MAP=""
 
-            # Đọc branch input từ workflow_dispatch — dùng env để tránh script injection
-            branch_name="${{ toJson(github.event.inputs) }}"
-            branch_name=$(echo "$branch_name" | jq -r --arg key "$input_key" '.[$key] // "main"')
+          for svc in "${!SVC_ENV[@]}"; do
+            env_key="${SVC_ENV[$svc]}"
+            branch="${!env_key:-main}"
 
-            # main hoặc rỗng → tag latest
-            if [ -z "$branch_name" ] || [ "$branch_name" = "main" ]; then
+            if [ -z "$branch" ] || [ "$branch" = "main" ]; then
               tag="latest"
+              echo "⏭️  [$svc]  main  →  latest"
             else
-              # ✅ Fix: dùng đúng $branch_name thay vì $BRANCH
-              tag=$(git ls-remote origin "refs/heads/$branch_name" | cut -f1)
-              if [ -z "$tag" ]; then
-                echo "⚠️  Branch '$branch_name' not found for '$svc' → fallback to latest"
+              # Resolve full SHA của HEAD trên branch (= tag mà service CI đã push)
+              sha=$(gh api "repos/${FULL_SOURCE_REPO}/commits/${branch}" \
+                      --jq '.sha' 2>/dev/null || echo "")
+
+              if [ -z "$sha" ]; then
+                echo "⚠️  [$svc]  branch '$branch' not found  →  fallback to latest"
                 tag="latest"
               else
-                # Dùng short SHA (7 ký tự) cho dễ đọc
-                tag="${tag:0:7}"
+                tag="$sha"
+                echo "✅ [$svc]  $branch  →  ${sha:0:7}  (full: $sha)"
               fi
             fi
 
-            FILE_PATH="k8s/charts/$svc/values.yaml" 
+            TAG_MAP="${TAG_MAP}${svc}=${tag},"
+          done
 
-            if [ -f "$FILE_PATH" ]; then
-              echo "✅ $svc → tag: $tag"
-              yq -i ".image.tag = \"$tag\"" "$FILE_PATH"
+          TAG_MAP="${TAG_MAP%,}"
+          echo "tag_map=${TAG_MAP}" >> "$GITHUB_OUTPUT"
+
+      - name: Update values-dev.yaml
+        env:
+          TAG_MAP: ${{ steps.resolve.outputs.tag_map }}
+        run: |
+          set -euo pipefail
+
+          IFS=',' read -ra ENTRIES <<< "$TAG_MAP"
+          for entry in "${ENTRIES[@]}"; do
+            svc="${entry%%=*}"
+            tag="${entry#*=}"
+            file="k8s/charts/${svc}/values-dev.yaml"
+
+            if [ ! -f "$file" ]; then
+              echo "⚠️  $file not found — skipping"
+              continue
+            fi
+
+            yq -i ".image.tag = \"${tag}\"" "$file"
+            echo "✅ $svc  →  ${tag:0:7}${tag:7:+...}"
+          done
+
+      - name: Commit & Push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add k8s/charts/
+
+          if git diff --cached --quiet; then
+            echo "No changes — all services already on requested tags"
+            exit 0
+          fi
+
+          git commit -m "GitOps: dev-build — Update values-dev.yaml image tags
+
+          Triggered by : ${{ github.actor }}
+          Run ID       : ${{ github.run_id }}"
+
+          for attempt in 1 2 3; do
+            git push origin main && break || {
+              echo "⚠️  Push attempt $attempt failed — rebasing..."
+              git pull --rebase origin main
+            }
+          done
+
+  # Sync ArgoCD dev apps
+  sync:
+    name: Sync ArgoCD
+    needs: gitops
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger sync — all dev apps
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_TOKEN:  ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          APPS=(
+            backoffice-bff-dev   cart-dev         customer-dev
+            inventory-dev        location-dev     media-dev
+            order-dev            payment-dev      payment-paypal-dev
+            product-dev          promotion-dev    rating-dev
+            recommendation-dev   sampledata-dev   search-dev
+            storefront-bff-dev   tax-dev          webhook-dev
+          )
+
+          FAILED=()
+
+          for app in "${APPS[@]}"; do
+            echo -n "🔄 $app ... "
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+              -H "Content-Type: application/json" \
+              "https://${ARGOCD_SERVER}/api/v1/applications/${app}/sync" \
+              -d '{"prune":false,"dryRun":false}')
+
+            if [[ "$http_code" =~ ^2 ]]; then
+              echo "✅"
             else
-              echo "⚠️  $FILE_PATH not found, skipping"
+              echo "⚠️  HTTP $http_code"
+              FAILED+=("$app")
             fi
           done
 
-      - name: Commit and Push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/charts/ 
-          # Chỉ commit nếu có thay đổi thực sự
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "GitOps: dev-build - Update image tags [skip ci]"
-          git push origin main
+          echo ""
+          if [ ${#FAILED[@]} -gt 0 ]; then
+            echo "⚠️  Non-blocking failures: ${FAILED[*]}"
+          else
+            echo "✅ All apps synced"
+          fi
 
-      - name: Trigger ArgoCD Sync
+  # JOB 3 — Developer access info
+  notify:
+    name: Print Access Info
+    needs: [gitops, sync]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print endpoints
         env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }} 
-          ARGOCD_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          WORKER_IP: ${{ secrets.WORKER_IP }}
+          TAG_MAP:   ${{ needs.gitops.outputs.tag_map }}
         run: |
-          # Sync tất cả app thuộc project developer (hoặc liệt kê từng app)
-          SERVICES=(
-            backoffice-bff-dev cart-dev customer-dev inventory-dev
-            location-dev media-dev order-dev payment-dev payment-paypal-dev
-            product-dev promotion-dev rating-dev recommendation-dev
-            sampledata-dev search-dev storefront-bff-dev tax-dev webhook-dev
-          )
-          for app in ${SERVICES[@]}; do
-            echo "Syncing ArgoCD app: $app"
-            curl -s -X POST \
-              -H "Authorization: Bearer $ARGOCD_TOKEN" \
-              -H "Content-Type: application/json" \
-              "https://$ARGOCD_SERVER/api/v1/applications/$app/sync" \
-              -d '{"prune":false,"dryRun":false}' || echo "⚠️  Sync $app failed (non-blocking)"
+          echo ""
+          echo "╔══════════════════════════════════════════════════════╗"
+          echo "║            DEVELOPER ENVIRONMENT READY               ║"
+          echo "╚══════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "  📦 Deployed services"
+          echo "  ─────────────────────────────────────────────────────"
+          UPDATED=0
+          IFS=',' read -ra ENTRIES <<< "$TAG_MAP"
+          for entry in "${ENTRIES[@]}"; do
+            svc="${entry%%=*}"
+            tag="${entry#*=}"
+            if [ "$tag" != "latest" ]; then
+              printf "     %-22s  →  %s...\n" "$svc" "${tag:0:7}"
+              UPDATED=$((UPDATED + 1))
+            fi
           done
-
-      - name: Print Developer Access Info
-        run: |
-          # Worker node IP — lưu trong secret hoặc hardcode nếu cố định
-          WORKER_IP="${{ secrets.K8S_WORKER_IP }}" 
+          [ "$UPDATED" -eq 0 ] && echo "     (none — all services on latest)"
 
           echo ""
-          echo "👉 Add bellow code line to your file hosts:"
-          echo "   (Windows: C:\\Windows\\System32\\drivers\\etc\\hosts)"
-          echo "   (Linux/Mac: /etc/hosts)"
+          echo "  🌐 Add to /etc/hosts"
+          echo "  ─────────────────────────────────────────────────────"
+          echo "  Windows : C:\\Windows\\System32\\drivers\\etc\\hosts"
+          echo "  Linux/Mac: /etc/hosts"
           echo ""
-          echo "   $WORKER_IP  dev.backoffice.local"
-          echo "   $WORKER_IP  dev.storefront.local"
-          echo "   $WORKER_IP  dev.api.local"
+          echo "     ${WORKER_IP}  dev.backoffice.local"
+          echo "     ${WORKER_IP}  dev.storefront.local"
+          echo "     ${WORKER_IP}  dev.api.local"
           echo ""
-          echo "📌 NodePort endpoints:"
-          echo "   Storefront BFF : http://dev.storefront.local:30001"
-          echo "   Backoffice BFF : http://dev.backoffice.local:30002"
-          echo "   API Gateway    : http://dev.api.local:30000"
+          echo "  🔌 NodePort Endpoints"
+          echo "  ─────────────────────────────────────────────────────"
+          echo "     Storefront BFF  →  http://dev.storefront.local:30001"
+          echo "     Backoffice BFF  →  http://dev.backoffice.local:30002"
+          echo "     API Gateway     →  http://dev.api.local:30000"
           echo ""
-          echo "⚠️  ArgoCD sync can take a few minutes to complete pod restart"
-          echo "=========================================="
+          echo "  ⏳ ArgoCD syncing — pod restarts may take 1-3 min"
+          echo "══════════════════════════════════════════════════════"
