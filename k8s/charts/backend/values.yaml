@@ -118,6 +118,8 @@ ingress:
   host: chart-example.local
   path: /
   pathType: ImplementationSpecific
+  backendServiceName: ""
+  backendServicePort: 0
   tls: {}
 #    secretName: chart-example-tls
 #    host: chart-example.local
