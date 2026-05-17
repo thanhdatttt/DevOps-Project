@@ -10,7 +10,7 @@ helm repo add grafana https://grafana.github.io/helm-charts
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo add jetstack https://charts.jetstack.io
-helm repo add argo argoproj/argo-helm
+helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 
 #Read configuration value from cluster-config.yaml file
@@ -35,11 +35,12 @@ helm upgrade --install postgres ./postgres/postgresql \
 #Install pgadmin
 pg_admin_hostname="pgadmin.$DOMAIN" yq -i '.hostname=env(pg_admin_hostname)' ./postgres/pgadmin/values.yaml
 helm upgrade --install pgadmin ./postgres/pgadmin \
---create-namespace --namespace postgres \
+--create-namespace --namespace postgres
 
 #Install strimzi-kafka-operator
 helm upgrade --install kafka-operator strimzi/strimzi-kafka-operator \
---create-namespace --namespace kafka
+--create-namespace --namespace kafka \
+--version 0.51.0
 
 #Install kafka and postgresql connector
 helm upgrade --install kafka-cluster ./kafka/kafka-cluster \
@@ -63,7 +64,8 @@ helm upgrade --install elastic-operator elastic/eck-operator \
 helm upgrade --install elasticsearch-cluster ./elasticsearch/elasticsearch-cluster \
 --create-namespace --namespace elasticsearch \
 --set elasticsearch.replicas="$ELASTICSEARCH_REPLICAES" \
---set kibana.ingress.hostname="kibana.$DOMAIN"
+--set kibana.ingress.hostname="kibana.$DOMAIN" \
+--server-side=false
 
 #Install loki
 helm upgrade --install loki grafana/loki \
@@ -103,8 +105,9 @@ grafana_hostname="grafana.$DOMAIN" yq -i '.hostname=env(grafana_hostname)' ./obs
 postgresql_username="$POSTGRESQL_USERNAME" yq -i '.grafana."grafana.ini".database.user=env(postgresql_username)' ./observability/prometheus.values.yaml
 postgresql_password="$POSTGRESQL_PASSWORD" yq -i '.grafana."grafana.ini".database.password=env(postgresql_password)' ./observability/prometheus.values.yaml
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
- --create-namespace --namespace observability \
+--create-namespace --namespace observability \
 -f ./observability/prometheus.values.yaml \
+--set grafana.assertNoLeakedSecrets=false
 
 #Install grafana operator
 helm upgrade --install grafana-operator oci://ghcr.io/grafana-operator/helm-charts/grafana-operator \
