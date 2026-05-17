@@ -19,11 +19,6 @@ curl -sfL https://get.k3s.io | K3S_URL="https://<MASTER_IP>:6443" K3S_TOKEN="<NO
   --flannel-iface tailscale0" sh -
 
 
-
-curl -sfL https://get.k3s.io | K3S_URL="https://<MASTER_IP>:6443" K3S_TOKEN="<NODE_TOKEN>" INSTALL_K3S_EXEC="agent \
-  --node-ip <WORKER_IP> \
-  --flannel-iface tailscale0" sh -
-
 On master:
 
 Instaling Ingress

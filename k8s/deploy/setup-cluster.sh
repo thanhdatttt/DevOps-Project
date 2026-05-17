@@ -127,5 +127,4 @@ helm upgrade --install zookeeper ./zookeeper \
  --namespace zookeeper --create-namespace
 
  helm upgrade --install argocd argo/argo-cd \
- --create-namespace --namespace argocd \
- -f ./argo-cd/values.yaml
+ --create-namespace --namespace argocd
