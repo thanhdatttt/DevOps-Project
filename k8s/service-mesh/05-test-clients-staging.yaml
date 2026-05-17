@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mesh-curl-allowed
+  namespace: staging
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mesh-curl-allowed
+  namespace: staging
+  labels:
+    app.kubernetes.io/name: mesh-curl-allowed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mesh-curl-allowed
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mesh-curl-allowed
+    spec:
+      serviceAccountName: mesh-curl-allowed
+      containers:
+        - name: curl
+          image: curlimages/curl:8.7.1
+          command: ["sleep", "365d"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mesh-curl-blocked
+  namespace: staging
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mesh-curl-blocked
+  namespace: staging
+  labels:
+    app.kubernetes.io/name: mesh-curl-blocked
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mesh-curl-blocked
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mesh-curl-blocked
+    spec:
+      serviceAccountName: mesh-curl-blocked
+      containers:
+        - name: curl
+          image: curlimages/curl:8.7.1
+          command: ["sleep", "365d"]

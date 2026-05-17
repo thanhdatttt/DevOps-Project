@@ -1,0 +1,242 @@
+# Retry policy for staging YAS HTTP services. Retries are executed by the caller sidecar.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: backoffice-bff-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - backoffice-bff.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: backoffice-bff.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: storefront-bff-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - storefront-bff.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: storefront-bff.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cart-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - cart.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: cart.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: customer-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - customer.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: customer.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: inventory-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - inventory.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: inventory.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: media-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - media.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: media.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: order-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - order.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: order.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: product-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - product.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: product.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: sampledata-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - sampledata.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: sampledata.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: search-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - search.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: search.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: tax-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - tax.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: tax.staging.svc.cluster.local
+            port:
+              number: 80

@@ -45,21 +45,21 @@ spec:
   template:
     metadata:
       name: '{{service}}'
-      namespace: dev
+      namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}"
     spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: feat/argocd
+        targetRevision: main
         path: 'k8s/charts/{{service}}'
         helm:
           valueFiles:
             - values.yaml 
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: dev # Deploy to Dev namespace
+        namespace: dev # Deploy vào namespace 'dev'
       syncPolicy:
         automated:
           prune: true

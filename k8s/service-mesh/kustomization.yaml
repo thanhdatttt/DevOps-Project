@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 01-namespaces-injection.yaml
+  - 02-mtls-dev.yaml
+  - 03-retry-virtualservices-dev.yaml
+  - 04-authorization-policies-dev.yaml
+  - 05-test-clients-dev.yaml
+  - 06-istio-gateway-dev.yaml
+  - 07-ingress-bridge-dev.yaml
+  - 08-podmonitor-envoy-dev.yaml
+  - 02-mtls-staging.yaml
+  - 03-retry-virtualservices-staging.yaml
+  - 04-authorization-policies-staging.yaml
+  - 05-test-clients-staging.yaml
+  - 06-istio-gateway-staging.yaml
+  - 07-ingress-bridge-staging.yaml
+  - 08-podmonitor-envoy-staging.yaml

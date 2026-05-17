@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: dev-backend-services
+  name: staging-backend-services
   namespace: argocd
 spec:
   generators:
@@ -41,8 +41,10 @@ spec:
             - values-staging.yaml 
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: staging # Deploy to Staging namespace
+        namespace: staging # Deploy vào namespace 'staging'
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+      syncOptions:
+        - CreateNamespace=true

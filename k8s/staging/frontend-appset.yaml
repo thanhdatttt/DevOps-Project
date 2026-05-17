@@ -25,7 +25,7 @@ spec:
 
   template:
     metadata:
-      name: '{{service}}-dev'
+      name: '{{service}}-staging'
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
@@ -36,6 +36,8 @@ spec:
         targetRevision: main
         path: 'k8s/charts/{{service}}'
         helm:
+          valueFiles:
+            - values-staging.yaml
           parameters:
             # Truyền động tên tham số và giá trị domain
             - name: '{{helm_param_name}}'
