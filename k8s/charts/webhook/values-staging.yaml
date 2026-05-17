@@ -1,0 +1,10 @@
+backend:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-webhook
+    tag: staging
+
+  nameOverride: webhook
+  fullnameOverride: webhook
+  databaseName: webhook
+  ingress:
+    enabled: false

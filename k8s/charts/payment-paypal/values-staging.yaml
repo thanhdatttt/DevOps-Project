@@ -1,0 +1,10 @@
+backend:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-payment-paypal
+    tag: staging
+
+  nameOverride: payment-paypal
+  fullnameOverride: payment-paypal
+  databaseName: payment-paypal
+  ingress:
+    enabled: false

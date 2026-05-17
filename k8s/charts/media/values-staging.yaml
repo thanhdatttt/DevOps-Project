@@ -1,0 +1,10 @@
+backend:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-media
+    tag: staging
+
+  nameOverride: media
+  fullnameOverride: media
+  databaseName: media
+  ingress:
+    enabled: false

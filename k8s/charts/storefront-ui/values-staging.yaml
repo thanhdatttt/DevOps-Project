@@ -1,0 +1,10 @@
+ui:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-storefront
+    tag: staging
+  nameOverride: storefront-ui
+  fullnameOverride: storefront-ui
+#  extraVolumes:
+#    - name: storefront-env-production
+#      configMap:
+#        name: storefront-env-production-configmap

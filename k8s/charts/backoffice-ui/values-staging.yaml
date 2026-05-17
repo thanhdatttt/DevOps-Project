@@ -1,0 +1,8 @@
+ui:
+  image:
+    repository: ghcr.io/thanhdatttt/yas-backoffice
+    tag: staging
+  nameOverride: backoffice-ui
+  fullnameOverride: backoffice-ui
+  ingress:
+    enabled: false
