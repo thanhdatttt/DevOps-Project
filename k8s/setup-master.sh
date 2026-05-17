@@ -1,6 +1,6 @@
 #!/bin/bash
 
-helm repo add argo argoproj/argo-helm
+helm repo add argo https://argoproj.github.io/argo-helm
 
 ## For studying reason
 helm search repo argo

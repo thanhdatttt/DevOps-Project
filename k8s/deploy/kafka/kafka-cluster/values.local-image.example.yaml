@@ -1,0 +1,14 @@
+debeziumConnect:
+  image: ghcr.io/thanhdatttt/debezium-connect-postgresql:strimzi-0.51.0-kafka-4.2.0-debezium-3.5.1
+  template:
+    pod:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      # Change to the K3S node where the image was imported.
+                      - k3s-node

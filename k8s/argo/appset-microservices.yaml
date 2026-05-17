@@ -31,7 +31,7 @@ spec:
             - values.yaml
       destination:
         server: https://kubernetes.default.svc # Deploy vào cụm hiện tại
-        namespace: dev-env
+        namespace: yas
       syncPolicy:
         automated:
           prune: true

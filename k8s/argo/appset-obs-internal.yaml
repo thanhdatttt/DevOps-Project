@@ -25,7 +25,7 @@ spec:
       sources:
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
           targetRevision: feat/argocd
-          path: k
+          path: k8s/deploy
           ref: values
           
         - repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'

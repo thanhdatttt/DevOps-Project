@@ -5,6 +5,7 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --node-ip <MASTER_IP> \
   --bind-address <MASTER_IP> \
   --advertise-address <MASTER_IP> \
+  --disable traefik \
   --flannel-iface tailscale0" sh -
 
 Disable traefik on masternode
@@ -14,12 +15,12 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 
 On worker Node
 curl -sfL https://get.k3s.io | K3S_URL="https://<MASTER_IP>:6443" K3S_TOKEN="<NODE_TOKEN>" INSTALL_K3S_EXEC="agent \
-  --node-ip <WORKER_IP> \a
+  --node-ip <WORKER_IP> \
   --flannel-iface tailscale0" sh -
 
 
 
-curl -sfL https://get.k3s.io | K3S_URL="https://100.114.3.80 :6443" K3S_TOKEN="K10fb7bf516e9ac544cbf15d727481e1f1fcc15e3fe361fd434e8f1413751a0f11d::server:e72197341c7167697928a04c59dc3d72" INSTALL_K3S_EXEC="agent \
+curl -sfL https://get.k3s.io | K3S_URL="https://<MASTER_IP>:6443" K3S_TOKEN="<NODE_TOKEN>" INSTALL_K3S_EXEC="agent \
   --node-ip <WORKER_IP> \
   --flannel-iface tailscale0" sh -
 

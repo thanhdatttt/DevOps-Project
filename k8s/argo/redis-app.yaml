@@ -16,11 +16,11 @@ spec:
     # 2. Pull the Bitnami Redis chart from the OCI registry
     - repoURL: 'registry-1.docker.io/bitnamicharts' # Notice: NO 'oci://' prefix here
       chart: redis
-      targetRevision: 19.6.1 # ALWAYS pin versions for third-party charts!
+      targetRevision: 25.5.3
       helm:
         valueFiles:
           # See the crucial note below about why this file needs to be specific
-          - $values/k8s/argo/redis-values.yaml 
+          - $values/k8s/argo/values/redis-values.yaml 
 
   destination:
     server: 'https://kubernetes.default.svc'
