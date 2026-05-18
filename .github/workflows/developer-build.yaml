@@ -196,7 +196,7 @@ jobs:
               continue
             fi
 
-            yq -i ".image.tag = \"${tag}\"" "$file"
+            yq -i ".backend.image.tag = \"${tag}\"" "$file"
             echo "✅ $svc  →  ${tag:0:7}${tag:7:+...}"
           done
 
