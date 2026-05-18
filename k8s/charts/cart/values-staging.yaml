@@ -1,10 +1,3 @@
 backend:
   image:
-    repository: ghcr.io/thanhdatttt/yas-cart
-    tag: staging
-
-  nameOverride: cart
-  fullnameOverride: cart
-  databaseName: cart
-  ingress:
-    enabled: false
+    tag: v.1.0.0

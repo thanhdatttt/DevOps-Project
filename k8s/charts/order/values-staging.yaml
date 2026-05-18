@@ -1,10 +1,3 @@
 backend:
   image:
-    repository: ghcr.io/thanhdatttt/yas-order
-    tag: staging
-
-  nameOverride: order
-  fullnameOverride: order
-  databaseName: order
-  ingress:
-    enabled: false
+    tag: v.1.0.0

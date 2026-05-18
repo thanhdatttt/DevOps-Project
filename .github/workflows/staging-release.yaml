@@ -1,0 +1,55 @@
+name: image for release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true 
+      matrix:
+        service:
+          - inventory
+          - tax
+          - customer
+          - webhook
+          - media
+          - search
+          - storefront-bff
+          - order
+          - backoffice-bff
+          - location
+          - rating
+          - sampledata
+          - payment-paypal
+          - recommendation
+          - product
+          - payment
+          - promotion
+          - cart
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      # We dynamically inject the service name into the Maven command
+      - name: Run Maven Build for ${{ matrix.service }}
+        run: mvn clean package -DskipTests -pl ${{ matrix.service }} -am
+        
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      # We dynamically inject the service name into the Docker context and tag
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ghcr.io/thanhdatttt/yas-${{ matrix.service }}:${{ github.ref_name }}

@@ -1,10 +1,3 @@
 backend:
   image:
-    repository: ghcr.io/thanhdatttt/yas-product
-    tag: staging
-
-  nameOverride: product
-  fullnameOverride: product
-  databaseName: product
-  ingress:
-    enabled: false
+    tag: v.1.0.0
