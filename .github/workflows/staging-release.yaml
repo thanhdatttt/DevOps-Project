@@ -15,24 +15,29 @@ jobs:
           - inventory
           - tax
           - customer
-          - webhook
+          # - webhook
           - media
           - search
           - storefront-bff
           - order
           - backoffice-bff
-          - location
-          - rating
+          # - location
+          # - rating
           - sampledata
-          - payment-paypal
-          - recommendation
+          # - payment-paypal
+          # - recommendation
           - product
-          - payment
-          - promotion
+          # - payment
+          # - promotion
           - cart
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
       
       # We dynamically inject the service name into the Maven command
       - name: Run Maven Build for ${{ matrix.service }}
