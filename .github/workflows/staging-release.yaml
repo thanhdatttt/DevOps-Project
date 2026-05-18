@@ -58,3 +58,66 @@ jobs:
           push: true
           tags: |
             ghcr.io/thanhdatttt/yas-${{ matrix.service }}:${{ github.ref_name }}
+
+  update-staging-values:
+    needs: build-and-push 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main 
+
+      - name: Update tags using yq
+        run: |
+          # Define your array of services
+          SERVICES=(
+            "inventory"
+            "tax"
+            "customer"
+            "webhook"
+            "media"
+            "search"
+            "storefront-bff"
+            "order"
+            "backoffice-bff"
+            "location"
+            "rating"
+            "sampledata"
+            "payment-paypal"
+            "recommendation"
+            "product"
+            "payment"
+            "promotion"
+            "cart"
+          )
+
+          # Loop through each service and safely update the YAML file
+          for service in "${SERVICES[@]}"; do
+            echo "Updating $service to tag ${{ github.ref_name }}..."
+            
+            # yq is pre-installed on ubuntu-latest runners. 
+            # It safely modifies YAML without destroying comments or formatting.
+            # NOTE: If your values file uses a different path than `image.tag`, adjust the ".image.tag" part below.
+            yq -i ".backend.image.tag = \"${{ github.ref_name }}\"" k8s/charts/$service/values-staging.yaml
+          done
+
+      - name: Commit and Push changes
+        run: |
+          # Configure the Git user as the official GitHub Actions bot
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Stage the modified files
+          git add k8s/charts/*/values-staging.yaml
+          
+          # Check if there are actually changes to commit (prevents the workflow from failing if the tag is already up to date)
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore(cd): update staging image tags to ${{ github.ref_name }}"
+            git push origin main
+          fi
