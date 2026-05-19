@@ -50,6 +50,8 @@ spec:
             # Truyền động tên tham số và giá trị domain
             - name: '{{helm_param_name}}'
               value: '{{domain}}'
+            - name: backend.image.pullPolicy
+              value: Always
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: dev

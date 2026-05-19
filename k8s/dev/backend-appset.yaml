@@ -57,6 +57,9 @@ spec:
         helm:
           valueFiles:
             - values-dev.yaml 
+          parameters:
+            - name: backend.image.pullPolicy
+              value: Always
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: dev # Deploy vào namespace 'dev'
