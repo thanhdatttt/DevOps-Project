@@ -46,6 +46,20 @@ jobs:
       - uses: ./.github/workflows/actions
       - name: Build Application
         run: mvn clean package -DskipTests -pl product -am
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./product
+          push: true
+          tags: |
+            ghcr.io/thanhdatttt/yas-product:latest
+            ghcr.io/thanhdatttt/yas-product:${{ github.sha }}
 
   # Test
   test:
