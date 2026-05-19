@@ -69,7 +69,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: main 
+          ref: feat/argocd
 
       - name: Update tags using yq
         run: |
