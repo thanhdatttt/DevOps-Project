@@ -119,5 +119,5 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "chore(cd): update staging image tags to ${{ github.ref_name }}"
-            git push origin main
+            git push origin feat/argocd
           fi
