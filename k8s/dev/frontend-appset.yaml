@@ -35,7 +35,7 @@ spec:
 
   template:
     metadata:
-      name: '{{service}}'
+      name: '{{service}}-dev'
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
@@ -43,7 +43,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: main
+        targetRevision: feat/argocd
         path: 'k8s/charts/{{service}}'
         helm:
           parameters:

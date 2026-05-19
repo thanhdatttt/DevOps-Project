@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: dev-backend-services
+  name: staging-backend-services
   namespace: argocd
 spec:
   generators:
@@ -44,7 +44,7 @@ spec:
 
   template:
     metadata:
-      name: '{{service}}'
+      name: '{{service}}-staging'
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}"
@@ -56,10 +56,10 @@ spec:
         path: 'k8s/charts/{{service}}'
         helm:
           valueFiles:
-            - values.yaml 
+            - values-staging.yaml 
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: dev # Deploy vào namespace 'dev'
+        namespace: staging
       syncPolicy:
         automated:
           prune: true

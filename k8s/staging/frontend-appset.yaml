@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: dev-frontend-services
+  name: staing-frontend-services
   namespace: argocd
 spec:
   generators:
@@ -35,7 +35,7 @@ spec:
 
   template:
     metadata:
-      name: '{{service}}'
+      name: '{{service}}-staging'
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
