@@ -44,6 +44,20 @@ jobs:
       - uses: ./.github/workflows/actions
       - name: Build
         run: mvn clean package -DskipTests -pl payment-paypal -am
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./payment-paypal
+          push: true
+          tags: |
+            ghcr.io/thanhdatttt/yas-payment-paypal:latest
+            ghcr.io/thanhdatttt/yas-payment-paypal:${{ github.sha }}
 
   test:
     runs-on: ubuntu-latest
