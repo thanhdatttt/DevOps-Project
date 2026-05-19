@@ -7,6 +7,171 @@ spec:
   mtls:
     mode: STRICT
 ---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: backoffice-bff-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-bff
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: storefront-bff-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-bff
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cart-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: customer-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: customer
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: inventory-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: media-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: order-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: product-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: product
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: sampledata-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sampledata
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: search-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tax-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:

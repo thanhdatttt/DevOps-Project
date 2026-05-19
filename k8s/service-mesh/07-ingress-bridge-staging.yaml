@@ -5,7 +5,7 @@ metadata:
   namespace: staging
 spec:
   type: ExternalName
-  externalName: istio-ingressgateway.istio-system.svc.cluster.local
+  externalName: istio-ingressgateway.service-mesh.svc.cluster.local
   ports:
     - name: http
       port: 80

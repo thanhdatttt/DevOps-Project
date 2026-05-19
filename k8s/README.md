@@ -46,7 +46,9 @@ For any outsider machine want to connect to it, add
 100.114.3.80 kibana.yas.local.com
 100.114.3.80 akhq.yas.local.com
 100.114.3.80 grafana.yas.local.com
+100.114.3.80 prometheus.yas.local.com
 100.114.3.80 kiali.yas.local.com
+100.114.3.80 argocd.yas.local.com
 100.114.3.80 pgadmin.yas.local.com
 
 
@@ -56,5 +58,7 @@ The ip is from any machine in tailscale
 100.71.220.45 kibana.yas.local.com
 100.71.220.45 akhq.yas.local.com
 100.71.220.45 grafana.yas.local.com
+100.71.220.45 prometheus.yas.local.com
 100.71.220.45 kiali.yas.local.com
+100.71.220.45 argocd.yas.local.com
 100.71.220.45 pgadmin.yas.local.com

@@ -5,19 +5,12 @@ helm repo add argo https://argoproj.github.io/argo-helm
 ## For studying reason
 helm search repo argo
 
-helm show values argo/argo-cd > values.yaml
-
-# Change service in server from using ClusterIP to NodePort
-
 helm upgrade --install argocd argo/argo-cd \
  --create-namespace --namespace argocd \
- -f ./values.yaml
+ -f ./deploy/argocd.values.yaml
 
-# For now
-kubectl port-forward service/argocd-server -n argocd 8080:443
-
-# Later
-# enable ingress in the values file `server.ingress.enabled` and either
+# Argo CD is exposed through ingress-nginx at http://argocd.yas.local.com
+# instead of requiring `kubectl port-forward service/argocd-server -n argocd 8080:443`.
 
 # CoreDNS must be run before this, if not restart it first
 kubectl rollout restart deployment coredns -n kube-system

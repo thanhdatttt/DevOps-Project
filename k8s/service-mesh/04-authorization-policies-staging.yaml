@@ -27,11 +27,11 @@ metadata:
   namespace: staging
 spec:
   action: ALLOW
+  # Metrics port 8090 has mTLS disabled so Prometheus can scrape from the
+  # non-mesh observability namespace. Source namespace/principal matches require
+  # mTLS, so keep this allow-list scoped to only the metrics operation.
   rules:
-    - from:
-        - source:
-            namespaces: ["observability"]
-      to:
+    - to:
         - operation:
             methods: ["GET"]
             ports: ["8090"]
@@ -52,7 +52,7 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -68,7 +68,7 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
