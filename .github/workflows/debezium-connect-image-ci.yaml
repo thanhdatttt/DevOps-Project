@@ -1,0 +1,57 @@
+name: debezium connect image ci
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/debezium-connect-image-ci.yaml"
+      - "k8s/deploy/kafka/kafka-cluster/debezium-connect-image/**"
+      - "k8s/deploy/kafka/kafka-cluster/values.yaml"
+      - "k8s/deploy/kafka/kafka-cluster/values.local-image.example.yaml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/debezium-connect-image-ci.yaml"
+      - "k8s/deploy/kafka/kafka-cluster/debezium-connect-image/**"
+      - "k8s/deploy/kafka/kafka-cluster/values.yaml"
+      - "k8s/deploy/kafka/kafka-cluster/values.local-image.example.yaml"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  STRIMZI_VERSION: 0.51.0
+  KAFKA_VERSION: 4.2.0
+  DEBEZIUM_VERSION: 3.5.1.Final
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./k8s/deploy/kafka/kafka-cluster/debezium-connect-image
+          push: true
+          build-args: |
+            STRIMZI_VERSION=${{ env.STRIMZI_VERSION }}
+            KAFKA_VERSION=${{ env.KAFKA_VERSION }}
+            DEBEZIUM_VERSION=${{ env.DEBEZIUM_VERSION }}
+          tags: |
+            ghcr.io/thanhdatttt/debezium-connect-postgresql:latest
+            ghcr.io/thanhdatttt/debezium-connect-postgresql:${{ github.sha }}
+            ghcr.io/thanhdatttt/debezium-connect-postgresql:strimzi-0.51.0-kafka-4.2.0-debezium-3.5.1

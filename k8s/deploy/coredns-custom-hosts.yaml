@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  yas.server: |
+    yas.local.com:53 {
+      errors
+      hosts {
+        10.43.166.185 identity.yas.local.com
+        fallthrough
+      }
+    }

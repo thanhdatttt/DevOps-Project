@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-frontend-services
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # Định nghĩa service, tên param của Helm và domain tương ứng
+          - service: backoffice-bff
+            helm_param_name: "backend.ingress.host"
+            domain: "dev.backoffice.yas.local.com"
+            wave: "3"
+            
+          - service: storefront-bff
+            helm_param_name: "backend.ingress.host"
+            domain: "dev.storefront.yas.local.com"
+            wave: "3"
+            
+          - service: swagger-ui
+            helm_param_name: "ingress.host"
+            domain: "api.yas.local.com"
+            wave: "3"
+          
+          - service: backoffice-ui
+            helm_param_name: "global.enabled"
+            domain: "true"
+            wave: "2" 
+            
+          - service: storefront-ui
+            helm_param_name: "global.enabled"
+            domain: "true"
+            wave: "2"
+
+  template:
+    metadata:
+      name: '{{service}}-dev'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+        targetRevision: feat/argocd
+        path: 'k8s/charts/{{service}}'
+        helm:
+          parameters:
+            # Truyền động tên tham số và giá trị domain
+            - name: '{{helm_param_name}}'
+              value: '{{domain}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

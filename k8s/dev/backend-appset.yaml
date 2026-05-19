@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-backend-services
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - service: yas-configuration
+            wave: "0"
+          - service: cart
+            wave: "1"
+          - service: customer
+            wave: "1"
+          - service: inventory
+            wave: "1"
+          # - service: location
+          #   wave: "1"
+          - service: media
+            wave: "1"
+          - service: order
+            wave: "1"
+          # - service: payment
+          #   wave: "1"
+          # - service: payment-paypal
+          #   wave: "1"
+          - service: product
+            wave: "1"
+          # - service: promotion
+          #   wave: "1"
+          # - service: rating
+          #   wave: "1"
+          - service: search
+            wave: "1"
+          - service: tax
+            wave: "1"
+          # - service: recommendation
+          #   wave: "1"          
+          # - service: webhook
+          #   wave: "1"
+          - service: sampledata
+            wave: "1"
+
+  template:
+    metadata:
+      name: '{{service}}-dev'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{wave}}"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
+        targetRevision: feat/argocd
+        path: 'k8s/charts/{{service}}'
+        helm:
+          valueFiles:
+            - values-dev.yaml 
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: dev # Deploy vào namespace 'dev'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

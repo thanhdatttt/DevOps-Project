@@ -1,0 +1,316 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: staging-strict-mtls
+  namespace: staging
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: backoffice-bff-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-bff
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: storefront-bff-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-bff
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cart-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: customer-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: customer
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: inventory-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: media-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: order-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: product-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: product
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: sampledata-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sampledata
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: search-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tax-metrics-plaintext
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8090":
+      mode: DISABLE
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: backoffice-bff-istio-mutual
+  namespace: staging
+spec:
+  host: backoffice-bff.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: storefront-bff-istio-mutual
+  namespace: staging
+spec:
+  host: storefront-bff.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: storefront-ui-istio-mutual
+  namespace: staging
+spec:
+  host: storefront-ui.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: backoffice-ui-istio-mutual
+  namespace: staging
+spec:
+  host: backoffice-ui.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cart-istio-mutual
+  namespace: staging
+spec:
+  host: cart.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: customer-istio-mutual
+  namespace: staging
+spec:
+  host: customer.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: inventory-istio-mutual
+  namespace: staging
+spec:
+  host: inventory.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: media-istio-mutual
+  namespace: staging
+spec:
+  host: media.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: order-istio-mutual
+  namespace: staging
+spec:
+  host: order.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: product-istio-mutual
+  namespace: staging
+spec:
+  host: product.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: sampledata-istio-mutual
+  namespace: staging
+spec:
+  host: sampledata.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: search-istio-mutual
+  namespace: staging
+spec:
+  host: search.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: tax-istio-mutual
+  namespace: staging
+spec:
+  host: tax.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

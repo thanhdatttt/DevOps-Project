@@ -1,0 +1,29 @@
+auth:
+  strategy: anonymous
+deployment:
+  ingress:
+    enabled: true
+    class_name: nginx
+    override_yaml:
+      spec:
+        ingressClassName: nginx
+        rules:
+          - host: kiali.yas.local.com
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kiali
+                      port:
+                        number: 20001
+  view_only_mode: true
+external_services:
+  prometheus:
+    enabled: true
+    url: http://prometheus-kube-prometheus-prometheus.observability:9090
+  grafana:
+    enabled: true
+    internal_url: http://prometheus-grafana.observability:80
+    external_url: http://grafana.yas.local.com

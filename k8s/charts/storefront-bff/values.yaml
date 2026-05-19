@@ -12,8 +12,12 @@ backend:
 
   ingress:
     enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/upstream-vhost: dev.storefront.yas.local.com
     host: storefront.yas.local.com
     path: /
+    backendServiceName: istio-ingressgateway-bridge
+    backendServicePort: 80
 
   extraEnvs:
     - name: SPRING_PROFILES_ACTIVE

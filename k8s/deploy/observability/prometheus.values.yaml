@@ -1,5 +1,14 @@
-hostname: &hostname grafana.yas.local.com
+hostname: &grafanaHostname grafana.yas.local.com
+prometheusHostname: &prometheusHostname prometheus.yas.local.com
 prometheus:
+  ingress:
+    ingressClassName: nginx
+    enabled: true
+    hosts:
+      - *prometheusHostname
+    paths:
+      - /
+    pathType: Prefix
   prometheusSpec:
     enableRemoteWriteReceiver: true
 grafana:
@@ -17,4 +26,4 @@ grafana:
     ingressClassName: nginx
     enabled: true
     hosts:
-      - *hostname
+      - *grafanaHostname
