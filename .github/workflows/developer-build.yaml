@@ -84,7 +84,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: read # need this for pulling images from ghcr.io
@@ -105,7 +105,7 @@ jobs:
 
       - name: Create developer namespace
         run: |
-          kubectl create namespace developer --dry-run=client -o yaml | kubectl apply -f -
+          kubectl get namespace developer || kubectl create namespace developer
           echo "Namespace 'developer' ready."
 
       - name: Create imagePullSecret for ghcr.io
@@ -208,7 +208,7 @@ jobs:
                   - name: ghcr-secret
                 containers:
                   - name: ${SERVICE}
-                    image: $
+                    image: ${IMAGE}
                     imagePullPolicy: Always
                     ports:
                       - containerPort: 8080
