@@ -10,12 +10,12 @@ spec:
           # Định nghĩa service, tên param của Helm và domain tương ứng
           - service: backoffice-bff
             helm_param_name: "backend.ingress.host"
-            domain: "backoffice.yas.local.com"
+            domain: "dev.backoffice.yas.local.com"
             wave: "3"
             
           - service: storefront-bff
             helm_param_name: "backend.ingress.host"
-            domain: "storefront.yas.local.com"
+            domain: "dev.storefront.yas.local.com"
             wave: "3"
             
           - service: swagger-ui
