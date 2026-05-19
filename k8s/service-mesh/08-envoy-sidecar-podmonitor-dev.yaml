@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: envoy-sidecar-podmonitor-dev
+  namespace: observability
+  labels:
+    app: envoy-sidecar-podmonitor
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - dev
+  selector: {}
+  podMetricsEndpoints:
+    - interval: 15s
+      path: /stats/prometheus
+      scheme: http
+      targetPort: 15090
