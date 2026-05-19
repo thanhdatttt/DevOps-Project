@@ -78,6 +78,7 @@ class ProductOptionValueControllerTest {
         mockProductOptionValue.setId(1L);
         mockProductOptionValue.setValue("1GB");
         mockProductOptionValue.setProductOption(productOption);
+        mockProductOptionValue.setProduct(mockProduct);
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
         when(productOptionValueRepository.findAllByProduct(mockProduct)).thenReturn(List.of(mockProductOptionValue));
@@ -89,5 +90,65 @@ class ProductOptionValueControllerTest {
         when(productRepository.findById(2L)).thenReturn(Optional.empty());
         mockMvc.perform(get("/storefront/product-option-values/2"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testListProductOptionValues_Empty() throws Exception {
+        when(productOptionValueRepository.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/backoffice/product-option-values"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testListProductOptionValueOfProduct_Empty() throws Exception {
+        Long productId = 3L;
+        Product mockProduct = new Product();
+        mockProduct.setId(productId);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productOptionValueRepository.findAllByProduct(mockProduct)).thenReturn(List.of());
+
+        mockMvc.perform(get("/storefront/product-option-values/{productId}", productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testListProductOptionValueOfProduct_MultipleValues() throws Exception {
+        Long productId = 4L;
+        Product mockProduct = new Product();
+        mockProduct.setId(productId);
+
+        ProductOption optRam = new ProductOption();
+        optRam.setId(1L);
+        optRam.setName("RAM");
+
+        ProductOption optColor = new ProductOption();
+        optColor.setId(2L);
+        optColor.setName("Color");
+
+        ProductOptionValue val1 = new ProductOptionValue();
+        val1.setId(10L);
+        val1.setValue("8GB");
+        val1.setProductOption(optRam);
+        val1.setProduct(mockProduct);
+
+        ProductOptionValue val2 = new ProductOptionValue();
+        val2.setId(11L);
+        val2.setValue("Black");
+        val2.setProductOption(optColor);
+        val2.setProduct(mockProduct);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productOptionValueRepository.findAllByProduct(mockProduct))
+                .thenReturn(List.of(val1, val2));
+
+        mockMvc.perform(get("/storefront/product-option-values/{productId}", productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(10L))
+                .andExpect(jsonPath("$[1].id").value(11L));
     }
 }

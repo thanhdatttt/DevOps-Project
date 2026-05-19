@@ -155,4 +155,43 @@ class ProductTemplateControllerTest {
                         .content(objectMapper.writeValueAsString(postVm)))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void testListProductTemplateEmpty() throws Exception {
+        when(productTemplateRepository.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/backoffice/product-template"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void testGetPageableProductTemplatesDefaultParams() throws Exception {
+        ProductTemplateGetVm template = new ProductTemplateGetVm(1L, "Default Template");
+        ProductTemplateListGetVm response =
+                new ProductTemplateListGetVm(List.of(template), 0, 10, 1, 1, true);
+
+        when(productTemplateService.getPageableProductTemplate(anyInt(), anyInt()))
+                .thenReturn(response);
+
+        mockMvc.perform(get("/backoffice/product-template/paging"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNo").value(0))
+                .andExpect(jsonPath("$.isLast").value(true))
+                .andExpect(jsonPath("$.productTemplateVms[0].name").value("Default Template"));
+    }
+
+    @Test
+    void testUpdateProductTemplateNotFound() throws Exception {
+        ProductAttributeTemplatePostVm attr = new ProductAttributeTemplatePostVm(1L, 0);
+        ProductTemplatePostVm postVm = new ProductTemplatePostVm("Ghost", List.of(attr));
+
+        org.mockito.Mockito.doThrow(new NotFoundException("Template not found"))
+                .when(productTemplateService).updateProductTemplate(anyLong(), any(ProductTemplatePostVm.class));
+
+        mockMvc.perform(put("/backoffice/product-template/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postVm)))
+                .andExpect(status().isNotFound());
+    }
 }

@@ -4,15 +4,16 @@ import com.yas.commonlibrary.exception.AccessDeniedException;
 import com.yas.commonlibrary.exception.NotFoundException;
 import com.yas.customer.model.UserAddress;
 import com.yas.customer.repository.UserAddressRepository;
+import com.yas.customer.util.SecurityContextUtils;
 import com.yas.customer.viewmodel.address.ActiveAddressVm;
 import com.yas.customer.viewmodel.address.AddressDetailVm;
 import com.yas.customer.viewmodel.address.AddressPostVm;
 import com.yas.customer.viewmodel.address.AddressVm;
 import com.yas.customer.viewmodel.useraddress.UserAddressVm;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
@@ -37,10 +38,12 @@ class UserAddressServiceTest {
         userAddressRepository = mock(UserAddressRepository.class);
         locationService = mock(LocationService.class);
         userAddressService = new UserAddressService(userAddressRepository, locationService);
-        // Set up authenticated security context
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(USER_ID, null, Collections.emptyList())
-        );
+        SecurityContextUtils.setUpSecurityContext(USER_ID);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // ── getUserAddressList ─────────────────────────────────────────────────────
@@ -65,9 +68,7 @@ class UserAddressServiceTest {
 
     @Test
     void getUserAddressList_whenAnonymousUser_throwsAccessDeniedException() {
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken("anonymousUser", null, Collections.emptyList())
-        );
+        SecurityContextUtils.setUpSecurityContext("anonymousUser");
 
         assertThrows(AccessDeniedException.class, () -> userAddressService.getUserAddressList());
         verifyNoInteractions(userAddressRepository);
@@ -98,9 +99,7 @@ class UserAddressServiceTest {
 
     @Test
     void getAddressDefault_whenAnonymousUser_throwsAccessDeniedException() {
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken("anonymousUser", null, Collections.emptyList())
-        );
+        SecurityContextUtils.setUpSecurityContext("anonymousUser");
 
         assertThrows(AccessDeniedException.class, () -> userAddressService.getAddressDefault());
     }
