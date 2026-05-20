@@ -77,7 +77,6 @@ on:
         default: 'main'
 
 jobs:
-  # Resolve tags + update values-dev.yaml + commit & push
   gitops:
     name: Resolve Tags & Update values-dev
     runs-on: ubuntu-latest
@@ -91,6 +90,8 @@ jobs:
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
+          # checkout branch ArgoCD is watching, not the workflow trigger branch
+          ref: feat/argocd
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -148,7 +149,6 @@ jobs:
             [webhook]=INPUT_webhook
           )
 
-          # github.repository = "owner/repo"
           FULL_SOURCE_REPO="$CURRENT_REPO"
           TAG_MAP=""
 
@@ -179,6 +179,65 @@ jobs:
           TAG_MAP="${TAG_MAP%,}"
           echo "tag_map=${TAG_MAP}" >> "$GITHUB_OUTPUT"
 
+      # Verify non-latest image has been in GHCR before deploying
+      # Developer should run CI on their branch first (workflow_dispatch on that branch)
+      - name: Pre-flight — verify images exist in GHCR
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          TAG_MAP:   ${{ steps.resolve.outputs.tag_map }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+
+          MISSING=()
+
+          IFS=',' read -ra ENTRIES <<< "$TAG_MAP"
+          for entry in "${ENTRIES[@]}"; do
+            svc="${entry%%=*}"
+            tag="${entry#*=}"
+
+            [ "$tag" = "latest" ] && continue
+
+            IMAGE_NAME="yas-${svc}"
+
+            TOKEN=$(curl -sf \
+              -u "${REPO_OWNER}:${GH_TOKEN}" \
+              "https://ghcr.io/token?scope=repository:${REPO_OWNER}/${IMAGE_NAME}:pull" \
+              | jq -r '.token // empty')
+
+            if [ -z "$TOKEN" ]; then
+              echo "[$svc]  Cannot get GHCR token for ${IMAGE_NAME} — skipping verify"
+              continue
+            fi
+
+            HTTP=$(curl -sf -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
+              "https://ghcr.io/v2/${REPO_OWNER}/${IMAGE_NAME}/manifests/${tag}" || echo "000")
+
+            if [ "$HTTP" = "200" ]; then
+              echo "[$svc]  image found: ${IMAGE_NAME}:${tag:0:7}..."
+            else
+              echo "[$svc]  image NOT found: ${IMAGE_NAME}:${tag:0:7}...  (HTTP ${HTTP})"
+              MISSING+=("$svc (branch image missing — run CI on your branch first)")
+            fi
+          done
+
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo ""
+            echo "Deploy aborted — images not found in GHCR:"
+            for m in "${MISSING[@]}"; do
+              echo "   • $m"
+            done
+            echo ""
+            echo "   → Go to GitHub Actions → <service>-ci → Run workflow → select your branch"
+            echo "   → Wait for CI to complete, then re-run this workflow"
+            exit 1
+          fi
+
+          echo ""
+          echo "All non-latest images verified in GHCR"
+
       - name: Update values-dev.yaml
         env:
           TAG_MAP: ${{ steps.resolve.outputs.tag_map }}
@@ -197,7 +256,7 @@ jobs:
             fi
 
             yq -i ".backend.image.tag = \"${tag}\"" "$file"
-            echo "✅ $svc  →  ${tag:0:7}${tag:7:+...}"
+            echo "✅ $svc  →  ${tag:0:7}..."
           done
 
       - name: Commit & Push
@@ -217,27 +276,29 @@ jobs:
           Triggered by : ${{ github.actor }}
           Run ID       : ${{ github.run_id }}"
 
+          # push into right branch that ArgoCD is watching
           for attempt in 1 2 3; do
-            git push origin main && break || {
+            git push origin feat/argocd && break || {
               echo "⚠️  Push attempt $attempt failed — rebasing..."
-              git pull --rebase origin main
+              git pull --rebase origin feat/argocd
             }
           done
 
-  # Sync ArgoCD dev apps
   sync:
     name: Sync ArgoCD
     needs: gitops
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger sync — all dev apps
+      - name: Trigger sync — active dev apps
         env:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_TOKEN:  ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
           set -euo pipefail
 
+          # Only sync apps that actually exist in ArgoCD
+          # (matching backend-appset.yaml + frontend-appset.yaml — exclude commented-out services)
           APPS=(
             backoffice-bff-dev   cart-dev         customer-dev
             inventory-dev        location-dev     media-dev
@@ -261,16 +322,17 @@ jobs:
             if [[ "$http_code" =~ ^2 ]]; then
               echo "✅"
             else
-              echo "⚠️  HTTP $http_code"
+              echo "HTTP $http_code"
               FAILED+=("$app")
             fi
           done
 
           echo ""
           if [ ${#FAILED[@]} -gt 0 ]; then
-            echo "⚠️  Non-blocking failures: ${FAILED[*]}"
+            echo "Sync failed for: ${FAILED[*]}"
+            exit 1
           else
-            echo "✅ All apps synced"
+            echo "All apps synced successfully"
           fi
 
   # JOB 3 — Developer access info
@@ -311,15 +373,15 @@ jobs:
           echo "  Windows : C:\\Windows\\System32\\drivers\\etc\\hosts"
           echo "  Linux/Mac: /etc/hosts"
           echo ""
-          echo "     ${WORKER_IP}  dev.backoffice.local"
-          echo "     ${WORKER_IP}  dev.storefront.local"
-          echo "     ${WORKER_IP}  dev.api.local"
+          echo "     ${WORKER_IP}  dev.backoffice.yas.local.com"
+          echo "     ${WORKER_IP}  dev.storefront.yas.local.com"
+          echo "     ${WORKER_IP}  api.yas.local.com"
           echo ""
           echo "  🔌 NodePort Endpoints"
           echo "  ─────────────────────────────────────────────────────"
-          echo "     Storefront BFF  →  http://dev.storefront.local:30001"
-          echo "     Backoffice BFF  →  http://dev.backoffice.local:30002"
-          echo "     API Gateway     →  http://dev.api.local:30000"
+          echo "     Storefront BFF  →  http://dev.storefront.yas.local.com:30001"
+          echo "     Backoffice BFF  →  http://dev.backoffice.yas.local.com:30002"
+          echo "     API Gateway     →  http://api.yas.local.com:30000"
           echo ""
           echo "  ⏳ ArgoCD syncing — pod restarts may take 1-3 min"
           echo "══════════════════════════════════════════════════════"
