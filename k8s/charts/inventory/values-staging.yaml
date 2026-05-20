@@ -1,10 +1,3 @@
 backend:
   image:
-    repository: ghcr.io/thanhdatttt/yas-inventory
-    tag: staging
-
-  nameOverride: inventory
-  fullnameOverride: inventory
-  databaseName: inventory
-  ingress:
-    enabled: false
+    tag: v1.0.1

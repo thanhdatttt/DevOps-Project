@@ -1,0 +1,17 @@
+global:
+  domain: argocd.yas.local.com
+
+configs:
+  cm:
+    url: http://argocd.yas.local.com
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: argocd.yas.local.com
+    path: /
+    pathType: Prefix
+    tls: false

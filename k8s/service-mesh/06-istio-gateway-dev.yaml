@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: dev-yas-public-gateway
+  namespace: dev
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - dev.storefront.yas.local.com
+        - dev.backoffice.yas.local.com
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: storefront-public
+  namespace: dev
+spec:
+  hosts:
+    - dev.storefront.yas.local.com
+  gateways:
+    - dev-yas-public-gateway
+  http:
+    - route:
+        - destination:
+            host: storefront-bff.dev.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: backoffice-public
+  namespace: dev
+spec:
+  hosts:
+    - dev.backoffice.yas.local.com
+  gateways:
+    - dev-yas-public-gateway
+  http:
+    - route:
+        - destination:
+            host: backoffice-bff.dev.svc.cluster.local
+            port:
+              number: 80

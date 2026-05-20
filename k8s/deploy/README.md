@@ -56,6 +56,8 @@ edit host file `/etc/hots`
 192.168.49.2 backoffice.yas.local.com
 192.168.49.2 storefront.yas.local.com
 192.168.49.2 grafana.yas.local.com
+192.168.49.2 prometheus.yas.local.com
+192.168.49.2 argocd.yas.local.com
 
 ```
 `192.168.49.2` is ip of minikbe node use this command line to get the ip of minikube

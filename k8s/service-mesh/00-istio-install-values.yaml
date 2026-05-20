@@ -1,0 +1,23 @@
+# Install with: istioctl install -f k8s/service-mesh/00-istio-install-values.yaml -y
+# This keeps the Istio control plane minimal and enables the standard ingress gateway.
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: yas-service-mesh
+  namespace: service-mesh
+spec:
+  profile: default
+  meshConfig:
+    defaultConfig:
+      holdApplicationUntilProxyStarts: true
+    enableTracing: true
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          service:
+            type: ClusterIP
+  values:
+    global:
+      istioNamespace: service-mesh

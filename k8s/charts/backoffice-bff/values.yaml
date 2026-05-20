@@ -10,8 +10,12 @@ backend:
       configmap.reloader.stakater.com/reload: "yas-gateway-routes-config-configmap,backoffice-bff-extra-configmap"
   ingress:
     enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/upstream-vhost: dev.backoffice.yas.local.com
     host: backoffice.yas.local.com
     path: /
+    backendServiceName: istio-ingressgateway-bridge
+    backendServicePort: 80
   extraEnvs:
     - name: SPRING_PROFILES_ACTIVE
       value: prod

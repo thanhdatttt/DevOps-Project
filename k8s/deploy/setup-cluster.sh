@@ -102,6 +102,8 @@ helm upgrade --install promtail grafana/promtail \
 
 #Install prometheus + grafana
 grafana_hostname="grafana.$DOMAIN" yq -i '.hostname=env(grafana_hostname)' ./observability/prometheus.values.yaml
+prometheus_hostname="prometheus.$DOMAIN" yq -i '.prometheusHostname=env(prometheus_hostname)' ./observability/prometheus.values.yaml
+argocd_hostname="argocd.$DOMAIN" yq -i '.global.domain=env(argocd_hostname) | .configs.cm.url=("http://" + env(argocd_hostname)) | .server.ingress.hostname=env(argocd_hostname)' ./argocd.values.yaml
 postgresql_username="$POSTGRESQL_USERNAME" yq -i '.grafana."grafana.ini".database.user=env(postgresql_username)' ./observability/prometheus.values.yaml
 postgresql_password="$POSTGRESQL_PASSWORD" yq -i '.grafana."grafana.ini".database.password=env(postgresql_password)' ./observability/prometheus.values.yaml
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
@@ -127,4 +129,5 @@ helm upgrade --install zookeeper ./zookeeper \
  --namespace zookeeper --create-namespace
 
  helm upgrade --install argocd argo/argo-cd \
- --create-namespace --namespace argocd
+ --create-namespace --namespace argocd \
+ -f ./argocd.values.yaml

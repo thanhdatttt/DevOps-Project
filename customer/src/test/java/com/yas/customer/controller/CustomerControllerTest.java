@@ -49,12 +49,14 @@ class CustomerControllerTest {
 
     private ObjectWriter objectWriter;
 
+    // Trigger Workflow
+
     @BeforeEach
     void setUp() {
         objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
     }
-
-    @Test
+    
+    @Test 
     void testGetCustomers_whenNormalCase_responseCustomerListVm() throws Exception {
 
         CustomerListVm customerListVm = new CustomerListVm(

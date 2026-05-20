@@ -1,10 +1,3 @@
 backend:
   image:
-    repository: ghcr.io/thanhdatttt/yas-payment
-    tag: staging
-
-  nameOverride: payment
-  fullnameOverride: payment
-  databaseName: payment
-  ingress:
-    enabled: false
+    tag: v1.0.1

@@ -10,35 +10,33 @@ spec:
           # Định nghĩa service, tên param của Helm và domain tương ứng
           - service: backoffice-bff
             helm_param_name: "backend.ingress.host"
-            domain: "backoffice.yas.local.com"
+            domain: "dev.backoffice.yas.local.com"
             wave: "3"
             
           - service: storefront-bff
             helm_param_name: "backend.ingress.host"
-            domain: "storefront.yas.local.com"
+            domain: "dev.storefront.yas.local.com"
             wave: "3"
             
           - service: swagger-ui
-            helm_param_name: "ingress.host" # Lưu ý: Swagger UI trong script của bạn dùng tham số khác
+            helm_param_name: "ingress.host"
             domain: "api.yas.local.com"
             wave: "3"
           
           - service: backoffice-ui
-            namespace: yas
-            helm_param_name: "global.enabled" # Dummy param since no overrides were in your script
+            helm_param_name: "global.enabled"
             domain: "true"
             wave: "2" 
             
           - service: storefront-ui
-            namespace: yas
             helm_param_name: "global.enabled"
             domain: "true"
             wave: "2"
 
   template:
     metadata:
-      name: '{{service}}'
-      namespace: dev
+      name: '{{service}}-dev'
+      namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{wave}}" # Đọc wave từ biến để đảm bảo thứ tự
     spec:
