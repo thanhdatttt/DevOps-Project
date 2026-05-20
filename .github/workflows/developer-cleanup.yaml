@@ -35,13 +35,15 @@ jobs:
       contents: write
 
     outputs:
-      reset_list:  ${{ steps.reset.outputs.reset_list }}   # services actually changed
-      argocd_apps: ${{ steps.reset.outputs.argocd_apps }}  # corresponding ArgoCD app names
+      reset_list:  ${{ steps.reset.outputs.reset_list }}
+      argocd_apps: ${{ steps.reset.outputs.argocd_apps }}
 
     steps:
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
+          # checkout branch ArgoCD is watching
+          ref: feat/argocd
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -104,13 +106,13 @@ jobs:
               continue
             fi
 
-            current=$(yq '/backend.image.tag' "$file" 2>/dev/null || echo "unknown")
+            current=$(yq '.backend.image.tag' "$file" 2>/dev/null || echo "unknown")
 
             if [ "$current" = "latest" ]; then
               echo "⏭️  [$svc]  already on latest — no change"
             else
               yq -i '.backend.image.tag = "latest"' "$file"
-              echo "✅ [$svc]  $current  →  latest"
+              echo "✅ [$svc]  ${current:0:7}...  →  latest"
               RESET_LIST="${RESET_LIST}${svc},"
               ARGOCD_APPS="${ARGOCD_APPS}${svc}-dev,"
             fi
@@ -120,8 +122,12 @@ jobs:
           ARGOCD_APPS="${ARGOCD_APPS%,}"
 
           echo ""
-          count=$(echo "$RESET_LIST" | tr -cd ',' | wc -c)
-          echo "$((count + ${#RESET_LIST:+1})) service(s) reset"
+          if [ -z "$RESET_LIST" ]; then
+            echo "No changes — all targeted services were already on latest"
+          else
+            count=$(echo "$RESET_LIST" | tr ',' '\n' | wc -l)
+            echo "${count} service(s) reset to latest"
+          fi
 
           echo "reset_list=${RESET_LIST}"   >> "$GITHUB_OUTPUT"
           echo "argocd_apps=${ARGOCD_APPS}" >> "$GITHUB_OUTPUT"
@@ -145,14 +151,12 @@ jobs:
           Run ID       : ${{ github.run_id }}"
 
           for attempt in 1 2 3; do
-            git push origin main && break || {
+            git push origin feat/argocd && break || {
               echo "⚠️  Push attempt $attempt failed — rebasing..."
-              git pull --rebase origin main
+              git pull --rebase origin feat/argocd
             }
           done
 
-  # Sync only the apps that were actually reset
-  # prune=true to remove stale ReplicaSets / leftover resources
   sync:
     name: Sync ArgoCD (prune=true)
     needs: gitops
@@ -187,14 +191,15 @@ jobs:
             if [[ "$http_code" =~ ^2 ]]; then
               echo "✅"
             else
-              echo "⚠️  HTTP $http_code"
+              echo "❌ HTTP $http_code"
               FAILED+=("$app")
             fi
           done
 
           echo ""
           if [ ${#FAILED[@]} -gt 0 ]; then
-            echo "⚠️  Non-blocking sync failures: ${FAILED[*]}"
+            echo "❌ Sync failed for: ${FAILED[*]}"
+            exit 1
           else
             echo "✅ Sync complete"
           fi
@@ -221,8 +226,8 @@ jobs:
           echo ""
 
           if [ -z "$RESET_LIST" ]; then
-            echo "All targeted services were already on 'latest'"
-            echo "No changes were necessary."
+            echo "  All targeted services were already on 'latest'"
+            echo "  No changes were necessary."
           else
             echo "  ✅ Reset to 'latest':"
             IFS=',' read -ra SVCS <<< "$RESET_LIST"
