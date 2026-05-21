@@ -1,7 +1,6 @@
 backend:
   image:
     tag: latest
-
   ingress:
     annotations:
       nginx.ingress.kubernetes.io/upstream-vhost: dev.storefront.yas.local.com
