@@ -2,75 +2,49 @@ name: media service ci
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'media/**'
-      - 'common-library/**'
+      - "media/**"
+      - "common-library/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/media-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'media/**'
-      - 'common-library/**'
+      - "media/**"
+      - "common-library/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/media-ci.yaml"
       - "pom.xml"
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FROM_ORIGINAL_REPOSITORY: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+  SERVICE_NAME: media
+  IMAGE_NAME: ghcr.io/thanhdatttt/yas-media
 
 jobs:
-  # gitleaks
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run Gitleaks
+
+      - name: Gitleaks check
         run: |
           docker pull zricethezav/gitleaks:latest
           docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./media" --config="/work/gitleaks.toml" --verbose --no-git
 
-  # Build
-  build:
-    needs: gitleaks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: ./.github/workflows/actions
-      - name: Build Application
-        run: mvn clean package -DskipTests -pl media -am
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v6
-        with:
-          context: ./media
-          push: true
-          tags: |
-            ghcr.io/thanhdatttt/yas-media:latest
-            ghcr.io/thanhdatttt/yas-media:${{ github.sha }}
-
-  # Test
   test:
-    needs: build
     runs-on: ubuntu-latest
+    needs: gitleaks
     permissions:
+      contents: read
       pull-requests: write
       checks: write
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,12 +52,18 @@ jobs:
 
       - uses: ./.github/workflows/actions
 
-      # test
-      - name: Run Tests
+      - name: Build and test
         run: mvn clean verify -pl media -am
 
-      # Upload Test Result
-      - name: Upload Test Results
+      - name: Upload JVM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: media-jar
+          path: media/target/*.jar
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Test Results
         uses: dorny/test-reporter@v2.6.0
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
         with:
@@ -91,43 +71,76 @@ jobs:
           path: "media/**/*-reports/TEST*.xml"
           reporter: java-junit
 
-      # sonar
-      - name: SonarCloud Scan
+      - name: Analyze with SonarCloud
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
-          mvn clean verify sonar:sonar
-          -pl media -am
+          mvn sonar:sonar -pl media -am
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
           -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.coverage.jacoco.xmlReportPaths=media/target/site/jacoco/jacoco.xml
+          -Dsonar.token=$SONAR_TOKEN
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/media/target/site/jacoco/jacoco.xml
 
-      # Upload coverage report
-      - name: Upload coverage report to PR
+      - name: Add coverage report to PR
+        id: jacoco_reporter
         uses: madrapps/jacoco-report@v1.7.2
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         with:
-          paths: ${{github.workspace}}/media/target/site/jacoco/jacoco.xml
-          token: ${{secrets.GITHUB_TOKEN}}
+          paths: ${{ github.workspace }}/media/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 70
           title: "Media Coverage Report"
           update-comment: true
 
-  # security
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download JVM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: media-jar
+          path: media/target
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./media
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/thanhdatttt/yas-media:latest
+            ghcr.io/thanhdatttt/yas-media:${{ github.sha }}
+
   security:
     runs-on: ubuntu-latest
-
     permissions:
+      contents: read
       security-events: write
-
     steps:
-      # Run Snyk scan
       - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/actions
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/maven@master
         continue-on-error: true
@@ -136,8 +149,8 @@ jobs:
         with:
           args: --sarif-file-output=snyk.sarif
 
-      # Upload result to GitHub Security tab
-      - name: Upload Snyk SARIF
+      - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
+        if: ${{ always() && hashFiles('snyk.sarif') != '' }}
         with:
           sarif_file: snyk.sarif

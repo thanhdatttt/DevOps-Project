@@ -18,7 +18,9 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FROM_ORIGINAL_REPOSITORY: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+  SERVICE_NAME: order
+  IMAGE_NAME: ghcr.io/thanhdatttt/yas-order
 
 jobs:
   gitleaks:
@@ -34,47 +36,30 @@ jobs:
           docker pull zricethezav/gitleaks:latest
           docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./order" --config="/work/gitleaks.toml" --verbose --no-git
 
-  build:
-    runs-on: ubuntu-latest
-    needs: gitleaks
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: ./.github/workflows/actions
-      - name: Build
-        run: mvn clean package -DskipTests -pl order -am
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v6
-        with:
-          context: ./order
-          push: true
-          tags: |
-            ghcr.io/thanhdatttt/yas-order:latest
-            ghcr.io/thanhdatttt/yas-order:${{ github.sha }}
-
   test:
     runs-on: ubuntu-latest
-    needs: build
+    needs: gitleaks
     permissions:
+      contents: read
       pull-requests: write
       checks: write
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: ./.github/workflows/actions
-      - name: Run Tests
-        run: mvn verify -pl order -am
+
+      - name: Build and test
+        run: mvn clean verify -pl order -am
+
+      - name: Upload JVM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-jar
+          path: order/target/*.jar
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Test Results
         uses: dorny/test-reporter@v2.6.0
@@ -84,38 +69,76 @@ jobs:
           path: "order/**/*-reports/TEST*.xml"
           reporter: java-junit
 
-      - name: Analyze with sonar cloud
+      - name: Analyze with SonarCloud
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         continue-on-error: true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean verify sonar:sonar
-          -pl order -am
+        run: >
+          mvn sonar:sonar -pl order -am
           -Dsonar.projectKey=thanhdatttt_DevOps-Project
           -Dsonar.organization=thanhdatttt
           -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.coverage.jacoco.xmlReportPaths=${{github.workspace}}/order/target/site/jacoco/jacoco.xml
+          -Dsonar.token=$SONAR_TOKEN
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/order/target/site/jacoco/jacoco.xml
 
       - name: Add coverage report to PR
+        id: jacoco_reporter
         uses: madrapps/jacoco-report@v1.7.2
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         with:
-          paths: ${{github.workspace}}/order/target/site/jacoco/jacoco.xml
-          token: ${{secrets.GITHUB_TOKEN}}
+          paths: ${{ github.workspace }}/order/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 70
           title: "Order Coverage Report"
           update-comment: true
 
-  security:
+  build:
     runs-on: ubuntu-latest
-
+    needs: test
+    if: ${{ github.event_name != 'pull_request' }}
     permissions:
-      security-events: write
-
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download JVM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: order-jar
+          path: order/target
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./order
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/thanhdatttt/yas-order:latest
+            ghcr.io/thanhdatttt/yas-order:${{ github.sha }}
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/actions
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/maven@master
         continue-on-error: true
@@ -126,5 +149,6 @@ jobs:
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
+        if: ${{ always() && hashFiles('snyk.sarif') != '' }}
         with:
           sarif_file: snyk.sarif
