@@ -4,4 +4,4 @@ backend:
   ingress:
     annotations:
       nginx.ingress.kubernetes.io/upstream-vhost: staging.storefront.yas.local.com
-      host: staging.storefront.yas.local.com
+    host: staging.storefront.yas.local.com
