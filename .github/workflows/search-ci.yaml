@@ -136,8 +136,6 @@ jobs:
         with:
           context: ./search
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: ${{ steps.docker-tags.outputs.tags }}
 
   security:

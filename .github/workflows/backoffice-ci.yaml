@@ -128,8 +128,6 @@ jobs:
           context: ./backoffice
           file: ./backoffice/Dockerfile.ci
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: ${{ steps.docker-tags.outputs.tags }}
 
       - name: Run Trivy image scanner
