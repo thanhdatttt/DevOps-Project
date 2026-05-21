@@ -34,13 +34,10 @@ applicationConfig:
     tracing:
       sampling:
         probability: 1.0
-    metrics:
-      tags:
-        application: ${spring.application.name}
     endpoints:
       web:
         exposure:
-          include: prometheus, health
+          include: health
     endpoint:
       health:
         probes:

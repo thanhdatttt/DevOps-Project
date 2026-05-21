@@ -23,24 +23,6 @@ spec:
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-observability-prometheus
-  namespace: staging
-spec:
-  action: ALLOW
-  # Metrics port 8090 has mTLS disabled so Prometheus can scrape from the
-  # non-mesh observability namespace. Source namespace/principal matches require
-  # mTLS, so keep this allow-list scoped to only the metrics operation.
-  rules:
-    - to:
-        - operation:
-            methods: ["GET"]
-            ports: ["8090"]
-            paths:
-              - /actuator/prometheus
----
-apiVersion: security.istio.io/v1
-kind: AuthorizationPolicy
-metadata:
   name: allow-istio-ingress-to-storefront-bff
   namespace: staging
 spec:

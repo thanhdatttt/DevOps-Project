@@ -36,7 +36,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
             .authorizeExchange(auth -> auth
-                .pathMatchers("/health", "/actuator/prometheus", "/actuator/health/**").permitAll()
+                .pathMatchers("/health", "/actuator/health/**").permitAll()
                 .anyExchange().hasAnyRole("ADMIN"))
             .oauth2Login(Customizer.withDefaults())
             .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)

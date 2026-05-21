@@ -76,8 +76,6 @@ spec:
             - name: http
               containerPort: {{ .Values.httpPort }}
               protocol: TCP
-            - name: http-metrics
-              containerPort: {{ .Values.metricPort }}
           lifecycle:
             {{ toYaml .Values.lifecycle | nindent 12 }}
           livenessProbe:

@@ -14,7 +14,6 @@ public class SecurityConfig {
         return http
             .authorizeHttpRequests(
                 auth -> auth.requestMatchers(
-                    "/actuator/prometheus",
                     "/actuator/health/**",
                     "/swagger-ui",
                     "/swagger-ui/**",
