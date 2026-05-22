@@ -12,8 +12,8 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - storefront.yas.local.com
-        - backoffice.yas.local.com
+        - staging.storefront.yas.local.com
+        - staging.backoffice.yas.local.com
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
@@ -22,7 +22,7 @@ metadata:
   namespace: staging
 spec:
   hosts:
-    - storefront.yas.local.com
+    - staging.storefront.yas.local.com
   gateways:
     - staging-yas-public-gateway
   http:
@@ -39,7 +39,7 @@ metadata:
   namespace: staging
 spec:
   hosts:
-    - backoffice.yas.local.com
+    - staging.backoffice.yas.local.com
   gateways:
     - staging-yas-public-gateway
   http:

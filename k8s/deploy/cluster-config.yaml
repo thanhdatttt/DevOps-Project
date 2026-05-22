@@ -4,7 +4,7 @@ postgresql:
   username: yasadminuser
   password: admin
 kafka:
-  replicas: 1
+  replicas: 2
 zookeeper:
   replicas: 1
 elasticsearch:
@@ -15,8 +15,10 @@ keycloak:
   bootstrapAdmin:
     username: admin
     password: admin
-  backofficeRedirectUrl: http://backoffice.yas.local.com
-  storefrontRedirectUrl: http://storefront.yas.local.com
+  backofficeRedirectUrlDev: http://dev.backoffice.yas.local.com
+  backofficeRedirectUrlStaging: http://staging.backoffice.yas.local.com
+  storefrontRedirectUrlDev: http://dev.storefront.yas.local.com
+  storefrontRedirectUrlStaging: http://staging.storefront.yas.local.com
 grafana:
   username: admin
   password: admin

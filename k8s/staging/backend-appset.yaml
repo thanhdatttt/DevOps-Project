@@ -52,11 +52,11 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: main
+        targetRevision: feat/argocd
         path: 'k8s/charts/{{service}}'
         helm:
           valueFiles:
-            - values-staging.yaml 
+            - values-staging.yaml
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: staging

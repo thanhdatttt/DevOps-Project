@@ -9,28 +9,18 @@ spec:
         elements:
           # Định nghĩa service, tên param của Helm và domain tương ứng
           - service: backoffice-bff
-            helm_param_name: "backend.ingress.host"
-            domain: "dev.backoffice.yas.local.com"
             wave: "3"
             
           - service: storefront-bff
-            helm_param_name: "backend.ingress.host"
-            domain: "dev.storefront.yas.local.com"
             wave: "3"
             
           - service: swagger-ui
-            helm_param_name: "ingress.host"
-            domain: "api.yas.local.com"
             wave: "3"
           
           - service: backoffice-ui
-            helm_param_name: "global.enabled"
-            domain: "true"
             wave: "2" 
             
           - service: storefront-ui
-            helm_param_name: "global.enabled"
-            domain: "true"
             wave: "2"
 
   template:
@@ -46,10 +36,9 @@ spec:
         targetRevision: feat/argocd
         path: 'k8s/charts/{{service}}'
         helm:
+          valueFiles:
+            - values-dev.yaml 
           parameters:
-            # Truyền động tên tham số và giá trị domain
-            - name: '{{helm_param_name}}'
-              value: '{{domain}}'
             - name: backend.image.pullPolicy
               value: Always
       destination:
