@@ -132,6 +132,9 @@ jobs:
             # "payment"
             # "promotion"
             "cart"
+          )
+
+          UI=(
             "storefront-ui"
             "backoffice-ui"
           )
@@ -144,6 +147,11 @@ jobs:
             # It safely modifies YAML without destroying comments or formatting.
             # NOTE: If your values file uses a different path than `image.tag`, adjust the ".image.tag" part below.
             yq -i ".backend.image.tag = \"${{ github.ref_name }}\"" k8s/charts/$service/values-staging.yaml
+          done
+
+          for ui in "${UI[@]}"; do
+            echo "Updating $ui to tag ${{ github.ref_name }}..."
+            yq -i ".ui.image.tag = \"${{ github.ref_name }}\"" k8s/charts/$ui/values-staging.yaml
           done
 
       - name: Commit and Push changes
