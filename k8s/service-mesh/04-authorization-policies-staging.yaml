@@ -35,7 +35,6 @@ spec:
         - source:
             principals:
               - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -52,7 +51,6 @@ spec:
         - source:
             principals:
               - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -69,7 +67,6 @@ spec:
         - source:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -86,7 +83,6 @@ spec:
         - source:
             principals:
               - cluster.local/ns/staging/sa/backoffice-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -108,7 +104,6 @@ spec:
               - cluster.local/ns/staging/sa/inventory
               - cluster.local/ns/staging/sa/order
               - cluster.local/ns/staging/sa/search
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -128,7 +123,6 @@ spec:
               - cluster.local/ns/staging/sa/backoffice-bff
               - cluster.local/ns/staging/sa/cart
               - cluster.local/ns/staging/sa/product
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -146,7 +140,6 @@ spec:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -165,7 +158,6 @@ spec:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
               - cluster.local/ns/staging/sa/order
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -184,7 +176,6 @@ spec:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
               - cluster.local/ns/staging/sa/order
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -202,7 +193,6 @@ spec:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -221,7 +211,6 @@ spec:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
               - cluster.local/ns/staging/sa/order
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -239,7 +228,6 @@ spec:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -257,20 +245,3 @@ spec:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
----
-apiVersion: security.istio.io/v1
-kind: AuthorizationPolicy
-metadata:
-  name: allow-to-swagger-ui
-  namespace: staging
-spec:
-  action: ALLOW
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: swagger-ui
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
