@@ -97,7 +97,9 @@ jobs:
           tags: ghcr.io/thanhdatttt/yas-${{ matrix.service }}:${{ github.ref_name }}
 
   update-staging-values:
-    needs: build-and-push 
+    needs:
+      - build-and-push-backend
+      - build-and-push-frontend
     runs-on: ubuntu-latest
     permissions:
       contents: write
