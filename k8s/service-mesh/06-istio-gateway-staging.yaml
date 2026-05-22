@@ -14,6 +14,7 @@ spec:
       hosts:
         - staging.storefront.yas.local.com
         - staging.backoffice.yas.local.com
+        - staging.api.yas.local.com
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
@@ -48,3 +49,20 @@ spec:
             host: backoffice-bff.staging.svc.cluster.local
             port:
               number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: api-public
+  namespace: staging
+spec:
+  hosts:
+    - staging.api.yas.local.com
+  gateways:
+    - staging-yas-public-gateway
+  http:
+    - route:
+        - destination:
+            host: swagger-ui.staging.svc.cluster.local 
+            port:
+              number: 8080

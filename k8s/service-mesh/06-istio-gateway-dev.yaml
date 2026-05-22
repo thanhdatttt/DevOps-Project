@@ -14,6 +14,7 @@ spec:
       hosts:
         - dev.storefront.yas.local.com
         - dev.backoffice.yas.local.com
+        - api.yas.local.com
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
@@ -48,3 +49,20 @@ spec:
             host: backoffice-bff.dev.svc.cluster.local
             port:
               number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: api-public
+  namespace: dev
+spec:
+  hosts:
+    - api.yas.local.com
+  gateways:
+    - dev-yas-public-gateway
+  http:
+    - route:
+        - destination:
+            host: swagger-ui.dev.svc.cluster.local 
+            port:
+              number: 8080
