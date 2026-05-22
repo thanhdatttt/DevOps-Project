@@ -1,6 +1,3 @@
 ui:
   image:
     tag: v1.0.0
-backend:
-  image:
-    tag: v1.0.3
