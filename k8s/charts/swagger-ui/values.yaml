@@ -11,8 +11,8 @@ image:
   tag: "v4.16.0"
 
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: "swagger-ui"
+fullnameOverride: "swagger-ui"
 
 serviceAccount:
   # Specifies whether a service account should be created
