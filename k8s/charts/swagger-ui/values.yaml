@@ -66,6 +66,8 @@ ingress:
       paths:
         - path: /swagger-ui
           pathType: ImplementationSpecific
+  backendServiceName: istio-ingressgateway-bridge
+  backendServicePort: 80
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
