@@ -1,3 +1,3 @@
 backend:
   image:
-    tag: latest
+    tag: fa8578386f4f25f601bcf88318fee6fffce2b867
