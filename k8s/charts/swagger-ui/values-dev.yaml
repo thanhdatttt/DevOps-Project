@@ -1,4 +1,12 @@
-urls: "[{ url: 'http://dev.api.yas.local.com/product/v3/api-docs', name: 'Product' }, { url: 'http://dev.api.yas.local.com/media/v3/api-docs', name: 'Media' }, { url: 'http://dev.api.yas.local.com/customer/v3/api-docs', name: 'Customer' }, { url: 'http://dev.api.yas.local.com/cart/v3/api-docs', name: 'Cart'}, { url: 'http://dev.api.yas.local.com/order/v3/api-docs', name: 'Order'}, { url: 'http://dev.api.yas.local.com/inventory/v3/api-docs', name: 'Inventory'}, { url: 'http://dev.api.yas.local.com/tax/v3/api-docs', name: 'Tax' }, { url: 'http://dev.api.yas.local.com/search/v3/api-docs', name: 'Search'}]"
+urls: "[{ url: 'http://dev.api.yas.local.com/product/v3/api-docs', name: 'Product' },
+      { url: 'http://dev.api.yas.local.com/media/v3/api-docs', name: 'Media' },
+      { url: 'http://dev.api.yas.local.com/customer/v3/api-docs', name: 'Customer' }, 
+      { url: 'http://dev.api.yas.local.com/cart/v3/api-docs', name: 'Cart'},
+      { url: 'http://dev.api.yas.local.com/order/v3/api-docs', name: 'Order'},
+      { url: 'http://dev.api.yas.local.com/inventory/v3/api-docs', name: 'Inventory'},
+      { url: 'http://dev.api.yas.local.com/tax/v3/api-docs', name: 'Tax' },
+      { url: 'http://dev.api.yas.local.com/search/v3/api-docs', name: 'Search'}]"
+
 ingress:
   host: dev.api.yas.local.com
   hosts:
@@ -22,6 +30,3 @@ ingress:
           pathType: Prefix
         - path: /search
           pathType: Prefix
-backend:
-  image:
-    tag: latest
