@@ -83,10 +83,6 @@ on:
         description: 'backoffice-ui'
         required: false
         default: 'main'
-      swagger_ui_branch:
-        description: 'swagger-ui'
-        required: false
-        default: 'main'
 
 jobs:
   gitops:
@@ -138,7 +134,6 @@ jobs:
           INPUT_webhook:         ${{ inputs.webhook_branch }}
           INPUT_storefront_ui:   ${{ inputs.storefront_ui_branch }}
           INPUT_backoffice_ui:   ${{ inputs.backoffice_ui_branch }}
-          INPUT_swagger_ui:      ${{ inputs.swagger_ui_branch }}
         run: |
           set -euo pipefail
 
@@ -163,7 +158,6 @@ jobs:
             [webhook]=INPUT_webhook
             [storefront-ui]=INPUT_storefront_ui
             [backoffice-ui]=INPUT_backoffice_ui
-            [swagger-ui]=INPUT_swagger_ui
           )
 
           FULL_SOURCE_REPO="$CURRENT_REPO"
@@ -265,13 +259,25 @@ jobs:
             tag="${entry#*=}"
             file="k8s/charts/${svc}/values-dev.yaml"
 
+            # Chỉ update những service có tag khác latest
+            if [ "$tag" = "latest" ]; then
+              echo "⏭️  $svc  →  already latest, skip"
+              continue
+            fi
+
             if [ ! -f "$file" ]; then
               echo "⚠️  $file not found — skipping"
               continue
             fi
 
-            yq -i ".backend.image.tag = \"${tag}\"" "$file"
-            echo "✅ $svc  →  ${tag:0:7}..."
+            # Detect key: .ui.image.tag hoặc .backend.image.tag
+            if yq '.ui.image.tag' "$file" | grep -qv "null"; then
+              yq -i ".ui.image.tag = \"${tag}\"" "$file"
+              echo "✅ $svc (ui)  →  ${tag:0:7}..."
+            else
+              yq -i ".backend.image.tag = \"${tag}\"" "$file"
+              echo "✅ $svc (backend)  →  ${tag:0:7}..."
+            fi
           done
 
       - name: Commit & Push
