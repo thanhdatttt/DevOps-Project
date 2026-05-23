@@ -57,7 +57,7 @@ metadata:
   namespace: dev
 spec:
   hosts:
-    - api.yas.local.com
+    - dev.api.yas.local.com
   gateways:
     - dev-yas-public-gateway
   http:
