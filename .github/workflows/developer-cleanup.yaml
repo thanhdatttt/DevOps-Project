@@ -43,7 +43,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install yq
         run: |
@@ -66,6 +66,7 @@ jobs:
             product          promotion        rating
             recommendation   sampledata       search
             storefront-bff   tax              webhook
+            storefront-ui    backoffice-ui    swagger-ui
           )
 
           # Resolve target list
