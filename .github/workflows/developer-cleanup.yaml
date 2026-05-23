@@ -104,14 +104,25 @@ jobs:
               continue
             fi
 
-            current=$(yq '.backend.image.tag' "$file" 2>/dev/null || echo "unknown")
-
-            if [ "$current" = "latest" ]; then
-              echo "⏭️  [$svc]  already on latest — no change"
+            # Detect key: .ui.image.tag hoặc .backend.image.tag
+            if yq '.ui.image.tag' "$file" | grep -qv "null"; then
+              current=$(yq '.ui.image.tag' "$file" 2>/dev/null || echo "unknown")
+              if [ "$current" = "latest" ]; then
+                echo "⏭️  [$svc]  already on latest — no change"
+              else
+                yq -i '.ui.image.tag = "latest"' "$file"
+                echo "✅ [$svc]  ${current:0:7}...  →  latest"
+                RESET_LIST="${RESET_LIST}${svc},"
+              fi
             else
-              yq -i '.backend.image.tag = "latest"' "$file"
-              echo "✅ [$svc]  ${current:0:7}...  →  latest"
-              RESET_LIST="${RESET_LIST}${svc},"
+              current=$(yq '.backend.image.tag' "$file" 2>/dev/null || echo "unknown")
+              if [ "$current" = "latest" ]; then
+                echo "⏭️  [$svc]  already on latest — no change"
+              else
+                yq -i '.backend.image.tag = "latest"' "$file"
+                echo "✅ [$svc]  ${current:0:7}...  →  latest"
+                RESET_LIST="${RESET_LIST}${svc},"
+              fi
             fi
           done
 

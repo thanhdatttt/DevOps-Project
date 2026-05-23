@@ -276,8 +276,14 @@ jobs:
               continue
             fi
 
-            yq -i ".backend.image.tag = \"${tag}\"" "$file"
-            echo "✅ $svc  →  ${tag:0:7}..."
+            # Detect key: .ui.image.tag hoặc .backend.image.tag
+            if yq '.ui.image.tag' "$file" | grep -qv "null"; then
+              yq -i ".ui.image.tag = \"${tag}\"" "$file"
+              echo "✅ $svc (ui)  →  ${tag:0:7}..."
+            else
+              yq -i ".backend.image.tag = \"${tag}\"" "$file"
+              echo "✅ $svc (backend)  →  ${tag:0:7}..."
+            fi
           done
 
       - name: Commit & Push
