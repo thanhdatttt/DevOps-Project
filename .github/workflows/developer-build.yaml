@@ -83,10 +83,6 @@ on:
         description: 'backoffice-ui'
         required: false
         default: 'main'
-      swagger_ui_branch:
-        description: 'swagger-ui'
-        required: false
-        default: 'main'
 
 jobs:
   gitops:
@@ -138,7 +134,6 @@ jobs:
           INPUT_webhook:         ${{ inputs.webhook_branch }}
           INPUT_storefront_ui:   ${{ inputs.storefront_ui_branch }}
           INPUT_backoffice_ui:   ${{ inputs.backoffice_ui_branch }}
-          INPUT_swagger_ui:      ${{ inputs.swagger_ui_branch }}
         run: |
           set -euo pipefail
 
@@ -163,7 +158,6 @@ jobs:
             [webhook]=INPUT_webhook
             [storefront-ui]=INPUT_storefront_ui
             [backoffice-ui]=INPUT_backoffice_ui
-            [swagger-ui]=INPUT_swagger_ui
           )
 
           FULL_SOURCE_REPO="$CURRENT_REPO"
