@@ -68,7 +68,27 @@ ingress:
           pathType: ImplementationSpecific
         - path: /product
           pathType: Prefix
+        - path: /media
+          pathType: Prefix
+        - path: /customer
+          pathType: Prefix
         - path: /cart
+          pathType: Prefix
+        - path: /rating
+          pathType: Prefix
+        - path: /order
+          pathType: Prefix
+        - path: /payment
+          pathType: Prefix
+        - path: /location
+          pathType: Prefix
+        - path: /inventory
+          pathType: Prefix
+        - path: /tax
+          pathType: Prefix
+        - path: /promotion
+          pathType: Prefix
+        - path: /search
           pathType: Prefix
   backendServiceName: istio-ingressgateway-bridge
   backendServicePort: 80
