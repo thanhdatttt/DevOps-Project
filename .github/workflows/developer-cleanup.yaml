@@ -66,6 +66,7 @@ jobs:
             product          promotion        rating
             recommendation   sampledata       search
             storefront-bff   tax              webhook
+            storefront-ui    backoffice-ui    swagger-ui
           )
 
           # Resolve target list
