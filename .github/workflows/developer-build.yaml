@@ -90,7 +90,7 @@ jobs:
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
-          ref: feat/argocd
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -274,9 +274,9 @@ jobs:
           Run ID       : ${{ github.run_id }}"
 
           for attempt in 1 2 3; do
-            git push origin feat/argocd && break || {
+            git push origin main && break || {
               echo "⚠️  Push attempt $attempt failed — rebasing..."
-              git pull --rebase origin feat/argocd
+              git pull --rebase origin main
             }
           done
 
