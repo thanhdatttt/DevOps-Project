@@ -288,7 +288,7 @@ jobs:
     steps:
       - name: Print endpoints
         env:
-          WORKER_IP: ${{ secrets.WORKER_IP }}
+          WORKER_IP: ${{ vars.WORKER_IP }}
           TAG_MAP:   ${{ needs.gitops.outputs.tag_map }}
         run: |
           echo ""
