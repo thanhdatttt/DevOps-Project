@@ -66,6 +66,10 @@ ingress:
       paths:
         - path: /swagger-ui
           pathType: ImplementationSpecific
+        - path: /product
+          pathType: Prefix
+        - path: /cart
+          pathType: Prefix
   backendServiceName: istio-ingressgateway-bridge
   backendServicePort: 80
   tls: []
