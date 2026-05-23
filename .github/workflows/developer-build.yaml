@@ -265,6 +265,12 @@ jobs:
             tag="${entry#*=}"
             file="k8s/charts/${svc}/values-dev.yaml"
 
+            # Chỉ update những service có tag khác latest
+            if [ "$tag" = "latest" ]; then
+              echo "⏭️  $svc  →  already latest, skip"
+              continue
+            fi
+
             if [ ! -f "$file" ]; then
               echo "⚠️  $file not found — skipping"
               continue
