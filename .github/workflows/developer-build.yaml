@@ -75,6 +75,18 @@ on:
         description: 'webhook'
         required: false
         default: 'main'
+      storefront_ui_branch:
+        description: 'storefront-ui'
+        required: false
+        default: 'main'
+      backoffice_ui_branch:
+        description: 'backoffice-ui'
+        required: false
+        default: 'main'
+      swagger_ui_branch:
+        description: 'swagger-ui'
+        required: false
+        default: 'main'
 
 jobs:
   gitops:
@@ -92,7 +104,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install yq
         run: |
@@ -124,6 +136,9 @@ jobs:
           INPUT_storefront_bff:  ${{ inputs.storefront_bff_branch }}
           INPUT_tax:             ${{ inputs.tax_branch }}
           INPUT_webhook:         ${{ inputs.webhook_branch }}
+          INPUT_storefront_ui:   ${{ inputs.storefront_ui_branch }}
+          INPUT_backoffice_ui:   ${{ inputs.backoffice_ui_branch }}
+          INPUT_swagger_ui:      ${{ inputs.swagger_ui_branch }}
         run: |
           set -euo pipefail
 
@@ -146,6 +161,9 @@ jobs:
             [storefront-bff]=INPUT_storefront_bff
             [tax]=INPUT_tax
             [webhook]=INPUT_webhook
+            [storefront-ui]=INPUT_storefront_ui
+            [backoffice-ui]=INPUT_backoffice_ui
+            [swagger-ui]=INPUT_swagger_ui
           )
 
           FULL_SOURCE_REPO="$CURRENT_REPO"
@@ -268,7 +286,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "GitOps: dev-build — Update values-dev.yaml image tags
+          git commit -m "GitOps: dev-build — Update values-dev.yaml image tags [skip ci]
 
           Triggered by : ${{ github.actor }}
           Run ID       : ${{ github.run_id }}"
@@ -288,7 +306,7 @@ jobs:
     steps:
       - name: Print endpoints
         env:
-          WORKER_IP: ${{ secrets.WORKER_IP }}
+          WORKER_IP: ${{ vars.WORKER_IP }}
           TAG_MAP:   ${{ needs.gitops.outputs.tag_map }}
         run: |
           echo ""
@@ -319,13 +337,13 @@ jobs:
           echo ""
           echo "     ${WORKER_IP}  dev.backoffice.yas.local.com"
           echo "     ${WORKER_IP}  dev.storefront.yas.local.com"
-          echo "     ${WORKER_IP}  api.yas.local.com"
+          echo "     ${WORKER_IP}  dev.api.yas.local.com"
           echo ""
           echo "  🔌 NodePort Endpoints"
           echo "  ─────────────────────────────────────────────────────"
           echo "     Storefront BFF  →  http://dev.storefront.yas.local.com"
           echo "     Backoffice BFF  →  http://dev.backoffice.yas.local.com"
-          echo "     API Gateway     →  http://api.yas.local.com"
+          echo "     API Gateway     →  http://dev.api.yas.local.com"
           echo ""
           echo "  ⏳ ArgoCD syncing — pod restarts may take 1-3 min"
           echo "══════════════════════════════════════════════════════"
