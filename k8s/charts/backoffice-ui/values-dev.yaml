@@ -1,6 +1,3 @@
 ui:
   image:
     tag: latest
-backend:
-  image:
-    tag: latest
