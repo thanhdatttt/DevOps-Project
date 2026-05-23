@@ -68,16 +68,26 @@ import org.springframework.data.domain.Pageable;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
-    @Mock private ProductRepository productRepository;
-    @Mock private MediaService mediaService;
-    @Mock private BrandRepository brandRepository;
-    @Mock private CategoryRepository categoryRepository;
-    @Mock private ProductCategoryRepository productCategoryRepository;
-    @Mock private ProductImageRepository productImageRepository;
-    @Mock private ProductOptionRepository productOptionRepository;
-    @Mock private ProductOptionValueRepository productOptionValueRepository;
-    @Mock private ProductOptionCombinationRepository productOptionCombinationRepository;
-    @Mock private ProductRelatedRepository productRelatedRepository;
+    @Mock
+    private ProductRepository productRepository;
+    @Mock
+    private MediaService mediaService;
+    @Mock
+    private BrandRepository brandRepository;
+    @Mock
+    private CategoryRepository categoryRepository;
+    @Mock
+    private ProductCategoryRepository productCategoryRepository;
+    @Mock
+    private ProductImageRepository productImageRepository;
+    @Mock
+    private ProductOptionRepository productOptionRepository;
+    @Mock
+    private ProductOptionValueRepository productOptionValueRepository;
+    @Mock
+    private ProductOptionCombinationRepository productOptionCombinationRepository;
+    @Mock
+    private ProductRelatedRepository productRelatedRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -85,7 +95,6 @@ class ProductServiceTest {
     private NoFileMediaVm mediaVm;
 
     // ── helpers ──────────────────────────────────────────────────────────────
-
     private Product buildProduct(long id, String name, String slug, String sku) {
         return Product.builder()
                 .id(id).name(name).slug(slug).sku(sku).gtin("")
@@ -106,7 +115,6 @@ class ProductServiceTest {
     }
 
     // ── createProduct ─────────────────────────────────────────────────────────
-
     @Test
     void createProduct_WhenValidSimpleProduct_ReturnsGetDetailVm() {
         ProductPostVm vm = new ProductPostVm(
@@ -195,7 +203,6 @@ class ProductServiceTest {
     }
 
     // ── setProductImages ───────────────────────────────────────────────────────
-
     @Test
     void setProductImages_WhenImageIdsProvided_ReturnsProductImageList() {
         Product product = buildProduct(1L, "P", "p", "S");
@@ -219,7 +226,6 @@ class ProductServiceTest {
     }
 
     // ── getProductSlug ─────────────────────────────────────────────────────────
-
     @Test
     void getProductSlug_WhenProductHasNoParent_ReturnsProductSlug() {
         Product product = buildProduct(1L, "P", "my-slug", "S");
@@ -253,7 +259,6 @@ class ProductServiceTest {
     }
 
     // ── getProductEsDetailById ─────────────────────────────────────────────────
-
     @Test
     void getProductEsDetailById_WhenSimpleProduct_ReturnsEsDetailVm() {
         Product product = buildProduct(1L, "Laptop", "laptop", "SKU-1");
@@ -324,7 +329,6 @@ class ProductServiceTest {
     }
 
     // ── getRelatedProductsBackoffice ───────────────────────────────────────────
-
     @Test
     void getRelatedProductsBackoffice_WhenProductHasRelated_ReturnsList() {
         Product related = buildProduct(2L, "Related", "related", "R-SKU");
@@ -363,7 +367,6 @@ class ProductServiceTest {
     }
 
     // ── getRelatedProductsStorefront ───────────────────────────────────────────
-
     @Test
     void getRelatedProductsStorefront_WhenProductExists_ReturnsPaginatedVm() {
         Product main = buildProduct(1L, "Main", "main", "M-SKU");
@@ -415,7 +418,6 @@ class ProductServiceTest {
     }
 
     // ── getProductsForWarehouse ────────────────────────────────────────────────
-
     @Test
     void getProductsForWarehouse_WhenMatchingProducts_ReturnsList() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
@@ -442,7 +444,6 @@ class ProductServiceTest {
     }
 
     // ── updateProductQuantity ──────────────────────────────────────────────────
-
     @Test
     void updateProductQuantity_WhenProductsExist_UpdatesStockQuantity() {
         Product product = buildProduct(1L, "P", "p", "S");
@@ -468,7 +469,6 @@ class ProductServiceTest {
     }
 
     // ── subtractStockQuantity ──────────────────────────────────────────────────
-
     @Test
     void subtractStockQuantity_WhenStockTrackingEnabled_DecrementsStock() {
         Product product = buildProduct(1L, "P", "p", "S");
@@ -512,7 +512,6 @@ class ProductServiceTest {
     }
 
     // ── restoreStockQuantity ───────────────────────────────────────────────────
-
     @Test
     void restoreStockQuantity_WhenStockTrackingEnabled_IncrementsStock() {
         Product product = buildProduct(1L, "P", "p", "S");
@@ -528,7 +527,6 @@ class ProductServiceTest {
     }
 
     // ── getProductByIds ────────────────────────────────────────────────────────
-
     @Test
     void getProductByIds_WhenMatchingProducts_ReturnsMappedVms() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
@@ -551,11 +549,13 @@ class ProductServiceTest {
     }
 
     // ── exportProducts ─────────────────────────────────────────────────────────
-
     @Test
     void exportProducts_WhenProductsExist_ReturnsDetailVms() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
-        Brand brand = new Brand(); brand.setId(1L); brand.setName("BrandX"); p.setBrand(brand);
+        Brand brand = new Brand();
+        brand.setId(1L);
+        brand.setName("BrandX");
+        p.setBrand(brand);
         when(productRepository.getExportingProducts(anyString(), anyString()))
                 .thenReturn(List.of(p));
 
@@ -576,7 +576,6 @@ class ProductServiceTest {
     }
 
     // ── getProductVariationsByParentId ─────────────────────────────────────────
-
     @Test
     void getProductVariationsByParentId_WhenNoOptions_ReturnsEmptyList() {
         Product parent = buildProduct(1L, "Parent", "parent", "P-SKU");
@@ -651,7 +650,6 @@ class ProductServiceTest {
     }
 
     // ── getProductCheckoutList ─────────────────────────────────────────────────
-
     @Test
     void getProductCheckoutList_WhenProductsExist_ReturnsPaginatedVm() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
@@ -684,7 +682,6 @@ class ProductServiceTest {
     }
 
     // ── updateProduct ──────────────────────────────────────────────────────────
-
     @Test
     void updateProduct_WhenProductNotFound_ThrowsNotFoundException() {
         ProductPutVm vm = new ProductPutVm(
@@ -707,12 +704,12 @@ class ProductServiceTest {
         opt.setId(1L);
         opt.setName("Color");
 
-        com.yas.product.viewmodel.productoption.ProductOptionValuePutVm optVm =
-            new com.yas.product.viewmodel.productoption.ProductOptionValuePutVm(
-                1L, "dropdown", 0, List.of("Red"));
+        com.yas.product.viewmodel.productoption.ProductOptionValuePutVm optVm
+                = new com.yas.product.viewmodel.productoption.ProductOptionValuePutVm(
+                        1L, "dropdown", 0, List.of("Red"));
 
-        com.yas.product.viewmodel.product.ProductOptionValueDisplay displayVm =
-            new com.yas.product.viewmodel.product.ProductOptionValueDisplay(1L, "dropdown", 0, "Red");
+        com.yas.product.viewmodel.product.ProductOptionValueDisplay displayVm
+                = new com.yas.product.viewmodel.product.ProductOptionValueDisplay(1L, "dropdown", 0, "Red");
 
         ProductPutVm vm = new ProductPutVm(
                 "Updated", "updated-slug", 200.0, true, true, false, true, false,
@@ -740,7 +737,6 @@ class ProductServiceTest {
     }
 
     // ── updateMainProductFromVm ────────────────────────────────────────────────
-
     @Test
     void updateMainProductFromVm_UpdatesAllFields() {
         Product product = buildProduct(1L, "Old", "old-slug", "OLD");
@@ -766,7 +762,6 @@ class ProductServiceTest {
     }
 
     // ── getProductsWithFilter ──────────────────────────────────────────────────
-
     @Test
     void getProductsWithFilter_WhenProductsExist_ReturnsPaginatedList() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
@@ -794,7 +789,6 @@ class ProductServiceTest {
     }
 
     // ── getProductById ─────────────────────────────────────────────────────────
-
     @Test
     void getProductById_WhenProductExists_ReturnsDetailVm() {
         Product p = buildProduct(1L, "Laptop", "laptop", "L-SKU");
@@ -845,7 +839,6 @@ class ProductServiceTest {
     }
 
     // ── getLatestProducts ──────────────────────────────────────────────────────
-
     @Test
     void getLatestProducts_WhenCountPositive_ReturnsProducts() {
         Product p = buildProduct(1L, "Latest", "latest", "L-SKU");
@@ -878,7 +871,6 @@ class ProductServiceTest {
     }
 
     // ── getProductsByBrand ─────────────────────────────────────────────────────
-
     @Test
     void getProductsByBrand_WhenBrandExists_ReturnsThumbnailList() {
         Brand brand = new Brand();
@@ -907,7 +899,6 @@ class ProductServiceTest {
     }
 
     // ── getProductsFromCategory ────────────────────────────────────────────────
-
     @Test
     void getProductsFromCategory_WhenCategoryExists_ReturnsThumbnailList() {
         Category cat = new Category();
@@ -943,7 +934,6 @@ class ProductServiceTest {
     }
 
     // ── getFeaturedProductsById ────────────────────────────────────────────────
-
     @Test
     void getFeaturedProductsById_WhenProductsExist_ReturnsThumbnailGetVms() {
         Product p = buildProduct(1L, "Featured", "featured", "F-SKU");
@@ -968,7 +958,6 @@ class ProductServiceTest {
     }
 
     // ── getListFeaturedProducts ────────────────────────────────────────────────
-
     @Test
     void getListFeaturedProducts_WhenProductsExist_ReturnsFeatureGetVm() {
         Product p = buildProduct(1L, "Feature", "feature", "F-SKU");
@@ -994,7 +983,6 @@ class ProductServiceTest {
     }
 
     // ── getProductDetail ───────────────────────────────────────────────────────
-
     @Test
     void getProductDetail_WhenSlugNotFound_ThrowsNotFoundException() {
         when(productRepository.findBySlugAndIsPublishedTrue("ghost")).thenReturn(Optional.empty());
@@ -1036,7 +1024,6 @@ class ProductServiceTest {
     }
 
     // ── deleteProduct ──────────────────────────────────────────────────────────
-
     @Test
     void deleteProduct_WhenProductNotFound_ThrowsNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
@@ -1079,7 +1066,6 @@ class ProductServiceTest {
     }
 
     // ── getProductsByMultiQuery ────────────────────────────────────────────────
-
     @Test
     void getProductsByMultiQuery_WhenProductsMatch_ReturnsThumbnailVms() {
         Product p = buildProduct(1L, "Phone", "phone", "PH-1");
@@ -1111,7 +1097,6 @@ class ProductServiceTest {
     }
 
     // ── getProductByCategoryIds ────────────────────────────────────────────────
-
     @Test
     void getProductByCategoryIds_WhenMatchingProducts_ReturnsMappedVms() {
         Product p = buildProduct(1L, "Phone", "phone", "PH-1");
@@ -1132,7 +1117,6 @@ class ProductServiceTest {
     }
 
     // ── getProductByBrandIds ───────────────────────────────────────────────────
-
     @Test
     void getProductByBrandIds_WhenMatchingProducts_ReturnsMappedVms() {
         Product p = buildProduct(1L, "MacBook", "macbook", "MB-1");
