@@ -14,7 +14,7 @@ spec:
       hosts:
         - dev.storefront.yas.local.com
         - dev.backoffice.yas.local.com
-        - api.yas.local.com
+        - dev.api.yas.local.com
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
@@ -53,7 +53,7 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: api-public
+  name: swagger-public
   namespace: dev
 spec:
   hosts:
@@ -61,8 +61,132 @@ spec:
   gateways:
     - dev-yas-public-gateway
   http:
-    - route:
+    # 1. Swagger UI Frontend
+    - match:
+        - uri:
+            prefix: /swagger-ui
+      route:
         - destination:
             host: swagger-ui.dev.svc.cluster.local 
             port:
               number: 8080
+
+    # 2. Product API Docs
+    - match:
+        - uri:
+            prefix: /product
+      route:
+        - destination:
+            host: product.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 3. Media API Docs
+    - match:
+        - uri:
+            prefix: /media
+      route:
+        - destination:
+            host: media.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 4. Customer API Docs
+    - match:
+        - uri:
+            prefix: /customer
+      route:
+        - destination:
+            host: customer.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 5. Cart API Docs
+    - match:
+        - uri:
+            prefix: /cart
+      route:
+        - destination:
+            host: cart.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 6. Rating API Docs
+    - match:
+        - uri:
+            prefix: /rating
+      route:
+        - destination:
+            host: rating.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 7. Order API Docs
+    - match:
+        - uri:
+            prefix: /order
+      route:
+        - destination:
+            host: order.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 8. Payment API Docs
+    - match:
+        - uri:
+            prefix: /payment
+      route:
+        - destination:
+            host: payment.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 9. Location API Docs
+    - match:
+        - uri:
+            prefix: /location
+      route:
+        - destination:
+            host: location.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 10. Inventory API Docs
+    - match:
+        - uri:
+            prefix: /inventory
+      route:
+        - destination:
+            host: inventory.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 11. Tax API Docs
+    - match:
+        - uri:
+            prefix: /tax
+      route:
+        - destination:
+            host: tax.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 12. Promotion API Docs
+    - match:
+        - uri:
+            prefix: /promotion
+      route:
+        - destination:
+            host: promotion.dev.svc.cluster.local
+            port:
+              number: 80
+
+    # 13. Search API Docs
+    - match:
+        - uri:
+            prefix: /search
+      route:
+        - destination:
+            host: search.dev.svc.cluster.local
+            port:
+              number: 80
