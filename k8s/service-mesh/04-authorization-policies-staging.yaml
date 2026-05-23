@@ -23,24 +23,6 @@ spec:
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-observability-prometheus
-  namespace: staging
-spec:
-  action: ALLOW
-  # Metrics port 8090 has mTLS disabled so Prometheus can scrape from the
-  # non-mesh observability namespace. Source namespace/principal matches require
-  # mTLS, so keep this allow-list scoped to only the metrics operation.
-  rules:
-    - to:
-        - operation:
-            methods: ["GET"]
-            ports: ["8090"]
-            paths:
-              - /actuator/prometheus
----
-apiVersion: security.istio.io/v1
-kind: AuthorizationPolicy
-metadata:
   name: allow-istio-ingress-to-storefront-bff
   namespace: staging
 spec:
@@ -64,6 +46,22 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: backoffice-bff
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-swagger-ui
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: swagger-ui
   rules:
     - from:
         - source:
@@ -122,7 +120,6 @@ spec:
               - cluster.local/ns/staging/sa/inventory
               - cluster.local/ns/staging/sa/order
               - cluster.local/ns/staging/sa/search
-              - cluster.local/ns/staging/sa/mesh-curl-allowed
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -264,3 +261,179 @@ spec:
             principals:
               - cluster.local/ns/staging/sa/storefront-bff
               - cluster.local/ns/staging/sa/backoffice-bff
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-product-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: product
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/product/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-media-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/media/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-inventory-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/inventory/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-cart-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/cart/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-customer-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: customer
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/customer/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-order-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/order/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-tax-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/tax/v3/api-docs"
+            methods: 
+              - "GET"
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-istio-ingress-to-search-docs
+  namespace: staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/service-mesh/sa/istio-ingressgateway-service-account 
+      to:
+        - operation:
+            paths: 
+              - "/search/v3/api-docs"
+            methods: 
+              - "GET"

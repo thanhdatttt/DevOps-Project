@@ -8,9 +8,11 @@ resources:
   - 05-test-clients-dev.yaml
   - 06-istio-gateway-dev.yaml
   - 07-ingress-bridge-dev.yaml
+  - 08-envoy-sidecar-podmonitor-dev.yaml
   - 02-mtls-staging.yaml
   - 03-retry-virtualservices-staging.yaml
   - 04-authorization-policies-staging.yaml
   - 05-test-clients-staging.yaml
   - 06-istio-gateway-staging.yaml
   - 07-ingress-bridge-staging.yaml
+  - 08-envoy-sidecar-podmonitor-staging.yaml

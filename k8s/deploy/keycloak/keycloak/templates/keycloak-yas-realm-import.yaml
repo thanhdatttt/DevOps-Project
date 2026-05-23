@@ -526,9 +526,10 @@ spec:
         clientAuthenticatorType: client-secret
         secret: TVacLC0cQ8tiiEKiTVerTb2YvwQ1TRJF
         redirectUris:
-          - {{ .Values.backofficeRedirectUrl }}/*
-          - http://localhost:3000/*
-          - http://localhost:8087/*
+          - "{{ .Values.backofficeRedirectUrlDev }}/*"
+          - "{{ .Values.backofficeRedirectUrlStaging }}/*"
+          - "http://localhost:3000/*"
+          - "http://localhost:8087/*"
         webOrigins: [ ]
         notBefore: 0
         bearerOnly: false
@@ -820,8 +821,9 @@ spec:
         clientAuthenticatorType: client-secret
         secret: ZrU9I0q2uXBglBnmvyJdkl1lf0ncr8tn
         redirectUris:
-          - {{ .Values.storefrontRedirectUrl }}/*
-          - http://localhost:8087/*
+          - "{{ .Values.storefrontRedirectUrlDev }}/*"
+          - "{{ .Values.storefrontRedirectUrlStaging }}/*"
+          - "http://localhost:8087/*"
         webOrigins: [ ]
         notBefore: 0
         bearerOnly: false
