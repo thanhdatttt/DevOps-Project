@@ -11,8 +11,8 @@ image:
   tag: "v4.16.0"
 
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: "swagger-ui"
+fullnameOverride: "swagger-ui"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -66,6 +66,32 @@ ingress:
       paths:
         - path: /swagger-ui
           pathType: ImplementationSpecific
+        - path: /product
+          pathType: Prefix
+        - path: /media
+          pathType: Prefix
+        - path: /customer
+          pathType: Prefix
+        - path: /cart
+          pathType: Prefix
+        - path: /rating
+          pathType: Prefix
+        - path: /order
+          pathType: Prefix
+        - path: /payment
+          pathType: Prefix
+        - path: /location
+          pathType: Prefix
+        - path: /inventory
+          pathType: Prefix
+        - path: /tax
+          pathType: Prefix
+        - path: /promotion
+          pathType: Prefix
+        - path: /search
+          pathType: Prefix
+  backendServiceName: istio-ingressgateway-bridge
+  backendServicePort: 80
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

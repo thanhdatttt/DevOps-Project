@@ -54,6 +54,17 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
+  name: swagger-ui-istio-mutual
+  namespace: staging
+spec:
+  host: swagger-ui.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
   name: cart-istio-mutual
   namespace: staging
 spec:

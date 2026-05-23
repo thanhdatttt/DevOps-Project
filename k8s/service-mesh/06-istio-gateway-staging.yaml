@@ -14,6 +14,7 @@ spec:
       hosts:
         - staging.storefront.yas.local.com
         - staging.backoffice.yas.local.com
+        - staging.api.yas.local.com
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
@@ -46,5 +47,146 @@ spec:
     - route:
         - destination:
             host: backoffice-bff.staging.svc.cluster.local
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: swagger-public
+  namespace: staging
+spec:
+  hosts:
+    - staging.api.yas.local.com
+  gateways:
+    - staging-yas-public-gateway
+  http:
+    # 1. Swagger UI Frontend
+    - match:
+        - uri:
+            prefix: /swagger-ui
+      route:
+        - destination:
+            host: swagger-ui.staging.svc.cluster.local 
+            port:
+              number: 8080
+
+    # 2. Product API Docs
+    - match:
+        - uri:
+            prefix: /product
+      route:
+        - destination:
+            host: product.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # 3. Media API Docs
+    - match:
+        - uri:
+            prefix: /media
+      route:
+        - destination:
+            host: media.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # 4. Customer API Docs
+    - match:
+        - uri:
+            prefix: /customer
+      route:
+        - destination:
+            host: customer.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # 5. Cart API Docs
+    - match:
+        - uri:
+            prefix: /cart
+      route:
+        - destination:
+            host: cart.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # # 6. Rating API Docs
+    # - match:
+    #     - uri:
+    #         prefix: /rating
+    #   route:
+    #     - destination:
+    #         host: rating.staging.svc.cluster.local
+    #         port:
+    #           number: 80
+
+    # 7. Order API Docs
+    - match:
+        - uri:
+            prefix: /order
+      route:
+        - destination:
+            host: order.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # # 8. Payment API Docs
+    # - match:
+    #     - uri:
+    #         prefix: /payment
+    #   route:
+    #     - destination:
+    #         host: payment.staging.svc.cluster.local
+    #         port:
+    #           number: 80
+
+    # # 9. Location API Docs
+    # - match:
+    #     - uri:
+    #         prefix: /location
+    #   route:
+    #     - destination:
+    #         host: location.staging.svc.cluster.local
+    #         port:
+    #           number: 80
+
+    # 10. Inventory API Docs
+    - match:
+        - uri:
+            prefix: /inventory
+      route:
+        - destination:
+            host: inventory.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # 11. Tax API Docs
+    - match:
+        - uri:
+            prefix: /tax
+      route:
+        - destination:
+            host: tax.staging.svc.cluster.local
+            port:
+              number: 80
+
+    # # 12. Promotion API Docs
+    # - match:
+    #     - uri:
+    #         prefix: /promotion
+    #   route:
+    #     - destination:
+    #         host: promotion.staging.svc.cluster.local
+    #         port:
+    #           number: 80
+
+    # 13. Search API Docs
+    - match:
+        - uri:
+            prefix: /search
+      route:
+        - destination:
+            host: search.staging.svc.cluster.local
             port:
               number: 80
