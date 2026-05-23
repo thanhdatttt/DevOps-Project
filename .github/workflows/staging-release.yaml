@@ -108,7 +108,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: feat/argocd
+          ref: main
 
       - name: Update tags using yq
         run: |
@@ -168,5 +168,5 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "chore(cd): update staging image tags to ${{ github.ref_name }}"
-            git push origin feat/argocd
+            git push origin main
           fi

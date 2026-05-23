@@ -33,7 +33,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/thanhdatttt/DevOps-Project.git'
-        targetRevision: feat/argocd
+        targetRevision: main
         path: 'k8s/charts/{{service}}'
         helm:
           valueFiles:

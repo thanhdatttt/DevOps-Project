@@ -111,17 +111,7 @@ spec:
             port:
               number: 80
 
-    # # 6. Rating API Docs
-    # - match:
-    #     - uri:
-    #         prefix: /rating
-    #   route:
-    #     - destination:
-    #         host: rating.dev.svc.cluster.local
-    #         port:
-    #           number: 80
-
-    # 7. Order API Docs
+    # 6. Order API Docs
     - match:
         - uri:
             prefix: /order
@@ -131,27 +121,7 @@ spec:
             port:
               number: 80
 
-    # # 8. Payment API Docs
-    # - match:
-    #     - uri:
-    #         prefix: /payment
-    #   route:
-    #     - destination:
-    #         host: payment.dev.svc.cluster.local
-    #         port:
-    #           number: 80
-
-    # # 9. Location API Docs
-    # - match:
-    #     - uri:
-    #         prefix: /location
-    #   route:
-    #     - destination:
-    #         host: location.dev.svc.cluster.local
-    #         port:
-    #           number: 80
-
-    # 10. Inventory API Docs
+    # 7. Inventory API Docs
     - match:
         - uri:
             prefix: /inventory
@@ -161,7 +131,7 @@ spec:
             port:
               number: 80
 
-    # 11. Tax API Docs
+    # 8. Tax API Docs
     - match:
         - uri:
             prefix: /tax
@@ -171,17 +141,7 @@ spec:
             port:
               number: 80
 
-    # # 12. Promotion API Docs
-    # - match:
-    #     - uri:
-    #         prefix: /promotion
-    #   route:
-    #     - destination:
-    #         host: promotion.dev.svc.cluster.local
-    #         port:
-    #           number: 80
-
-    # 13. Search API Docs
+    # 9. Search API Docs
     - match:
         - uri:
             prefix: /search
