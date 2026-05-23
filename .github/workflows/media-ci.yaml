@@ -10,7 +10,7 @@ on:
       - ".github/workflows/media-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ] 
     paths:
       - 'media/**'
       - 'common-library/**'
