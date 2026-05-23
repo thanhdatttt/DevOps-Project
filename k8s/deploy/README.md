@@ -8,11 +8,7 @@
 - **Redis:** https://artifacthub.io/packages/helm/bitnami/redis
 - **Reloader:** https://github.com/stakater/Reloader
 - **Prometheus:** https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
-- **Grafana:** https://github.com/grafana-operator/grafana-operator
-- **Loki:** https://github.com/grafana/loki/tree/main/production/helm/loki
-- **Tempo:** https://github.com/grafana/helm-charts/tree/main/charts/tempo
-- **Promtail:** https://github.com/grafana/helm-charts/tree/main/charts/promtail
-- **Opentelemetry:** https://github.com/open-telemetry/opentelemetry-operator
+- **Grafana:** Provided by kube-prometheus-stack
 ## Local installation steps
 - Require a minikube node minimum 16G memory and 40G disk space and run on Ubuntu operator
 ```shell
@@ -85,15 +81,8 @@ All charts of Yas application situated in `charts` folder
 To Install the Yas helm charts access to [https://nashtech-garage.github.io/yas/](https://nashtech-garage.github.io/yas/)
 
 ## Observability
-The Yas observability follow by the standard of Open Telemetry recommendation.
-Promtail collect the log from all applications send to Open Telemetry Collector after that, Open Telemetry Collector distribute to Loki server.
-The Yas applications also send the metric data to Open Telemetry Collector, Open Telemetry collector send the metric data to Tempo server
+Cluster observability is limited to Prometheus and Grafana from kube-prometheus-stack. This is enough for Kiali mesh observability through `k8s/service-mesh/kiali-values.yaml`.
 
-View details configuration of Open Telemetry Collector at [opentelemetry](./observability/opentelemetry/values.yaml)
-
-### How to view log on the Grafana
-On the left menu select `Expore` -> select `Loki` datasource -> select Label filters:
-- namespace
-- container (Application)
-
-On the Loki also support track by traceId, on The Tempo you can select the Node graph to view the tracing of request 
+- Prometheus is exposed at `prometheus.yas.local.com`.
+- Grafana is exposed at `grafana.yas.local.com`.
+- Prometheus values live in `observability/prometheus.values.yaml`; Grafana values live in `observability/grafana.values.yaml`.

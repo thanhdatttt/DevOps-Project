@@ -2,58 +2,166 @@ name: storefront service ci
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - "storefront/**"
-      - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "storefront/**"
-      - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
   workflow_dispatch:
 
+env:
+  FROM_ORIGINAL_REPOSITORY: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+  APP_DIR: storefront
+  IMAGE_NAME: ghcr.io/thanhdatttt/yas-storefront
+
 jobs:
-  Build:
+  gitleaks:
     runs-on: ubuntu-latest
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks check
+        run: |
+          docker pull zricethezav/gitleaks:latest
+          docker run --rm -v ${{ github.workspace }}:/work -w /work zricethezav/gitleaks:latest detect --source="./storefront" --config="/work/gitleaks.toml" --verbose --no-git
+
+  test:
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
+          cache: npm
+          cache-dependency-path: storefront/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
         working-directory: storefront
-      - run: npm run build
+
+      - name: Build application
+        run: npm run build
         working-directory: storefront
-      - run: npm run lint
+
+      - name: Lint
+        run: npm run lint
         working-directory: storefront
-      - run: npx prettier --check .
+
+      - name: Check formatting
+        run: npx prettier --check .
         working-directory: storefront
+
       - name: SonarCloud Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: storefront
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload Next.js build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-next-build
+          path: |
+            storefront/.next/standalone
+            storefront/.next/static
+            storefront/public
+            storefront/package.json
+          if-no-files-found: error
+          retention-days: 1
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ github.event_name == 'push' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Next.js build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: storefront-next-build
+          path: storefront
+
       - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Resolve Docker tags
+        id: docker-tags
+        shell: bash
+        run: |
+          tags="${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            tags="${tags}"$'\n'"${{ env.IMAGE_NAME }}:latest"
+          fi
+          {
+            echo "tags<<EOF"
+            echo "$tags"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image from artifact
         uses: docker/build-push-action@v6
         with:
           context: ./storefront
+          file: ./storefront/Dockerfile.ci
           push: true
-          tags: ghcr.io/thanhdatttt/yas-storefront:latest
+          tags: ${{ steps.docker-tags.outputs.tags }}
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: storefront/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: storefront
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+        continue-on-error: true
+        working-directory: storefront
+
+      - name: Run Trivy filesystem scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: ./storefront
+          format: sarif
+          output: trivy-fs-results.sarif
+
+      - name: Upload Trivy filesystem scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: ${{ always() && hashFiles('trivy-fs-results.sarif') != '' }}
+        with:
+          sarif_file: trivy-fs-results.sarif

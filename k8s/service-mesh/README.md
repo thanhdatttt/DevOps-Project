@@ -167,36 +167,27 @@ istioctl experimental describe service product -n staging
 
 Kỳ vọng: traffic tới `product.<ns>.svc.cluster.local` dùng `mTLS`/`ISTIO_MUTUAL`.
 
-### B. Test AuthorizationPolicy allow/deny bằng curl pod
+### B. Test AuthorizationPolicy từ caller thật và blocked client
+
+Chạy script theo namespace. Script dùng `storefront-bff` làm caller thật cho các service storefront-facing (bỏ qua backoffice, swagger-ui, gateway và self-call), và dùng `mesh-curl-blocked` để xác nhận blocked client bị deny trên các service workload trong namespace.
 
 ```bash
-NS=dev # hoặc staging
-ALLOWED_POD=$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=mesh-curl-allowed -o jsonpath='{.items[0].metadata.name}')
-BLOCKED_POD=$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=mesh-curl-blocked -o jsonpath='{.items[0].metadata.name}')
+# Execute Permission
+chmod +x  k8s/service-mesh/test-scripts/*
 
-kubectl exec -n "$NS" "$ALLOWED_POD" -c curl -- \
-  curl -i http://product.$NS.svc.cluster.local/product/v3/api-docs
+# Dev
+k8s/service-mesh/test-scripts/curl-all-services-dev.sh
 
-kubectl exec -n "$NS" "$BLOCKED_POD" -c curl -- \
-  curl -i http://product.$NS.svc.cluster.local/product/v3/api-docs
+# Staging
+k8s/service-mesh/test-scripts/curl-all-services-staging.sh
 ```
 
 Kỳ vọng:
 
-- allowed pod: request không bị Istio RBAC deny; response có thể là `200`, `401`, hoặc `404` tùy app endpoint/security.
-- blocked pod: HTTP `403` với nội dung `RBAC: access denied`.
+- `storefront-bff`: request tới các service storefront-facing không bị Istio RBAC deny; response có thể là `200`, `401`, `404`, hoặc app-level error tùy endpoint.
+- `mesh-curl-blocked`: request tới mọi service workload non-gateway trả HTTP `403` hoặc nội dung `RBAC: access denied`.
 
-Lưu log:
-
-```bash
-mkdir -p k8s/service-mesh/test-logs
-kubectl exec -n "$NS" "$ALLOWED_POD" -c curl -- \
-  curl -i http://product.$NS.svc.cluster.local/product/v3/api-docs \
-  | tee k8s/service-mesh/test-logs/$NS-allowed-product.log
-kubectl exec -n "$NS" "$BLOCKED_POD" -c curl -- \
-  curl -i http://product.$NS.svc.cluster.local/product/v3/api-docs \
-  | tee k8s/service-mesh/test-logs/$NS-blocked-product.log
-```
+Gateway bridge được bỏ qua vì đó là `ExternalName` trỏ sang ingress gateway, không phải workload app được bảo vệ bởi AuthorizationPolicy trong namespace `dev`/`staging`.
 
 ### C. Test retry evidence
 

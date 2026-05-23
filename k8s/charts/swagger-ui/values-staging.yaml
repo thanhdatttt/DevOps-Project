@@ -1,3 +1,32 @@
-backend:
-  image:
-    tag: v1.0.0
+urls: "[{ url: 'http://staging.api.yas.local.com/product/v3/api-docs', name: 'Product' },
+      { url: 'http://staging.api.yas.local.com/media/v3/api-docs', name: 'Media' },
+      { url: 'http://staging.api.yas.local.com/customer/v3/api-docs', name: 'Customer' }, 
+      { url: 'http://staging.api.yas.local.com/cart/v3/api-docs', name: 'Cart'},
+      { url: 'http://staging.api.yas.local.com/order/v3/api-docs', name: 'Order'},
+      { url: 'http://staging.api.yas.local.com/inventory/v3/api-docs', name: 'Inventory'},
+      { url: 'http://staging.api.yas.local.com/tax/v3/api-docs', name: 'Tax' },
+      { url: 'http://staging.api.yas.local.com/search/v3/api-docs', name: 'Search'}]"
+
+ingress:
+  host: staging.api.yas.local.com
+  hosts:
+    - host: staging.api.yas.local.com
+      paths:
+        - path: /swagger-ui
+          pathType: ImplementationSpecific
+        - path: /product
+          pathType: Prefix
+        - path: /media
+          pathType: Prefix
+        - path: /customer
+          pathType: Prefix
+        - path: /cart
+          pathType: Prefix
+        - path: /order
+          pathType: Prefix
+        - path: /inventory
+          pathType: Prefix
+        - path: /tax
+          pathType: Prefix
+        - path: /search
+          pathType: Prefix

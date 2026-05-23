@@ -7,8 +7,13 @@ data:
   yas.server: |
     yas.local.com:53 {
       errors
-      hosts {
-        10.43.166.185 identity.yas.local.com
-        fallthrough
+      rewrite stop {
+        name exact identity.yas.local.com keycloak-service.keycloak.svc.cluster.local
+        answer name keycloak-service.keycloak.svc.cluster.local identity.yas.local.com
       }
+      kubernetes cluster.local in-addr.arpa ip6.arpa {
+        pods insecure
+        fallthrough in-addr.arpa ip6.arpa
+      }
+      cache 30
     }

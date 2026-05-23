@@ -22,8 +22,8 @@ deployment:
 external_services:
   prometheus:
     enabled: true
-    url: http://prometheus-kube-prometheus-prometheus.observability:9090
+    url: http://prometheus-kube-prometheus-prometheus.observability.svc.cluster.local:9090
   grafana:
     enabled: true
-    internal_url: http://prometheus-grafana.observability:80
+    internal_url: http://prometheus-grafana.observability.svc.cluster.local:80
     external_url: http://grafana.yas.local.com

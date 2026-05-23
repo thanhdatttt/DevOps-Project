@@ -56,7 +56,7 @@ spec:
         path: 'k8s/charts/{{service}}'
         helm:
           valueFiles:
-            - values-staging.yaml 
+            - values-staging.yaml
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: staging

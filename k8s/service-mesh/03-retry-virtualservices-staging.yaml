@@ -46,6 +46,28 @@ spec:
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
+  name: swagger-ui-retry-on-5xx
+  namespace: staging
+spec:
+  hosts:
+    - swagger-ui.staging.svc.cluster.local
+  gateways:
+    - mesh
+  http:
+    - timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,refused-stream,reset,gateway-error
+      route:
+        - destination:
+            host: swagger-ui.staging.svc.cluster.local
+            port:
+              number: 8080
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
   name: cart-retry-on-5xx
   namespace: staging
 spec:
