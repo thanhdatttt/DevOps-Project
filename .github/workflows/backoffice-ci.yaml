@@ -82,6 +82,7 @@ jobs:
             backoffice/public
             backoffice/package.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 1
 
   build:
@@ -100,6 +101,14 @@ jobs:
         with:
           name: backoffice-next-build
           path: backoffice
+
+      - name: Verify Next.js build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f backoffice/.next/standalone/server.js
+          test -d backoffice/.next/static
+          test -f backoffice/package.json
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -129,6 +138,27 @@ jobs:
           file: ./backoffice/Dockerfile.ci
           load: true
           tags: ${{ steps.docker-tags.outputs.tags }}
+
+      - name: Smoke test production image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image="${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          container_id="$(docker run -d -p 3000:3000 "$image")"
+          trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
+          deadline=$((SECONDS + 20))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if ! docker ps --format '{{.ID}}' | grep -q "^${container_id:0:12}"; then
+              docker logs "$container_id" || true
+              exit 1
+            fi
+            if curl -fsS --max-time 2 http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs "$container_id" || true
+          exit 1
 
       - name: Run Trivy image scanner
         uses: aquasecurity/trivy-action@v0.36.0
