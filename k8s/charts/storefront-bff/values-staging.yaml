@@ -1,6 +1,6 @@
 backend:
   image:
-    tag: v1.0.3
+    tag: v1.0.5
   ingress:
     annotations:
       nginx.ingress.kubernetes.io/upstream-vhost: staging.storefront.yas.local.com
