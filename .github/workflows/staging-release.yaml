@@ -163,10 +163,20 @@ jobs:
           # Stage the modified files
           git add k8s/charts/*/values-staging.yaml
           
-          # Check if there are actually changes to commit (prevents the workflow from failing if the tag is already up to date)
-          if git diff --staged --quiet; then
+          if git diff --cached --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "chore(cd): update staging image tags to ${{ github.ref_name }}"
-            git push origin main
+            exit 0
           fi
+          
+          # Commit with [skip ci] to prevent infinite workflow loops
+          git commit -m "chore(cd): update staging image tags to ${{ github.ref_name }} [skip ci]"
+          
+          # Push with a retry/rebase loop to avoid race conditions
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              break
+            else
+              echo "⚠️ Push failed due to remote changes. Rebasing and retrying ($attempt/3)..."
+              git pull --rebase origin main
+            fi
+          done
