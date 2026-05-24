@@ -186,12 +186,21 @@ Kỳ vọng:
 
 - `storefront-bff`: request tới các service storefront-facing không bị Istio RBAC deny; response có thể là `200`, `401`, `404`, hoặc app-level error tùy endpoint.
 - `mesh-curl-blocked`: request tới mọi service workload non-gateway trả HTTP `403` hoặc nội dung `RBAC: access denied`.
+- `retry-fault-injection`: script tạo tạm service `mesh-retry-fault`, service này trả `503` cho request đầu tiên rồi `200`; caller phải nhận final HTTP `200` để chứng minh sidecar đã retry.
 
 Gateway bridge được bỏ qua vì đó là `ExternalName` trỏ sang ingress gateway, không phải workload app được bảo vệ bởi AuthorizationPolicy trong namespace `dev`/`staging`.
 
 ### C. Test retry evidence
 
-Sau khi tạo lỗi `500` ở upstream test endpoint, xem metric retry tại caller sidecar:
+Các script ở mục B tự tạo fault target tạm thời (`mesh-retry-fault`) để kiểm tra retry behavior end-to-end. Lưu ý: không dùng `VirtualService.fault` trên cùng route với retry vì Istio không hỗ trợ kết hợp fault injection với retry/timeout policy trên cùng `VirtualService`.
+
+Có thể override một số tham số khi chạy script:
+
+```bash
+RETRY_TEST_FAIL_FIRST=1 RETRY_TEST_CLEANUP=true k8s/service-mesh/test-scripts/curl-all-services-dev.sh
+```
+
+Nếu cần xem metric retry tại caller sidecar:
 
 ```bash
 NS=dev # hoặc staging
