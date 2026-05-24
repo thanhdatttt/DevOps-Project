@@ -128,8 +128,12 @@ Since you are using Tailscale, use your **Master Node Tailscale IP** (e.g., `100
 ```text
 # YAS Local DNS Mapping (Tailscale IP)
 100.71.220.45 identity.yas.local.com
-100.71.220.45 storefront.yas.local.com
-100.71.220.45 backoffice.yas.local.com
+100.71.220.45 dev.storefront.yas.local.com
+100.71.220.45 dev.backoffice.yas.local.com
+100.71.220.45 dev.api.yas.local.com
+100.71.220.45 staging.storefront.yas.local.com
+100.71.220.45 staging.backoffice.yas.local.com
+100.71.220.45 staging.api.yas.local.com
 100.71.220.45 kibana.yas.local.com
 100.71.220.45 akhq.yas.local.com
 100.71.220.45 grafana.yas.local.com
