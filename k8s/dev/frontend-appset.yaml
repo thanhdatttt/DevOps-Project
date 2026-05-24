@@ -39,7 +39,7 @@ spec:
           valueFiles:
             - values-dev.yaml 
           parameters:
-            - name: backend.image.pullPolicy
+            - name: ui.image.pullPolicy
               value: Always
       destination:
         server: 'https://kubernetes.default.svc'

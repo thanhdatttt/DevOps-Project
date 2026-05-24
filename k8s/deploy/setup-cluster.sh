@@ -89,9 +89,6 @@ helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
 -f ./observability/grafana.values.yaml \
 --set grafana.assertNoLeakedSecrets=false
 
-helm upgrade --install zookeeper ./zookeeper \
- --namespace zookeeper --create-namespace
-
  helm upgrade --install argocd argo/argo-cd \
  --create-namespace --namespace argocd \
  -f ./argocd.values.yaml
