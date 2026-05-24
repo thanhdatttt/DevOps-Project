@@ -82,6 +82,7 @@ jobs:
             storefront/public
             storefront/package.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 1
 
   build:
@@ -99,6 +100,14 @@ jobs:
         with:
           name: storefront-next-build
           path: storefront
+
+      - name: Verify Next.js build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f storefront/.next/standalone/server.js
+          test -d storefront/.next/static
+          test -f storefront/package.json
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -121,12 +130,12 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Build and push Docker image from artifact
+      - name: Build Docker image from artifact
         uses: docker/build-push-action@v6
         with:
           context: ./storefront
           file: ./storefront/Dockerfile.ci
-          push: true
+          load: true
           tags: ${{ steps.docker-tags.outputs.tags }}
 
       - name: Smoke test production image

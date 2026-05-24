@@ -8,7 +8,7 @@ on:
         required: true
         default: 'no'
       target_services:
-        description: '"all"  OR  comma-separated names, e.g. "tax,payment,cart"'
+        description: '"all" served services OR comma-separated names, e.g. "tax,cart,storefront,backoffice"'
         required: false
         default: 'all'
 
@@ -60,26 +60,32 @@ jobs:
           set -euo pipefail
 
           ALL_SERVICES=(
-            backoffice-bff   cart             customer
-            inventory        location         media
-            order            payment          payment-paypal
-            product          promotion        rating
-            recommendation   sampledata       search
-            storefront-bff   tax              webhook
+            backoffice-bff   storefront-bff
+            cart             customer         inventory
+            media            order            product
+            sampledata       search           tax
             storefront-ui    backoffice-ui
           )
 
           # Resolve target list
           if [ -z "$TARGET" ] || [ "$TARGET" = "all" ]; then
             SERVICES=("${ALL_SERVICES[@]}")
-            echo "🎯 Target: ALL (${#SERVICES[@]} services)"
+            echo "🎯 Target: all served services (${#SERVICES[@]} services)"
           else
             SERVICES=()
             IFS=',' read -ra RAW <<< "$TARGET"
             for s in "${RAW[@]}"; do
               svc=$(echo "$s" | tr -d '[:space:]')
+              case "$svc" in
+                storefront) svc="storefront-ui" ;;
+                backoffice) svc="backoffice-ui" ;;
+              esac
               if printf '%s\n' "${ALL_SERVICES[@]}" | grep -qx "$svc"; then
-                SERVICES+=("$svc")
+                if printf '%s\n' "${SERVICES[@]}" | grep -qx "$svc"; then
+                  echo "⏭️  Duplicate service '$svc' — skipped"
+                else
+                  SERVICES+=("$svc")
+                fi
               else
                 echo "⚠️  Unknown service '$svc' — skipped"
               fi
@@ -157,10 +163,12 @@ jobs:
           Run ID       : ${{ github.run_id }}"
 
           for attempt in 1 2 3; do
-            git push origin main && break || {
+            if git push origin main; then
+              break
+            else
               echo "⚠️  Push attempt $attempt failed — rebasing..."
               git pull --rebase origin main
-            }
+            fi
           done
 
   summary:

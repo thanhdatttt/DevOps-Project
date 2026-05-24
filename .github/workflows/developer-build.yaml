@@ -19,10 +19,6 @@ on:
         description: 'inventory'
         required: false
         default: 'main'
-      location_branch:
-        description: 'location'
-        required: false
-        default: 'main'
       media_branch:
         description: 'media'
         required: false
@@ -31,28 +27,8 @@ on:
         description: 'order'
         required: false
         default: 'main'
-      payment_branch:
-        description: 'payment'
-        required: false
-        default: 'main'
-      payment_paypal_branch:
-        description: 'payment-paypal'
-        required: false
-        default: 'main'
       product_branch:
         description: 'product'
-        required: false
-        default: 'main'
-      promotion_branch:
-        description: 'promotion'
-        required: false
-        default: 'main'
-      rating_branch:
-        description: 'rating'
-        required: false
-        default: 'main'
-      recommendation_branch:
-        description: 'recommendation'
         required: false
         default: 'main'
       sampledata_branch:
@@ -69,10 +45,6 @@ on:
         default: 'main'
       tax_branch:
         description: 'tax'
-        required: false
-        default: 'main'
-      webhook_branch:
-        description: 'webhook'
         required: false
         default: 'main'
       storefront_ui_branch:
@@ -118,20 +90,13 @@ jobs:
           INPUT_cart:            ${{ inputs.cart_branch }}
           INPUT_customer:        ${{ inputs.customer_branch }}
           INPUT_inventory:       ${{ inputs.inventory_branch }}
-          INPUT_location:        ${{ inputs.location_branch }}
           INPUT_media:           ${{ inputs.media_branch }}
           INPUT_order:           ${{ inputs.order_branch }}
-          INPUT_payment:         ${{ inputs.payment_branch }}
-          INPUT_payment_paypal:  ${{ inputs.payment_paypal_branch }}
           INPUT_product:         ${{ inputs.product_branch }}
-          INPUT_promotion:       ${{ inputs.promotion_branch }}
-          INPUT_rating:          ${{ inputs.rating_branch }}
-          INPUT_recommendation:  ${{ inputs.recommendation_branch }}
           INPUT_sampledata:      ${{ inputs.sampledata_branch }}
           INPUT_search:          ${{ inputs.search_branch }}
           INPUT_storefront_bff:  ${{ inputs.storefront_bff_branch }}
           INPUT_tax:             ${{ inputs.tax_branch }}
-          INPUT_webhook:         ${{ inputs.webhook_branch }}
           INPUT_storefront_ui:   ${{ inputs.storefront_ui_branch }}
           INPUT_backoffice_ui:   ${{ inputs.backoffice_ui_branch }}
         run: |
@@ -142,20 +107,13 @@ jobs:
             [cart]=INPUT_cart
             [customer]=INPUT_customer
             [inventory]=INPUT_inventory
-            [location]=INPUT_location
             [media]=INPUT_media
             [order]=INPUT_order
-            [payment]=INPUT_payment
-            [payment-paypal]=INPUT_payment_paypal
             [product]=INPUT_product
-            [promotion]=INPUT_promotion
-            [rating]=INPUT_rating
-            [recommendation]=INPUT_recommendation
             [sampledata]=INPUT_sampledata
             [search]=INPUT_search
             [storefront-bff]=INPUT_storefront_bff
             [tax]=INPUT_tax
-            [webhook]=INPUT_webhook
             [storefront-ui]=INPUT_storefront_ui
             [backoffice-ui]=INPUT_backoffice_ui
           )
@@ -207,7 +165,11 @@ jobs:
 
             [ "$tag" = "latest" ] && continue
 
-            IMAGE_NAME="yas-${svc}"
+            case "$svc" in
+              storefront-ui) IMAGE_NAME="yas-storefront" ;;
+              backoffice-ui) IMAGE_NAME="yas-backoffice" ;;
+              *) IMAGE_NAME="yas-${svc}" ;;
+            esac
 
             TOKEN=$(curl -sf \
               -u "${REPO_OWNER}:${GH_TOKEN}" \
@@ -298,10 +260,12 @@ jobs:
           Run ID       : ${{ github.run_id }}"
 
           for attempt in 1 2 3; do
-            git push origin main && break || {
+            if git push origin main; then
+              break
+            else
               echo "⚠️  Push attempt $attempt failed — rebasing..."
               git pull --rebase origin main
-            }
+            fi
           done
 
   notify:
@@ -338,7 +302,7 @@ jobs:
           echo ""
           echo "  🌐 Add to /etc/hosts"
           echo "  ─────────────────────────────────────────────────────"
-          echo "  Windows : C:\\Windows\\System32\\drivers\\etc\\hosts"
+          printf '%s\n' "  Windows : C:\\Windows\\System32\\drivers\\etc\\hosts"
           echo "  Linux/Mac: /etc/hosts"
           echo ""
           echo "     ${WORKER_IP}  dev.backoffice.yas.local.com"
