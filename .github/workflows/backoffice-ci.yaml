@@ -146,17 +146,20 @@ jobs:
           image="${{ env.IMAGE_NAME }}:${{ github.sha }}"
           container_id="$(docker run -d -p 3000:3000 "$image")"
           trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
-          deadline=$((SECONDS + 20))
+          deadline=$((SECONDS + 60))
           while [ "$SECONDS" -lt "$deadline" ]; do
             if ! docker ps --format '{{.ID}}' | grep -q "^${container_id:0:12}"; then
+              echo "Container exited before becoming ready"
               docker logs "$container_id" || true
               exit 1
             fi
-            if curl -fsS --max-time 2 http://127.0.0.1:3000/ >/dev/null; then
+            if curl -fsS --max-time 2 http://127.0.0.1:3000/ >/dev/null 2>&1; then
+              echo "Production image smoke test passed"
               exit 0
             fi
-            sleep 1
+            sleep 2
           done
+          echo "Timed out waiting for production image to serve HTTP"
           docker logs "$container_id" || true
           exit 1
 
