@@ -123,7 +123,29 @@ kubectl apply -k k8s/service-mesh
 ## 6. Networking & Observability
 
 ### Update Hosts File
-Since you are using Tailscale, use your **Master Node Tailscale IP** (e.g., `100.x.x.x`) in your local `/etc/hosts`:
+Choose the host IP based on where you open the YAS URLs.
+
+If you browse from a K3s node itself, map the domains to `127.0.0.1` because ingress-nginx is exposed locally on that node:
+
+```text
+# YAS Local DNS Mapping (Local K3S Node)
+127.0.0.1 identity.yas.local.com
+127.0.0.1 dev.storefront.yas.local.com
+127.0.0.1 dev.backoffice.yas.local.com
+127.0.0.1 dev.api.yas.local.com
+127.0.0.1 staging.storefront.yas.local.com
+127.0.0.1 staging.backoffice.yas.local.com
+127.0.0.1 staging.api.yas.local.com
+127.0.0.1 kibana.yas.local.com
+127.0.0.1 akhq.yas.local.com
+127.0.0.1 grafana.yas.local.com
+127.0.0.1 prometheus.yas.local.com
+127.0.0.1 kiali.yas.local.com
+127.0.0.1 argocd.yas.local.com
+127.0.0.1 pgadmin.yas.local.com
+```
+
+If you browse from another machine on the same Tailnet, or from outside the Tailnet through a shared machine that can reach the K3s node, map the domains to the K3s node's **Tailscale IP** (replace `100.71.220.45` with your node IP):
 
 ```text
 # YAS Local DNS Mapping (Tailscale IP)
